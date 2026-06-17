@@ -1,0 +1,6 @@
+Nombre del curso: Compiladores e Intérpretes
+Numero de semestre y año lectivo: 1° Semestre 2026
+Nombre de los estudiantes: Geovanni González Aguilar
+Numero de carnet de los estudiantes: 2022163324
+Fecha de entrega: Sábado 27 de junio
+Estatus de la entrega: Excelente
