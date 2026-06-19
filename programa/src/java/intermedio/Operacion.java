@@ -10,6 +10,16 @@ package intermedio;
  * <p><strong>Restricciones:</strong> Debe asumir programas ya aceptados y no reemplazar las validaciones semanticas.</p>
  */
 public enum Operacion {
+    /** Declaracion de variable escalar. */
+    DECL,
+    /** Declaracion de arreglo bidimensional. */
+    DECL_ARRAY,
+    /** Declaracion de parametro formal. */
+    FORMAL_PARAM,
+    /** Carga de una variable o celda hacia un temporal. */
+    LOAD,
+    /** Escritura explicita de una celda de arreglo. */
+    STORE_ARRAY,
     /** Asignacion simple: destino = valor. */
     ASIG,
     /** Suma binaria. */
@@ -54,6 +64,8 @@ public enum Operacion {
     CALL,
     /** Impresion de salida. */
     PRINT,
+    /** Lectura de entrada. */
+    READ,
     /** Retorno . */
     RETURN,
     /** Etiqueta de salto. */

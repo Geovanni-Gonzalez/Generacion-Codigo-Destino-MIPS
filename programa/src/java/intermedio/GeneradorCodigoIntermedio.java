@@ -3,7 +3,10 @@ package intermedio;
 import ast.AsignacionNodo;
 import ast.AccesoArregloNodo;
 import ast.BloqueNodo;
+import ast.BreakNodo;
+import ast.CasoSwitchNodo;
 import ast.DeclaracionVariableNodo;
+import ast.EntradaNodo;
 import ast.ExpresionBinariaNodo;
 import ast.ExpresionNodo;
 import ast.ExpresionSentenciaNodo;
@@ -11,15 +14,20 @@ import ast.ExpresionUnariaNodo;
 import ast.FuncionNodo;
 import ast.IdentificadorNodo;
 import ast.IfNodo;
+import ast.InicializacionArregloNodo;
 import ast.LiteralNodo;
 import ast.LlamadaFuncionNodo;
 import ast.Nodo;
 import ast.ProgramaNodo;
+import ast.ParametroNodo;
 import ast.ReturnNodo;
 import ast.SalidaNodo;
+import ast.SwitchNodo;
 import ast.TipoDato;
 import ast.WhileNodo;
 import java.util.ArrayList;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 
 /**
@@ -48,6 +56,7 @@ public class GeneradorCodigoIntermedio {
     private final List<Instruccion> instrucciones = new ArrayList<>();
     private int contadorTemporales;
     private int contadorEtiquetas;
+    private final Deque<String> destinosBreak = new ArrayDeque<>();
 
     /**
      * <strong>Objetivo:</strong> Genera la representacion correspondiente dentro del compilador.
@@ -62,6 +71,7 @@ public class GeneradorCodigoIntermedio {
         instrucciones.clear();
         contadorTemporales = 0;
         contadorEtiquetas = 0;
+        destinosBreak.clear();
         for (FuncionNodo funcion : programa.getFunciones()) {
             generarFuncion(funcion);
         }
@@ -79,6 +89,10 @@ public class GeneradorCodigoIntermedio {
      */
     private void generarFuncion(FuncionNodo funcion) {
         instrucciones.add(new Instruccion(Operacion.INICIO_FUNC, funcion.getNombre()));
+        for (ParametroNodo parametro : funcion.getParametros()) {
+            instrucciones.add(new Instruccion(Operacion.FORMAL_PARAM, parametro.getNombre(),
+                    parametro.getTipo().toString()));
+        }
         generarBloque(funcion.getCuerpo());
         instrucciones.add(new Instruccion(Operacion.FIN_FUNC, funcion.getNombre()));
     }
@@ -124,6 +138,12 @@ public class GeneradorCodigoIntermedio {
             generarExpresionSentencia((ExpresionSentenciaNodo) nodo);
         } else if (nodo instanceof SalidaNodo) {
             generarSalida((SalidaNodo) nodo);
+        } else if (nodo instanceof EntradaNodo) {
+            generarEntrada((EntradaNodo) nodo);
+        } else if (nodo instanceof SwitchNodo) {
+            generarSwitch((SwitchNodo) nodo);
+        } else if (nodo instanceof BreakNodo) {
+            generarBreak();
         }
     }
 
@@ -137,11 +157,35 @@ public class GeneradorCodigoIntermedio {
      * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
      */
     private void generarDeclaracionVariable(DeclaracionVariableNodo declaracion) {
-        if (declaracion.getInicializador() == null) {
+        if (declaracion.esArreglo()) {
+            generarDeclaracionArreglo(declaracion);
             return;
         }
-        String valor = generarExpresion(declaracion.getInicializador());
-        instrucciones.add(new Instruccion(Operacion.ASIG, declaracion.getNombre(), valor));
+        instrucciones.add(new Instruccion(Operacion.DECL, declaracion.getNombre(),
+                declaracion.getTipo().toString()));
+        if (declaracion.getInicializador() != null) {
+            String valor = generarExpresion(declaracion.getInicializador());
+            instrucciones.add(new Instruccion(Operacion.ASIG, declaracion.getNombre(), valor));
+        }
+    }
+
+    private void generarDeclaracionArreglo(DeclaracionVariableNodo declaracion) {
+        String filas = generarExpresionSinCarga(declaracion.getFilas());
+        String columnas = generarExpresionSinCarga(declaracion.getColumnas());
+        instrucciones.add(new Instruccion(Operacion.DECL_ARRAY, declaracion.getNombre(),
+                declaracion.getTipo().toString(), "[" + filas + "][" + columnas + "]"));
+        InicializacionArregloNodo inicializacion = declaracion.getInicializacionArreglo();
+        if (inicializacion == null) {
+            return;
+        }
+        List<List<ExpresionNodo>> valores = inicializacion.getFilas();
+        for (int fila = 0; fila < valores.size(); fila++) {
+            for (int columna = 0; columna < valores.get(fila).size(); columna++) {
+                String destino = declaracion.getNombre() + "[" + fila + "][" + columna + "]";
+                String valor = generarExpresion(valores.get(fila).get(columna));
+                instrucciones.add(new Instruccion(Operacion.STORE_ARRAY, destino, valor));
+            }
+        }
     }
 
     /**
@@ -155,8 +199,10 @@ public class GeneradorCodigoIntermedio {
      */
     private void generarAsignacion(AsignacionNodo asignacion) {
         String valor = generarExpresion(asignacion.getValor());
-        String destino = generarExpresion(asignacion.getDestino());
-        instrucciones.add(new Instruccion(Operacion.ASIG, destino, valor));
+        String destino = generarDestino(asignacion.getDestino());
+        Operacion operacion = asignacion.getDestino() instanceof AccesoArregloNodo
+                ? Operacion.STORE_ARRAY : Operacion.ASIG;
+        instrucciones.add(new Instruccion(operacion, destino, valor));
     }
 
     /**
@@ -197,6 +243,54 @@ public class GeneradorCodigoIntermedio {
      */
     private void generarSalida(SalidaNodo salida) {
         instrucciones.add(new Instruccion(Operacion.PRINT, generarExpresion(salida.getValor())));
+    }
+
+    private void generarEntrada(EntradaNodo entrada) {
+        instrucciones.add(new Instruccion(Operacion.READ, entrada.getDestino()));
+    }
+
+    private void generarBreak() {
+        if (!destinosBreak.isEmpty()) {
+            instrucciones.add(new Instruccion(Operacion.GOTO, destinosBreak.peek()));
+        }
+    }
+
+    private void generarSwitch(SwitchNodo sentencia) {
+        String selector = generarExpresion(sentencia.getExpresion());
+        String etiquetaFin = nuevaEtiqueta();
+        List<CasoSwitchNodo> casos = sentencia.getCasos();
+        List<String> etiquetasCasos = new ArrayList<>();
+        String etiquetaDefault = etiquetaFin;
+        for (CasoSwitchNodo caso : casos) {
+            String etiqueta = nuevaEtiqueta();
+            etiquetasCasos.add(etiqueta);
+            if (caso.isDefecto()) {
+                etiquetaDefault = etiqueta;
+            }
+        }
+
+        for (int i = 0; i < casos.size(); i++) {
+            CasoSwitchNodo caso = casos.get(i);
+            if (caso.isDefecto()) {
+                continue;
+            }
+            String valorCaso = generarExpresion(caso.getValor());
+            String comparacion = nuevoTemporal();
+            instrucciones.add(new Instruccion(Operacion.IGUAL, comparacion, selector, valorCaso));
+            String siguiente = nuevaEtiqueta();
+            instrucciones.add(new Instruccion(Operacion.IF_FALSE, siguiente, comparacion));
+            instrucciones.add(new Instruccion(Operacion.GOTO, etiquetasCasos.get(i)));
+            instrucciones.add(new Instruccion(Operacion.LABEL, siguiente));
+        }
+        instrucciones.add(new Instruccion(Operacion.GOTO, etiquetaDefault));
+
+        destinosBreak.push(etiquetaFin);
+        for (int i = 0; i < casos.size(); i++) {
+            instrucciones.add(new Instruccion(Operacion.LABEL, etiquetasCasos.get(i)));
+            generarBloque(casos.get(i).getBloque());
+        }
+        destinosBreak.pop();
+        instrucciones.add(new Instruccion(Operacion.LABEL, etiquetaFin));
     }
 
     /**
@@ -269,16 +363,20 @@ public class GeneradorCodigoIntermedio {
      */
     private String generarExpresion(ExpresionNodo expresion) {
         if (expresion instanceof IdentificadorNodo) {
-            return ((IdentificadorNodo) expresion).getNombre();
+            String temporal = nuevoTemporal();
+            instrucciones.add(new Instruccion(Operacion.LOAD, temporal,
+                    ((IdentificadorNodo) expresion).getNombre()));
+            return temporal;
         }
         if (expresion instanceof AccesoArregloNodo) {
-            AccesoArregloNodo acceso = (AccesoArregloNodo) expresion;
-            return acceso.getNombre() + "[" + generarExpresion(acceso.getFila()) + "]"
-                    + "[" + generarExpresion(acceso.getColumnaIndice()) + "]";
+            String origen = generarDestino(expresion);
+            String temporal = nuevoTemporal();
+            instrucciones.add(new Instruccion(Operacion.LOAD, temporal, origen));
+            return temporal;
         }
         if (expresion instanceof LiteralNodo) {
             Object valor = ((LiteralNodo) expresion).getValor();
-            return valor == null ? "null" : valor.toString();
+            return formatearLiteral((LiteralNodo) expresion);
         }
         if (expresion instanceof ExpresionBinariaNodo) {
             return generarBinaria((ExpresionBinariaNodo) expresion);
@@ -295,6 +393,41 @@ public class GeneradorCodigoIntermedio {
          * durante nuevas extensiones.
          */
         return "<expr>";
+    }
+
+    private String generarDestino(ExpresionNodo expresion) {
+        if (expresion instanceof IdentificadorNodo) {
+            return ((IdentificadorNodo) expresion).getNombre();
+        }
+        if (expresion instanceof AccesoArregloNodo) {
+            AccesoArregloNodo acceso = (AccesoArregloNodo) expresion;
+            return acceso.getNombre() + "[" + generarExpresion(acceso.getFila()) + "]"
+                    + "[" + generarExpresion(acceso.getColumnaIndice()) + "]";
+        }
+        return generarExpresion(expresion);
+    }
+
+    private String generarExpresionSinCarga(ExpresionNodo expresion) {
+        if (expresion instanceof IdentificadorNodo) {
+            return ((IdentificadorNodo) expresion).getNombre();
+        }
+        return generarExpresion(expresion);
+    }
+
+    private String formatearLiteral(LiteralNodo literal) {
+        Object valor = literal.getValor();
+        if (valor == null) {
+            return "null";
+        }
+        if (literal.getTipo() == TipoDato.STRING) {
+            String texto = valor.toString();
+            return texto.length() >= 2 && texto.startsWith("\"") && texto.endsWith("\"")
+                    ? texto : "\"" + texto + "\"";
+        }
+        if (literal.getTipo() == TipoDato.CHAR) {
+            return "'" + valor + "'";
+        }
+        return valor.toString();
     }
 
     /**
@@ -325,11 +458,14 @@ public class GeneradorCodigoIntermedio {
      */
     private String generarUnaria(ExpresionUnariaNodo expresion) {
         if ("++".equals(expresion.getOperador()) || "--".equals(expresion.getOperador())) {
-            String destino = generarExpresion(expresion.getExpresion());
+            String destino = generarDestino(expresion.getExpresion());
+            String valorActual = generarExpresion(expresion.getExpresion());
             String temporal = nuevoTemporal();
             Operacion operacion = "++".equals(expresion.getOperador()) ? Operacion.SUMA : Operacion.RESTA;
-            instrucciones.add(new Instruccion(operacion, temporal, destino, "1"));
-            instrucciones.add(new Instruccion(Operacion.ASIG, destino, temporal));
+            instrucciones.add(new Instruccion(operacion, temporal, valorActual, "1"));
+            Operacion escritura = expresion.getExpresion() instanceof AccesoArregloNodo
+                    ? Operacion.STORE_ARRAY : Operacion.ASIG;
+            instrucciones.add(new Instruccion(escritura, destino, temporal));
             return temporal;
         }
         String valor = generarExpresion(expresion.getExpresion());

@@ -122,6 +122,16 @@ public class Instruccion {
      */
     public String toString() {
         switch (op) {
+            case DECL:
+                return "declare " + op1 + " " + resultado;
+            case DECL_ARRAY:
+                return "declare " + op1 + " " + resultado + op2;
+            case FORMAL_PARAM:
+                return "parameter " + op1 + " " + resultado;
+            case LOAD:
+                return resultado + " = load " + op1;
+            case STORE_ARRAY:
+                return "store " + op1 + " -> " + resultado;
             case ASIG:
                 return resultado + " = " + op1;
             case SUMA:
@@ -152,6 +162,8 @@ public class Instruccion {
                 return formatearCall();
             case PRINT:
                 return "print " + operandoUnico();
+            case READ:
+                return "read " + operandoUnico();
             case RETURN:
                 return op1 == null ? "return" : "return " + op1;
             case LABEL:
