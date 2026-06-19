@@ -10,6 +10,7 @@ import ast.ExpresionUnariaNodo;
 import ast.IdentificadorNodo;
 import ast.InicializacionArregloNodo;
 import ast.LlamadaFuncionNodo;
+import ast.LiteralNodo;
 import ast.ParametroNodo;
 import ast.ReturnNodo;
 import ast.SalidaNodo;
@@ -264,10 +265,15 @@ public class AnalizadorSemantico {
         }
         validarDimensionArreglo(nombre, "fila", filas);
         validarDimensionArreglo(nombre, "columna", columnas);
+        Integer cantidadFilas = valorEnteroLiteral(filas);
+        Integer cantidadColumnas = valorEnteroLiteral(columnas);
         if (inicializacion != null) {
             validarInicializacionArreglo(nombre, tipo, inicializacion);
+            validarDimensionesInicializacion(nombre, cantidadFilas, cantidadColumnas,
+                    inicializacion);
         }
-        insertarSimbolo(new Simbolo(nombre, tipo, CategoriaSimb.ARREGLO, linea, inicializacion != null));
+        insertarSimbolo(new Simbolo(nombre, tipo, CategoriaSimb.ARREGLO, linea,
+                inicializacion != null, cantidadFilas, cantidadColumnas));
     }
 
     /**
@@ -367,7 +373,7 @@ public class AnalizadorSemantico {
             return;
         }
         if (simbolo.getCategoria() == CategoriaSimb.ARREGLO
-                || !simbolo.getTipo().esDeclarableVariable()) {
+                || (simbolo.getTipo() != TipoDato.INT && simbolo.getTipo() != TipoDato.FLOAT)) {
             tablaSimbolos.reportarEntradaTipoInvalido(entrada.getDestino(), simbolo.getTipo(),
                     entrada.getLinea());
             return;
@@ -389,7 +395,8 @@ public class AnalizadorSemantico {
         if (tipo == TipoDato.ERROR || tipo == TipoDato.DESCONOCIDO) {
             return;
         }
-        if (tipo == TipoDato.VOID || tipo == TipoDato.EMPTY) {
+        if (tipo != TipoDato.STRING && tipo != TipoDato.CHAR && tipo != TipoDato.INT
+                && tipo != TipoDato.BOOL && tipo != TipoDato.FLOAT) {
             tablaSimbolos.reportarSalidaTipoInvalido(tipo, salida.getLinea());
         }
     }
@@ -754,6 +761,10 @@ public class AnalizadorSemantico {
         }
         validarIndiceArreglo(acceso.getFila());
         validarIndiceArreglo(acceso.getColumnaIndice());
+        validarRangoIndice(acceso.getNombre(), "de fila", acceso.getFila(),
+                simbolo.getFilasArreglo());
+        validarRangoIndice(acceso.getNombre(), "de columna", acceso.getColumnaIndice(),
+                simbolo.getColumnasArreglo());
         if (requiereInicializado && !simbolo.isInicializado()) {
             tablaSimbolos.reportarVariableNoInicializada(acceso.getNombre(), acceso.getLinea());
         }
@@ -789,6 +800,68 @@ public class AnalizadorSemantico {
         TipoDato tipo = evaluarTipo(expresion);
         if (tipo != TipoDato.ERROR && tipo != TipoDato.DESCONOCIDO && tipo != TipoDato.INT) {
             tablaSimbolos.reportarDimensionArregloInvalida(nombre, dimension, expresion.getLinea());
+              return;
+        }
+        Integer valor = valorEnteroLiteral(expresion);
+        if (valor != null && valor <= 0) {
+            tablaSimbolos.reportarDimensionArregloNoPositiva(nombre, dimension, valor,
+                    expresion.getLinea());
+        }
+    }
+
+    private void validarRangoIndice(String nombre, String dimension, ExpresionNodo indice,
+                                    Integer limite) {
+        Integer valor = valorEnteroLiteral(indice);
+        if (valor != null && limite != null && limite > 0 && (valor < 0 || valor >= limite)) {
+            tablaSimbolos.reportarIndiceFueraDeRango(nombre, dimension, valor, limite,
+                    indice.getLinea());
+        }
+    }
+
+    private Integer valorEnteroLiteral(ExpresionNodo expresion) {
+        if (expresion == null || expresion.getTipo() != TipoDato.INT) {
+            return null;
+        }
+        if (expresion instanceof LiteralNodo) {
+            Object valor = ((LiteralNodo) expresion).getValor();
+            return valor instanceof Number ? ((Number) valor).intValue() : null;
+        }
+        if (expresion instanceof ExpresionUnariaNodo) {
+            ExpresionUnariaNodo unaria = (ExpresionUnariaNodo) expresion;
+            Integer valor = valorEnteroLiteral(unaria.getExpresion());
+            if (valor != null && "-".equals(unaria.getOperador())) {
+                return -valor;
+            }
+            if (valor != null && "+".equals(unaria.getOperador())) {
+                return valor;
+            }
+        }
+        return null;
+    }
+
+    private void validarDimensionesInicializacion(String nombre, Integer filasEsperadas,
+                                                  Integer columnasEsperadas,
+                                                  InicializacionArregloNodo inicializacion) {
+        List<List<ExpresionNodo>> filas = inicializacion.getFilas();
+        int cantidadFilas = filas.size();
+        int cantidadColumnas = filas.isEmpty() ? 0 : filas.get(0).size();
+        boolean irregular = false;
+        for (List<ExpresionNodo> fila : filas) {
+            if (fila.size() != cantidadColumnas) {
+                irregular = true;
+                break;
+            }
+        }
+        if (irregular) {
+            tablaSimbolos.reportarInicializacionArregloIrregular(nombre,
+                    inicializacion.getLinea());
+            return;
+        }
+        if (filasEsperadas != null && columnasEsperadas != null
+                && (cantidadFilas != filasEsperadas || cantidadColumnas != columnasEsperadas)) {
+            tablaSimbolos.reportarInicializacionDimensionIncompatible(nombre, filasEsperadas,
+                    columnasEsperadas, cantidadFilas, cantidadColumnas,
+                    inicializacion.getLinea());
         }
     }
 

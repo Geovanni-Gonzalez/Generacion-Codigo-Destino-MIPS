@@ -402,6 +402,40 @@ public class TablaDeSimbolos {
         reportar("la dimension " + dimension + " del arreglo '" + nombre
                 + "' debe ser de tipo int", linea);
     }
+    /**
+     * <strong>Objetivo:</strong> Registra un diagnostico de error para el reporte semantico.
+     * <p><strong>Entradas:</strong> String nombre, String dimension, int valor, int linea</p>
+     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     */
+    public void reportarDimensionArregloNoPositiva(String nombre, String dimension,
+                                                    int valor, int linea) {
+        reportar("la dimension " + dimension + " del arreglo '" + nombre
+                + "' debe ser mayor que cero, se encontro " + valor, linea);
+    }
+    /**
+     * <strong>Objetivo:</strong> Registra un diagnostico de error para el reporte semantico.
+     * <p><strong>Entradas:</strong> String nombre, int filasEsperadas, int columnasEsperadas, int filas, int columnas, int linea</p>
+     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     */
+    public void reportarInicializacionDimensionIncompatible(String nombre, int filasEsperadas,
+                                                            int columnasEsperadas, int filas,
+                                                            int columnas, int linea) {
+        reportar("la inicializacion del arreglo '" + nombre + "' tiene dimensiones "
+                + filas + "x" + columnas + ", pero se declararon "
+                + filasEsperadas + "x" + columnasEsperadas, linea);
+    }
+    /**
+     * <strong>Objetivo:</strong> Registra un diagnostico de error para el reporte semantico.
+     * <p><strong>Entradas:</strong> String nombre, int linea</p>
+     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     */
+    public void reportarInicializacionArregloIrregular(String nombre, int linea) {
+        reportar("la inicializacion del arreglo '" + nombre
+                + "' debe tener la misma cantidad de columnas en todas sus filas", linea);
+    }
 
     /**
      * <strong>Objetivo:</strong> Registra un diagnostico de error para el reporte semantico.
@@ -440,7 +474,7 @@ public class TablaDeSimbolos {
      * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
      */
     public void reportarEntradaTipoInvalido(String nombre, TipoDato tipo, int linea) {
-        reportar("cin solo puede leer variables escalares declarables; '" + nombre
+        reportar("cin solo puede leer variables escalares de tipo int o float; '" + nombre
                 + "' tiene tipo " + tipo, linea);
     }
 
@@ -481,6 +515,19 @@ public class TablaDeSimbolos {
      */
     public void reportarIndiceNoEntero(TipoDato tipoIndice, int linea) {
         reportar("el indice del arreglo debe ser de tipo int, se encontro " + tipoIndice, linea);
+    }
+
+    
+    /**
+     *<strong>Objetivo:</strong> Registra un diagnostico de error para el reporte semantico. 
+     *<p><strong>Entradas:</strong> String nombre, String dimension, int indice, int limite, int linea</p>
+     *<p><strong>Salidas:</strong> No retorna valor.</p>
+     *<p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     */
+    public void reportarIndiceFueraDeRango(String nombre, String dimension, int indice,
+                                           int limite, int linea) {
+        reportar("el indice " + dimension + " " + indice + " esta fuera de rango para el arreglo '"
+                + nombre + "' (rango valido: 0 a " + (limite - 1) + ")", linea);
     }
 
     /**
