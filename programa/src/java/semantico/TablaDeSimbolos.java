@@ -304,8 +304,8 @@ public class TablaDeSimbolos {
      */
     public void reportarOperacionIncompatible(String operador, TipoDato izquierda, TipoDato derecha, int linea) {
         reportar("tipos incompatibles para operador '" + operador
-                + "': operando izquierdo de tipo " + izquierda
-                + " y operando derecho de tipo " + derecha, linea);
+                + " y operando derecho de tipo " + derecha
+                + ". " + requisitoOperador(operador), linea);
     }
 
     /**
@@ -319,7 +319,14 @@ public class TablaDeSimbolos {
      */
     public void reportarOperacionIncompatible(String operador, TipoDato operando, int linea) {
         reportar("tipo incompatible para operador '" + operador
-                + "': se obtuvo tipo " + operando, linea);
+                + "': se obtuvo tipo " + operando + ". " + requisitoOperador(operador), linea);
+    }
+
+    public void reportarOperandoNoModificable(String operador, TipoDato tipo, int linea) {
+        reportar("el operador '" + operador + "' no puede aplicarse a un literal o expresion "
+                + "no modificable de tipo " + tipo
+                + ". Use una variable o una posicion de arreglo como operando", linea);
+
     }
 
     /**
@@ -332,7 +339,8 @@ public class TablaDeSimbolos {
      * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
      */
     public void reportarVariableNoInicializada(String nombre, int linea) {
-        reportar("variable '" + nombre + "' usada antes de inicializarse", linea);
+        reportar("variable '" + nombre + "' usada antes de inicializarse. Asigne un valor antes "
+        + "de leerla", linea);
     }
 
     /**
@@ -345,7 +353,8 @@ public class TablaDeSimbolos {
      * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
      */
     public void reportarUsoArregloComoEscalar(String nombre, int linea) {
-        reportar("'" + nombre + "' es un arreglo y debe accederse con indices", linea);
+        reportar("'" + nombre + "' es un arreglo y debe accederse con indices. Use '" + nombre
+                + "<<fila>><<columna>>'", linea);
     }
 
     /**
@@ -358,7 +367,8 @@ public class TablaDeSimbolos {
      * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
      */
     public void reportarUsoEscalarComoArreglo(String nombre, int linea) {
-        reportar("'" + nombre + "' no es un arreglo", linea);
+        reportar("'" + nombre + "' no es un arreglo; fue declarado como variable escalar y no "
+                + "admite indices", linea);
     }
 
     /**
@@ -371,7 +381,8 @@ public class TablaDeSimbolos {
      * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
      */
     public void reportarAsignacionArregloCompleto(String nombre, int linea) {
-        reportar("no se puede asignar directamente al arreglo completo '" + nombre + "'", linea);
+          reportar("no se puede asignar directamente al arreglo completo '" + nombre
+                + "'. Asigne una posicion con '" + nombre + "<<fila>><<columna>> <- valor'", linea);
     }
 
     /**
@@ -566,8 +577,8 @@ public class TablaDeSimbolos {
      * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
      */
     public void reportarReturnConValorEnVoid(int linea) {
-        reportar("la funcion void no puede retornar un valor", linea);
-    }
+    reportar("la funcion void no puede retornar un valor. Use 'return~!' o elimine la "
+                + "sentencia return", linea);    }
 
     /**
      * <strong>Objetivo:</strong> Registra un diagnostico de error para el reporte semantico.
@@ -621,7 +632,8 @@ public class TablaDeSimbolos {
      * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
      */
     private void reportarVariableNoDeclarada(String nombre, int linea) {
-        reportar("variable '" + nombre + "' no declarada", linea);
+    reportar("variable '" + nombre + "' no declarada. Declare la variable antes de usarla y "
+                + "verifique la escritura de su nombre", linea);
     }
 
     /**
@@ -634,8 +646,9 @@ public class TablaDeSimbolos {
      * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
      */
     private void reportarFuncionNoDeclarada(String nombre, int linea) {
-        reportar("funcion '" + nombre + "' no declarada", linea);
-    }
+       reportar("funcion '" + nombre + "' no declarada. Declare la funcion antes de invocarla y "
+                + "verifique la escritura de su nombre", linea);
+   }
 
     /**
      * <strong>Objetivo:</strong> Registra un diagnostico de error para el reporte semantico.
@@ -719,6 +732,29 @@ public class TablaDeSimbolos {
      */
     private void reportar(String descripcion, int linea) {
         erroresSemanticos.add(ReportadorErrores.reportarSemantico(linea, 0, descripcion));
+    }
+
+       private String requisitoOperador(String operador) {
+        if ("%".equals(operador)) {
+            return "Se requieren dos operandos numericos del mismo tipo (int-int o float-float)";
+        }
+        if ("^".equals(operador)) {
+            return "Se requieren operandos numericos del mismo tipo (int ^ int o float ^ float)";
+        }
+        if ("less_t".equals(operador) || "less_te".equals(operador)
+                || "greather_t".equals(operador) || "greather_te".equals(operador)) {
+            return "Se requieren dos operandos numericos del mismo tipo";
+        }
+        if ("equal".equals(operador) || "n_equal".equals(operador)) {
+            return "Se requieren dos operandos del mismo tipo";
+        }
+        if ("#".equals(operador) || "@".equals(operador) || "$".equals(operador)) {
+            return "Se requieren operandos de tipo bool";
+        }
+        if ("++".equals(operador) || "--".equals(operador)) {
+            return "Se requiere una variable o posicion de arreglo de tipo int o float";
+        }
+        return "Se requieren operandos numericos de tipo int o float";
     }
 
     /**

@@ -646,7 +646,7 @@ public class AnalizadorSemantico {
             return TipoDato.ERROR;
         }
         if ("^".equals(operador)) {
-            if (izquierda.esNumerico() && derecha == TipoDato.INT) {
+            if (izquierda.esNumerico() && izquierda == derecha) {
                 return izquierda;
             }
             tablaSimbolos.reportarOperacionIncompatible(operador, izquierda, derecha, expresion.getLinea());
@@ -681,7 +681,7 @@ public class AnalizadorSemantico {
         }
         if ("-".equals(operador) || "++".equals(operador) || "--".equals(operador)) {
             if (("++".equals(operador) || "--".equals(operador)) && !esModificable(expresion.getExpresion())) {
-                tablaSimbolos.reportarOperacionIncompatible(operador, tipo, expresion.getLinea());
+                tablaSimbolos.reportarOperandoNoModificable(operador, tipo, expresion.getLinea());
                 return TipoDato.ERROR;
             }
             if (tipo.esNumerico()) {

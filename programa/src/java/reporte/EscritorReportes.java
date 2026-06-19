@@ -85,6 +85,12 @@ public final class EscritorReportes {
                                        List<String> erroresSintacticos,
                                        List<String> erroresSemanticos) throws Exception {
         try (BufferedWriter writer = Files.newBufferedWriter(archivo, StandardCharsets.UTF_8)) {
+            int total = erroresLexicos.size() + erroresSintacticos.size() + erroresSemanticos.size();
+            writer.write("RESUMEN: " + total + " error(es) encontrado(s) [lexicos: "
+                    + erroresLexicos.size() + ", sintacticos: " + erroresSintacticos.size()
+                    + ", semanticos: " + erroresSemanticos.size() + "]");
+            writer.newLine();
+            writer.newLine();
             escribirSeccionErrores(writer, "ERRORES LEXICOS", "Sin errores lexicos.", erroresLexicos);
             writer.newLine();
             escribirSeccionErrores(writer, "ERRORES SINTACTICOS", "Sin errores sintacticos.",
@@ -144,15 +150,15 @@ public final class EscritorReportes {
      */
     private static void escribirSeccionErrores(BufferedWriter writer, String titulo,
                                                String mensajeVacio, List<String> errores) throws Exception {
-        writer.write(titulo);
+        writer.write(titulo + " (" + errores.size() + ")");
         writer.newLine();
         if (errores.isEmpty()) {
             writer.write(mensajeVacio);
             writer.newLine();
             return;
         }
-        for (String error : errores) {
-            writer.write(error);
+        for (int i = 0; i < errores.size(); i++) {
+            writer.write((i + 1) + ". " + errores.get(i));
             writer.newLine();
         }
     }
