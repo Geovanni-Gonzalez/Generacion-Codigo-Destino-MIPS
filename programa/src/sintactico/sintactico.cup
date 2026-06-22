@@ -725,20 +725,8 @@ creacion
 restoNumerico
     ::= restoVariable:r
         {: RESULT = new DeclaracionSufijo(r); :}
-    | L_ARRAY expresion:f COMMA expresion:c R_ARRAY asigArr:a
-        {: RESULT = new DeclaracionSufijo(f, c, a); :}
     | L_ARRAY expresion:f R_ARRAY L_ARRAY expresion:c R_ARRAY asigArr:a
         {: RESULT = new DeclaracionSufijo(f, c, a); :}
-    | L_ARRAY expresion:f error expresion:c R_ARRAY asigArr:a
-        {:
-            parser.report_error("Se esperaba ',' entre las dos dimensiones del arreglo", null);
-            RESULT = new DeclaracionSufijo(f, c, a);
-        :}
-    | L_ARRAY expresion:f COMMA expresion:c error asigArr:a
-        {:
-            parser.report_error("Se esperaba '>>' para cerrar los indices del arreglo", null);
-            RESULT = new DeclaracionSufijo(f, c, a);
-        :}
     | L_ARRAY expresion:f error L_ARRAY expresion:c R_ARRAY asigArr:a
         {:
             parser.report_error("Se esperaba '>>' para cerrar la primera dimension del arreglo", null);
@@ -750,6 +738,7 @@ restoNumerico
             RESULT = new DeclaracionSufijo(f, c, a);
         :}
     ;
+
 
 /* Continuacion de una declaracion escalar: sin inicializar o con expresion inicial. */
 restoVariable

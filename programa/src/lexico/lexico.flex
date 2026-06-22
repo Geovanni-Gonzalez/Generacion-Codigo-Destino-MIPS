@@ -132,10 +132,13 @@ DIGITO_POS = [1-9]
 LETRA = [a-zA-Z]
 ID = ({LETRA} | "_") ({LETRA} | {DIGITO} | "_")*
 ENTERO_POS = ({DIGITO_POS}{DIGITO}* | "0")
+NATURAL_POS = {DIGITO_POS}{DIGITO}*
 ENTERO = "-"?{ENTERO_POS}
 FLOTANTE = {ENTERO}"."{DIGITO}+
-FRACCION = {ENTERO}"/"{ENTERO_POS}
-EXPONENTE = {ENTERO}"e"{ENTERO_POS}
+FRACCION = {ENTERO}"/"{NATURAL_POS}
+EXPONENTE = {ENTERO}"e"{NATURAL_POS}
+FRACCION_DENOMINADOR_CERO = {ENTERO}"/""0"+
+EXPONENTE_CERO = {ENTERO}"e""0"+
 CHAR = [^\r\n']
 STRING = [^\r\n\"]*
 
@@ -207,6 +210,8 @@ STRING = [^\r\n\"]*
 ":"             { return symbol(sym.COLON); }
 "!"             { return symbol(sym.END_EXPR); }
 
+{EXPONENTE_CERO} { errorLexico("literal exponencial con exponente no positivo"); }
+{FRACCION_DENOMINADOR_CERO} { errorLexico("literal fraccionario con denominador cero"); }
 {EXPONENTE}     { return symbol(sym.LIT_EXPONENTE, yytext()); }
 {FRACCION}      { return symbol(sym.LIT_FRACCION, yytext()); }
 {FLOTANTE}      { return symbol(sym.LIT_FLOTANTE, Double.parseDouble(yytext())); }
