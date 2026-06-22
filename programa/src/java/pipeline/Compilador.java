@@ -3,6 +3,7 @@ package pipeline;
 import intermedio.GeneradorCodigoIntermedio;
 import intermedio.Instruccion;
 import java.io.Reader;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,6 +35,7 @@ public class Compilador {
      * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
      */
     public ResultadoCompilacion compilar(Path fuente) throws Exception {
+        validarFuente(fuente);
         MiLexer lexerTokens = crearLexer(fuente);
         consumirTokens(lexerTokens);
 
@@ -60,6 +62,22 @@ public class Compilador {
 
         return new ResultadoCompilacion(fuente, lexerTokens, parser, sintaxisCompleta,
                 aceptado, codigoIntermedio);
+    }
+
+    /** Valida el archivo antes de iniciar las fases lexica y sintactica. */
+    private void validarFuente(Path fuente) throws IOException {
+        if (fuente == null) {
+            throw new IOException("No se proporciono una ruta de archivo fuente.");
+        }
+        if (!Files.exists(fuente)) {
+            throw new IOException("No existe el archivo fuente: " + fuente);
+        }
+        if (!Files.isRegularFile(fuente)) {
+            throw new IOException("La ruta no corresponde a un archivo regular: " + fuente);
+        }
+        if (!Files.isReadable(fuente)) {
+            throw new IOException("No se puede leer el archivo fuente: " + fuente);
+        }
     }
 
     /**

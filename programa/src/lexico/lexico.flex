@@ -123,7 +123,7 @@ private String informacionPara(int type, String lexema, Object value) {
             System.err.println(error);
         }
     }
-    return new Symbol(sym.EOF);
+    return new Symbol(sym.EOF, yyline + 1, yycolumn + 1, "<EOF>");
 %eofval}
 
 /* DEFINICIONES */
@@ -248,7 +248,7 @@ STRING = [^\r\n\"]*
 
 <COMMENT><<EOF>> {
     errorLexico("comentario multilinea sin cerrar");
-    return new Symbol(sym.EOF);
+    return new Symbol(sym.EOF, yyline + 1, yycolumn + 1, "<EOF>");
 }
 
 
