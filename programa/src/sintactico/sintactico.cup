@@ -110,6 +110,14 @@ parser code {:
         analizadorSemantico.verificarReturn(retorno);
     }
 
+    public void verificarContextoBreak(ProgramaNodo programa) {
+        analizadorSemantico.verificarContextoBreak(programa);
+    }
+
+    public void verificarRutasRetorno(ProgramaNodo programa) {
+        analizadorSemantico.verificarRutasRetorno(programa);
+    }
+
     @Override
     public void report_error(String message, Object info) {
         numErrores++;
@@ -162,7 +170,7 @@ parser code {:
         Symbol actual = getScanner().next_token();
         if (debeInsertarFinSentencia(ultimoTokenReal, actual)) {
             tokenPendiente = actual;
-            report_error("se inserto ';' para recuperar el analisis", actual);
+            report_error("se inserto '!' para recuperar el analisis", actual);
             Symbol insertado = new Symbol(sym.END_EXPR, actual.left, actual.right, "!");
             ultimoTokenReal = insertado;
             return insertado;
@@ -286,8 +294,11 @@ programa
     ::= inicioPrograma miembros:ms
         {:
             parser.verificarMain();
-            RESULT = new ProgramaNodo(msleft, msright, ms);
-            parser.ast = (ProgramaNodo) RESULT;
+            ProgramaNodo programaNodo = new ProgramaNodo(msleft, msright, ms);
+            parser.verificarContextoBreak(programaNodo);
+            parser.verificarRutasRetorno(programaNodo);
+            RESULT = programaNodo;
+            parser.ast = programaNodo;
             parser.cerrarPrograma();
         :}
     ;
@@ -560,7 +571,7 @@ sentencia
         {: RESULT = b; :}
     | creacion:c error
         {:
-            parser.report_error("se inserto ';' para recuperar el analisis", null);
+            parser.report_error("se inserto '!' para recuperar el analisis", null);
             RESULT = c;
         :}
     | asignacion:a error
@@ -1068,12 +1079,6 @@ retorno
     | RETURN:r
         {:
             ReturnNodo retorno = new ReturnNodo(rleft, rright, null);
-            parser.verificarReturn(retorno);
-            RESULT = retorno;
-        :}
-    | RETURN:r expresion:e
-        {:
-            ReturnNodo retorno = new ReturnNodo(rleft, rright, e);
             parser.verificarReturn(retorno);
             RESULT = retorno;
         :}
