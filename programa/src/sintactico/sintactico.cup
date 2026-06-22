@@ -271,7 +271,7 @@ non terminal java.util.List casos;
 non terminal CasoSwitchNodo caso;
 non terminal SentenciaNodo io, retorno, breakSt;
 non terminal ExpresionNodo expresion, expresionLog, expresionRelTernaria, expresionRelBinaria;
-non terminal ExpresionNodo expresionArit, termino, potencia, factor, base, literal;
+non terminal ExpresionNodo expresionArit, termino, unario, potencia, factor, base, literal;
 non terminal LlamadaFuncionNodo idFuncion;
 non terminal java.util.List args, listaArgs;
 
@@ -739,7 +739,6 @@ restoNumerico
         :}
     ;
 
-
 /* Continuacion de una declaracion escalar: sin inicializar o con expresion inicial. */
 restoVariable
     ::=
@@ -927,11 +926,9 @@ doWhile
         :}
     ;
 
-/* Terminador opcional del do-while para aceptar variantes del enunciado y pruebas. */
+/* Terminador obligatorio del do-while. */
 finDoWhile
-    ::=
-        {: RESULT = null; :}
-    | END_EXPR
+    ::= END_EXPR
         {: RESULT = null; :}
     ;
 
@@ -1341,27 +1338,27 @@ expresionArit
         :}
     ;
 
-/* Termino multiplicativo formado por potencias. */
+/* Termino multiplicativo formado por expresiones unarias. */
 termino
-    ::= termino:l TIMES:o potencia:r
+    ::= termino:l TIMES:o unario:r
         {:
             RESULT = new ExpresionBinariaNodo(
                 oleft, oright, "*", l, r);
         :}
 
-    | termino:l DIV:o potencia:r
+    | termino:l DIV:o unario:r
         {:
             RESULT = new ExpresionBinariaNodo(
                 oleft, oright, "/", l, r);
         :}
 
-    | termino:l MOD:o potencia:r
+    | termino:l MOD:o unario:r
         {:
             RESULT = new ExpresionBinariaNodo(
                 oleft, oright, "%", l, r);
         :}
 
-    | potencia:e
+    | unario:e
         {:
             RESULT = e;
         :}
@@ -1394,9 +1391,23 @@ termino
         :}
     ;
 
-/* Potencia con asociatividad a la derecha. */
+/* Signo unario: queda por debajo de la potencia, como en la precedencia matematica usual. */
+unario
+    ::= MINUS:o unario:e
+        {:
+            RESULT = new ExpresionUnariaNodo(
+                oleft, oright, "-", e);
+        :}
+
+    | potencia:e
+        {:
+            RESULT = e;
+        :}
+    ;
+
+/* Potencia con asociatividad a la derecha; admite exponentes con signo. */
 potencia
-    ::= factor:l POW:o potencia:r
+    ::= factor:l POW:o unario:r
         {:
             RESULT = new ExpresionBinariaNodo(
                 oleft, oright, "^", l, r);
@@ -1417,15 +1428,9 @@ potencia
         :}
     ;
 
-/* Factor: prefijos unarios o base de expresion. */
+/* Factor: operadores modificadores de alta precedencia o base de expresion. */
 factor
-    ::= MINUS:o factor:e
-        {:
-            RESULT = new ExpresionUnariaNodo(
-                oleft, oright, "-", e);
-        :}
-
-    | INC:o factor:e
+    ::= INC:o factor:e
         {:
             RESULT = new ExpresionUnariaNodo(
                 oleft, oright, "++", e);

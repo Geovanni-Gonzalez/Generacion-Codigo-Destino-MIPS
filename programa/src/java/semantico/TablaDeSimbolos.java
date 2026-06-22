@@ -304,6 +304,7 @@ public class TablaDeSimbolos {
      */
     public void reportarOperacionIncompatible(String operador, TipoDato izquierda, TipoDato derecha, int linea) {
         reportar("tipos incompatibles para operador '" + operador
+                + "': operando izquierdo de tipo " + izquierda
                 + " y operando derecho de tipo " + derecha
                 + ". " + requisitoOperador(operador), linea);
     }
@@ -326,8 +327,13 @@ public class TablaDeSimbolos {
         reportar("el operador '" + operador + "' no puede aplicarse a un literal o expresion "
                 + "no modificable de tipo " + tipo
                 + ". Use una variable o una posicion de arreglo como operando", linea);
-
     }
+
+     public void reportarNegativoSobreExpresionNoLiteral(TipoDato tipo, int linea) {
+        reportar("el operador '-' solo puede aplicarse a literales numericos; se intento aplicar "
+                + "a una expresion de tipo " + tipo, linea);
+    }
+
 
     /**
      * <strong>Objetivo:</strong> Registra un diagnostico de error para el reporte semantico.
@@ -340,7 +346,7 @@ public class TablaDeSimbolos {
      */
     public void reportarVariableNoInicializada(String nombre, int linea) {
         reportar("variable '" + nombre + "' usada antes de inicializarse. Asigne un valor antes "
-        + "de leerla", linea);
+                + "de leerla", linea);
     }
 
     /**
@@ -381,7 +387,7 @@ public class TablaDeSimbolos {
      * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
      */
     public void reportarAsignacionArregloCompleto(String nombre, int linea) {
-          reportar("no se puede asignar directamente al arreglo completo '" + nombre
+        reportar("no se puede asignar directamente al arreglo completo '" + nombre
                 + "'. Asigne una posicion con '" + nombre + "<<fila>><<columna>> <- valor'", linea);
     }
 
@@ -413,23 +419,13 @@ public class TablaDeSimbolos {
         reportar("la dimension " + dimension + " del arreglo '" + nombre
                 + "' debe ser de tipo int", linea);
     }
-    /**
-     * <strong>Objetivo:</strong> Registra un diagnostico de error para el reporte semantico.
-     * <p><strong>Entradas:</strong> String nombre, String dimension, int valor, int linea</p>
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
-     */
+
     public void reportarDimensionArregloNoPositiva(String nombre, String dimension,
                                                     int valor, int linea) {
         reportar("la dimension " + dimension + " del arreglo '" + nombre
                 + "' debe ser mayor que cero, se encontro " + valor, linea);
     }
-    /**
-     * <strong>Objetivo:</strong> Registra un diagnostico de error para el reporte semantico.
-     * <p><strong>Entradas:</strong> String nombre, int filasEsperadas, int columnasEsperadas, int filas, int columnas, int linea</p>
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
-     */
+
     public void reportarInicializacionDimensionIncompatible(String nombre, int filasEsperadas,
                                                             int columnasEsperadas, int filas,
                                                             int columnas, int linea) {
@@ -437,12 +433,7 @@ public class TablaDeSimbolos {
                 + filas + "x" + columnas + ", pero se declararon "
                 + filasEsperadas + "x" + columnasEsperadas, linea);
     }
-    /**
-     * <strong>Objetivo:</strong> Registra un diagnostico de error para el reporte semantico.
-     * <p><strong>Entradas:</strong> String nombre, int linea</p>
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
-     */
+
     public void reportarInicializacionArregloIrregular(String nombre, int linea) {
         reportar("la inicializacion del arreglo '" + nombre
                 + "' debe tener la misma cantidad de columnas en todas sus filas", linea);
@@ -512,7 +503,8 @@ public class TablaDeSimbolos {
      * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
      */
     public void reportarReturnFaltante(TipoDato esperado, int linea) {
-        reportar("la funcion de tipo " + esperado + " debe contener al menos un return", linea);
+        reportar("la funcion de tipo " + esperado
+                + " debe retornar un valor en todas las rutas de ejecucion", linea);
     }
 
     /**
@@ -528,13 +520,6 @@ public class TablaDeSimbolos {
         reportar("el indice del arreglo debe ser de tipo int, se encontro " + tipoIndice, linea);
     }
 
-    
-    /**
-     *<strong>Objetivo:</strong> Registra un diagnostico de error para el reporte semantico. 
-     *<p><strong>Entradas:</strong> String nombre, String dimension, int indice, int limite, int linea</p>
-     *<p><strong>Salidas:</strong> No retorna valor.</p>
-     *<p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
-     */
     public void reportarIndiceFueraDeRango(String nombre, String dimension, int indice,
                                            int limite, int linea) {
         reportar("el indice " + dimension + " " + indice + " esta fuera de rango para el arreglo '"
@@ -577,8 +562,9 @@ public class TablaDeSimbolos {
      * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
      */
     public void reportarReturnConValorEnVoid(int linea) {
-    reportar("la funcion void no puede retornar un valor. Use 'return~!' o elimine la "
-                + "sentencia return", linea);    }
+        reportar("la funcion void no puede retornar un valor. Use 'return!' o elimine la "
+                + "sentencia return", linea);
+    }
 
     /**
      * <strong>Objetivo:</strong> Registra un diagnostico de error para el reporte semantico.
@@ -593,7 +579,9 @@ public class TablaDeSimbolos {
         reportar("tipo incompatible en return: se esperaba tipo " + esperado
                 + " y se obtuvo tipo " + encontrado, linea);
     }
-
+    public void reportarBreakFueraDeCicloOSwitch(int linea) {
+        reportar("la sentencia break solo puede utilizarse dentro de un ciclo o switch", linea);
+    }
     /**
      * <strong>Objetivo:</strong> Registra un diagnostico de error para el reporte semantico.
      *
@@ -632,7 +620,7 @@ public class TablaDeSimbolos {
      * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
      */
     private void reportarVariableNoDeclarada(String nombre, int linea) {
-    reportar("variable '" + nombre + "' no declarada. Declare la variable antes de usarla y "
+        reportar("variable '" + nombre + "' no declarada. Declare la variable antes de usarla y "
                 + "verifique la escritura de su nombre", linea);
     }
 
@@ -646,9 +634,9 @@ public class TablaDeSimbolos {
      * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
      */
     private void reportarFuncionNoDeclarada(String nombre, int linea) {
-       reportar("funcion '" + nombre + "' no declarada. Declare la funcion antes de invocarla y "
+        reportar("funcion '" + nombre + "' no declarada. Declare la funcion antes de invocarla y "
                 + "verifique la escritura de su nombre", linea);
-   }
+    }
 
     /**
      * <strong>Objetivo:</strong> Registra un diagnostico de error para el reporte semantico.
@@ -734,7 +722,7 @@ public class TablaDeSimbolos {
         erroresSemanticos.add(ReportadorErrores.reportarSemantico(linea, 0, descripcion));
     }
 
-       private String requisitoOperador(String operador) {
+    private String requisitoOperador(String operador) {
         if ("%".equals(operador)) {
             return "Se requieren dos operandos numericos del mismo tipo (int-int o float-float)";
         }

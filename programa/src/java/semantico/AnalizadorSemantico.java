@@ -2,20 +2,27 @@ package semantico;
 
 import ast.AccesoArregloNodo;
 import ast.AsignacionNodo;
+import ast.BloqueNodo;
+import ast.BreakNodo;
 import ast.CasoSwitchNodo;
 import ast.EntradaNodo;
 import ast.ExpresionBinariaNodo;
 import ast.ExpresionNodo;
 import ast.ExpresionUnariaNodo;
+import ast.FuncionNodo;
 import ast.IdentificadorNodo;
 import ast.InicializacionArregloNodo;
 import ast.LlamadaFuncionNodo;
 import ast.LiteralNodo;
+import ast.Nodo;
 import ast.ParametroNodo;
+import ast.ProgramaNodo;
 import ast.ReturnNodo;
 import ast.SalidaNodo;
 import ast.SwitchNodo;
 import ast.TipoDato;
+import ast.WhileNodo;
+import ast.IfNodo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -36,7 +43,6 @@ public class AnalizadorSemantico {
     private TipoDato tipoRetornoActual = TipoDato.DESCONOCIDO;
     private String funcionActual;
     private int lineaFuncionActual;
-    private boolean retornoEncontradoActual;
     /**
      * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
      *
@@ -119,12 +125,11 @@ public class AnalizadorSemantico {
         tipoRetornoActual = tipoRetorno;
         funcionActual = nombre;
         lineaFuncionActual = linea;
-        retornoEncontradoActual = false;
         tablaSimbolos.abrirAlcance();
     }
 
     /**
-     * <strong>Objetivo:</strong> Cierra la funcion actual y valida que las funciones con retorno tengan al menos una sentencia return.
+     * <strong>Objetivo:</strong> Cierra el alcance de la funcion actual.
      *
      * <p><strong>Entradas:</strong> Sin parametros.</p>
      *
@@ -133,18 +138,10 @@ public class AnalizadorSemantico {
      * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
      */
     public void cerrarFuncion() {
-        boolean requiereReturn = tipoRetornoActual != TipoDato.EMPTY
-                && tipoRetornoActual != TipoDato.VOID
-                && tipoRetornoActual != TipoDato.ERROR
-                && tipoRetornoActual != TipoDato.DESCONOCIDO;
-        if (requiereReturn && !retornoEncontradoActual) {
-            tablaSimbolos.reportarReturnFaltante(tipoRetornoActual, lineaFuncionActual);
-        }
         tablaSimbolos.cerrarAlcance();
         tipoRetornoActual = TipoDato.DESCONOCIDO;
         funcionActual = null;
         lineaFuncionActual = 0;
-        retornoEncontradoActual = false;
     }
 
     /**
@@ -491,7 +488,6 @@ public class AnalizadorSemantico {
      * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
      */
     public void verificarReturn(ReturnNodo retorno) {
-        retornoEncontradoActual = true;
         TipoDato tipoEsperado = tipoRetornoActual;
         ExpresionNodo valor = retorno.getValor();
         boolean funcionVoid = tipoEsperado == TipoDato.EMPTY || tipoEsperado == TipoDato.VOID;
@@ -516,6 +512,95 @@ public class AnalizadorSemantico {
         }
         if (tipoEsperado != tipoRecibido) {
             tablaSimbolos.reportarReturnTipoIncompatible(tipoEsperado, tipoRecibido, retorno.getLinea());
+        }
+    }
+
+    /** Valida que cada break se encuentre dentro de un ciclo o switch, como en C. */
+    public void verificarContextoBreak(ProgramaNodo programa) {
+        for (FuncionNodo funcion : programa.getFunciones()) {
+            verificarBreakEnBloque(funcion.getCuerpo(), false);
+        }
+    }
+
+    /** Exige retorno con valor en todas las rutas de cada funcion no void/empty. */
+    public void verificarRutasRetorno(ProgramaNodo programa) {
+        for (FuncionNodo funcion : programa.getFunciones()) {
+            TipoDato tipo = funcion.getTipoRetorno();
+            boolean requiereRetorno = tipo != TipoDato.VOID && tipo != TipoDato.EMPTY
+                    && tipo != TipoDato.ERROR && tipo != TipoDato.DESCONOCIDO;
+            if (requiereRetorno && !bloqueGarantizaRetorno(funcion.getCuerpo())) {
+                tablaSimbolos.reportarReturnFaltante(tipo, funcion.getLinea());
+            }
+        }
+    }
+
+    private boolean bloqueGarantizaRetorno(BloqueNodo bloque) {
+        if (bloque == null) {
+            return false;
+        }
+        for (Nodo nodo : bloque.getInstrucciones()) {
+            if (nodo instanceof ReturnNodo) {
+                return ((ReturnNodo) nodo).getValor() != null;
+            }
+            if (nodo instanceof BreakNodo) {
+                return false;
+            }
+            if (nodo instanceof IfNodo) {
+                IfNodo condicional = (IfNodo) nodo;
+                if (condicional.getBloqueSino() != null
+                        && bloqueGarantizaRetorno(condicional.getBloqueEntonces())
+                        && bloqueGarantizaRetorno(condicional.getBloqueSino())) {
+                    return true;
+                }
+            } else if (nodo instanceof WhileNodo) {
+                WhileNodo ciclo = (WhileNodo) nodo;
+                if (ciclo.isDoWhile() && bloqueGarantizaRetorno(ciclo.getCuerpo())) {
+                    return true;
+                }
+            } else if (nodo instanceof SwitchNodo
+                    && switchGarantizaRetorno((SwitchNodo) nodo)) {
+                return true;
+            } else if (nodo instanceof BloqueNodo
+                    && bloqueGarantizaRetorno((BloqueNodo) nodo)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean switchGarantizaRetorno(SwitchNodo seleccion) {
+        boolean tieneDefault = false;
+        for (CasoSwitchNodo caso : seleccion.getCasos()) {
+            tieneDefault |= caso.isDefecto();
+            if (!bloqueGarantizaRetorno(caso.getBloque())) {
+                return false;
+            }
+        }
+        return tieneDefault;
+    }
+
+    private void verificarBreakEnBloque(BloqueNodo bloque, boolean permitido) {
+        if (bloque == null) {
+            return;
+        }
+        for (Nodo nodo : bloque.getInstrucciones()) {
+            if (nodo instanceof BreakNodo) {
+                if (!permitido) {
+                    tablaSimbolos.reportarBreakFueraDeCicloOSwitch(nodo.getLinea());
+                }
+            } else if (nodo instanceof WhileNodo) {
+                verificarBreakEnBloque(((WhileNodo) nodo).getCuerpo(), true);
+            } else if (nodo instanceof SwitchNodo) {
+                for (CasoSwitchNodo caso : ((SwitchNodo) nodo).getCasos()) {
+                    verificarBreakEnBloque(caso.getBloque(), true);
+                }
+            } else if (nodo instanceof IfNodo) {
+                IfNodo condicional = (IfNodo) nodo;
+                verificarBreakEnBloque(condicional.getBloqueEntonces(), permitido);
+                verificarBreakEnBloque(condicional.getBloqueSino(), permitido);
+            } else if (nodo instanceof BloqueNodo) {
+                verificarBreakEnBloque((BloqueNodo) nodo, permitido);
+            }
         }
     }
 
@@ -614,7 +699,8 @@ public class AnalizadorSemantico {
             return TipoDato.ERROR;
         }
         if ("equal".equals(operador) || "n_equal".equals(operador)) {
-            if (izquierda == derecha) {
+            if (izquierda == derecha && (izquierda == TipoDato.INT
+                    || izquierda == TipoDato.FLOAT || izquierda == TipoDato.BOOL)) {
                 return TipoDato.BOOL;
             }
             tablaSimbolos.reportarOperacionIncompatible(operador, izquierda, derecha, expresion.getLinea());
@@ -680,6 +766,10 @@ public class AnalizadorSemantico {
             return TipoDato.ERROR;
         }
         if ("-".equals(operador) || "++".equals(operador) || "--".equals(operador)) {
+            if ("-".equals(operador) && !(expresion.getExpresion() instanceof LiteralNodo)) {
+                tablaSimbolos.reportarNegativoSobreExpresionNoLiteral(tipo, expresion.getLinea());
+                return TipoDato.ERROR;
+            }
             if (("++".equals(operador) || "--".equals(operador)) && !esModificable(expresion.getExpresion())) {
                 tablaSimbolos.reportarOperandoNoModificable(operador, tipo, expresion.getLinea());
                 return TipoDato.ERROR;
@@ -800,7 +890,7 @@ public class AnalizadorSemantico {
         TipoDato tipo = evaluarTipo(expresion);
         if (tipo != TipoDato.ERROR && tipo != TipoDato.DESCONOCIDO && tipo != TipoDato.INT) {
             tablaSimbolos.reportarDimensionArregloInvalida(nombre, dimension, expresion.getLinea());
-              return;
+            return;
         }
         Integer valor = valorEnteroLiteral(expresion);
         if (valor != null && valor <= 0) {
