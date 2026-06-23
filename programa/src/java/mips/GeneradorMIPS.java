@@ -40,4 +40,53 @@ public final class GeneradorMIPS {
     private int indiceParametroFormal;
 }
 
-    
+
+/**
+     * <strong>Nombre:</strong> generarCodigo
+     *
+     * <p><strong>Objetivo:</strong> Generar un programa MIPS completo a partir del código intermedio validado.</p>
+     *
+     * <p><strong>Entrada:</strong> List&lt;Instruccion&gt; codigoIntermedio.</p>
+     *
+     * <p><strong>Salida:</strong> List&lt;String&gt; con las líneas de ensamblador MIPS.</p>
+     *
+     * <p><strong>Restricciones:</strong> Reinicia el estado interno en cada llamada.</p>
+     */
+    public List<String> generarCodigo(List<Instruccion> codigoIntermedio) {
+        reiniciar();
+    //    analizar(codigoIntermedio);
+      //  emitirDatos();
+        salida.add(".text");
+        salida.add(".globl main");
+       // traducir(codigoIntermedio);
+        return new ArrayList<>(salida);
+    }
+
+    /**
+     * <strong>Nombre:</strong> reiniciar
+     *
+     * <p><strong>Objetivo:</strong> Limpiar la salida, los registros y todas las tablas internas antes de una nueva generación.</p>
+     *
+     * <p><strong>Entrada:</strong> Ninguna.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
+    private void reiniciar() {
+        salida.clear();
+        registros.reiniciar();
+        tipos.clear();
+        direcciones.clear();
+        columnasArreglo.clear();
+        dimensionesDeclaradas.clear();
+        cadenas.clear();
+        flotantes.clear();
+        parametrosFuncion.clear();
+        retornosFuncion.clear();
+        contadorCadena = 0;
+        contadorFlotante = 0;
+        contadorEtiquetaInterna = 0;
+        funcionActual = null;
+        indiceParametroFormal = 0;
+    }
