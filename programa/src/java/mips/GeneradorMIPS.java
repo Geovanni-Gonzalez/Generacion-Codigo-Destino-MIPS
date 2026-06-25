@@ -470,6 +470,35 @@ public final class GeneradorMIPS {
         return valor != null && (valor.matches("[0-9]+\\.[0-9]+")
                 || valor.matches("[0-9]+/[1-9][0-9]*"));
     }
+        /**
+     * <strong>Nombre:</strong> esEnteroLiteral
+     *
+     * <p><strong>Objetivo:</strong> Indicar si un operando es un literal entero (con o sin notación exponencial).</p>
+     *
+     * <p><strong>Entrada:</strong> String valor.</p>
+     *
+     * <p><strong>Salida:</strong> boolean; true si es entero literal.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
+    private static boolean esEnteroLiteral(String valor) {
+        return valor != null && (valor.matches("[0-9]+") || valor.matches("[0-9]+e[1-9][0-9]*"));
+    }
+
+    /**
+     * <strong>Nombre:</strong> esAccesoArreglo
+     *
+     * <p><strong>Objetivo:</strong> Indicar si un operando tiene la forma de acceso a arreglo {@code nombre[..][..]}.</p>
+     *
+     * <p><strong>Entrada:</strong> String valor.</p>
+     *
+     * <p><strong>Salida:</strong> boolean; true si es acceso a arreglo.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
+    private static boolean esAccesoArreglo(String valor) {
+        return valor != null && valor.matches("[A-Za-z_][A-Za-z0-9_]*\\[[^]]+\\]\\[[^]]+\\]");
+    }
 
 
     /**
