@@ -33,12 +33,12 @@ public final class GeneradorMIPS {
     private final Map<String, String> flotantes = new LinkedHashMap<>();
     private final Map<String, Integer> parametrosFuncion = new LinkedHashMap<>();
     private final Map<String, String> retornosFuncion = new LinkedHashMap<>();
+    private final Map<String, Integer> dimensionesDeclaradas = new LinkedHashMap<>();
     private int contadorCadena;
     private int contadorFlotante;
     private int contadorEtiquetaInterna;
     private String funcionActual;
     private int indiceParametroFormal;
-    private final Map<String, Integer> dimensionesDeclaradas = new LinkedHashMap<>();
 }
 
 
@@ -55,8 +55,8 @@ public final class GeneradorMIPS {
      */
     public List<String> generarCodigo(List<Instruccion> codigoIntermedio) {
         reiniciar();
-    //    analizar(codigoIntermedio);
-      //  emitirDatos();
+        analizar(codigoIntermedio);
+        emitirDatos();
         salida.add(".text");
         salida.add(".globl main");
        // traducir(codigoIntermedio);
@@ -580,4 +580,84 @@ public final class GeneradorMIPS {
             return new int[] { filas, columnas };
         }
         return new int[] { 1, 1 };
+    }
+
+    private void emitirDatos() {
+        salida.add(".data");
+        for (Map.Entry<String, String> entrada : tipos.entrySet()) {
+            String etiqueta = direccionDato(entrada.getKey());
+            if (columnasArreglo.containsKey(entrada.getKey())) {
+                // El espacio exacto se reemplaza durante el segundo recorrido de declaraciones.
+                salida.add(etiqueta + ": .space " + espacioArreglo(entrada.getKey()));
+            } else if (esFloat(entrada.getValue())) {
+                salida.add(etiqueta + ": .float 0.0");
+            } else {
+                salida.add(etiqueta + ": .word 0");
+            }
+        }
+        for (Map.Entry<String, String> entrada : cadenas.entrySet()) {
+            salida.add(entrada.getValue() + ": .asciiz " + entrada.getKey());
+        }
+        for (Map.Entry<String, String> entrada : flotantes.entrySet()) {
+            salida.add(entrada.getValue() + ": .float " + valorFloat(entrada.getKey()));
+        }
+        salida.add("");
+    }
+
+
+    /**
+     * <strong>Nombre:</strong> direccionDato
+     *
+     * <p><strong>Objetivo:</strong> Devolver la etiqueta de memoria reservada para una clave variable/función.</p>
+     *
+     * <p><strong>Entrada:</strong> String clave.</p>
+     *
+     * <p><strong>Salida:</strong> String con la etiqueta.</p>
+     *
+     * <p><strong>Restricciones:</strong> Lanza excepción si no se reservó memoria para la clave.</p>
+     */
+    private String direccionDato(String clave) {
+        String direccion = direcciones.get(clave);
+        if (direccion == null) {
+            throw new IllegalStateException("No se reservo memoria MIPS para " + clave);
+        }
+        return direccion;
+    }
+    /**
+     * <strong>Nombre:</strong> valorEntero
+     *
+     * <p><strong>Objetivo:</strong> Convertir un literal entero (incluida la notación {@code NeM}) a su valor int.</p>
+     *
+     * <p><strong>Entrada:</strong> String valor.</p>
+     *
+     * <p><strong>Salida:</strong> int con el valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
+    private static int valorEntero(String valor) {
+        if (valor.contains("e")) {
+            String[] partes = valor.split("e", 2);
+            double calculado = Double.parseDouble(partes[0]) * Math.pow(10, Integer.parseInt(partes[1]));
+            return (int) calculado;
+        }
+        return Integer.parseInt(valor);
+    }
+
+    /**
+     * <strong>Nombre:</strong> valorFloat
+     *
+     * <p><strong>Objetivo:</strong> Convertir un literal flotante (decimal o fracción {@code a/b}) a su texto numérico.</p>
+     *
+     * <p><strong>Entrada:</strong> String valor.</p>
+     *
+     * <p><strong>Salida:</strong> String con el valor flotante.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
+    private static String valorFloat(String valor) {
+        if (valor.contains("/")) {
+            String[] partes = valor.split("/", 2);
+            return String.valueOf(Double.parseDouble(partes[0]) / Double.parseDouble(partes[1]));
+        }
+        return valor;
     }
