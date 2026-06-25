@@ -470,3 +470,26 @@ public final class GeneradorMIPS {
         return valor != null && (valor.matches("[0-9]+\\.[0-9]+")
                 || valor.matches("[0-9]+/[1-9][0-9]*"));
     }
+
+
+    /**
+     * <strong>Nombre:</strong> tipoOperando
+     *
+     * <p><strong>Objetivo:</strong> Determinar el tipo de un operando: por su forma si es literal, o consultando la tabla de tipos.</p>
+     *
+     * <p><strong>Entrada:</strong> String operando, String funcion.</p>
+     *
+     * <p><strong>Salida:</strong> String con el tipo ("int", "float", "bool", "char", "string").</p>
+     *
+     * <p><strong>Restricciones:</strong> Por defecto asume "int".</p>
+     */
+    private String tipoOperando(String operando, String funcion) {
+        if (operando == null) return "int";
+        if (esCadena(operando)) return "string";
+        if (esChar(operando)) return "char";
+        if ("true".equals(operando) || "false".equals(operando)) return "bool";
+        if (esFloatLiteral(operando)) return "float";
+        if (esEnteroLiteral(operando)) return "int";
+        String base = esAccesoArreglo(operando) ? operando.substring(0, operando.indexOf('[')) : operando;
+        return tipos.getOrDefault(clave(funcion, base), "int");
+    }
