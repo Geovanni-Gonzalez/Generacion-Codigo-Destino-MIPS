@@ -38,6 +38,7 @@ public final class GeneradorMIPS {
     private int contadorEtiquetaInterna;
     private String funcionActual;
     private int indiceParametroFormal;
+    private final Map<String, Integer> dimensionesDeclaradas = new LinkedHashMap<>();
 }
 
 
@@ -184,6 +185,23 @@ public final class GeneradorMIPS {
             direcciones.put(clave, repeticion == 0 ? base : base + "_" + repeticion);
         }
     }
+
+    
+    /**
+     * <strong>Nombre:</strong> espacioArreglo
+     *
+     * <p><strong>Objetivo:</strong> Calcular los bytes a reservar para un arreglo (número de celdas por 4).</p>
+     *
+     * <p><strong>Entrada:</strong> String clave.</p>
+     *
+     * <p><strong>Salida:</strong> int con el tamaño en bytes.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
+    private int espacioArreglo(String clave) {
+        return dimensionesDeclaradas.getOrDefault(clave, 1) * 4;
+    }
+
 
       /**
      * <strong>Nombre:</strong> tipoResultado
