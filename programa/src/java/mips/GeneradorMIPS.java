@@ -493,3 +493,44 @@ public final class GeneradorMIPS {
         String base = esAccesoArreglo(operando) ? operando.substring(0, operando.indexOf('[')) : operando;
         return tipos.getOrDefault(clave(funcion, base), "int");
     }
+
+        /**
+     * <strong>Nombre:</strong> registrarConstante
+     *
+     * <p><strong>Objetivo:</strong> Reservar una etiqueta en {@code .data} para una constante de cadena
+     * ({@code _str_N}) o flotante ({@code _flt_N}) la primera vez que aparece.</p>
+     *
+     * <p><strong>Entrada:</strong> String valor.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ignora valores que no son cadena ni flotante literal.</p>
+     */
+    private void registrarConstante(String valor) {
+        if (esCadena(valor)) {
+            cadenas.computeIfAbsent(valor, k -> "_str_" + contadorCadena++);
+        } else if (esFloatLiteral(valor)) {
+            flotantes.computeIfAbsent(valor, k -> "_flt_" + contadorFlotante++);
+        }
+    }
+
+        /**
+     * <strong>Nombre:</strong> dimensiones
+     *
+     * <p><strong>Objetivo:</strong> Extraer las dimensiones {@code [filas][columnas]} de un arreglo desde su texto.</p>
+     *
+     * <p><strong>Entrada:</strong> String texto.</p>
+     *
+     * <p><strong>Salida:</strong> int[] con {filas, columnas}; {1,1} si el texto no tiene el formato esperado.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
+    private int[] dimensiones(String texto) {
+        if (texto != null && texto.matches("\\[[0-9]+\\]\\[[0-9]+\\]")) {
+            int medio = texto.indexOf("][");
+            int filas = Integer.parseInt(texto.substring(1, medio));
+            int columnas = Integer.parseInt(texto.substring(medio + 2, texto.length() - 1));
+            return new int[] { filas, columnas };
+        }
+        return new int[] { 1, 1 };
+    }
