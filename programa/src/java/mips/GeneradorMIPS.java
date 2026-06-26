@@ -686,21 +686,21 @@ public final class GeneradorMIPS {
             }
             switch (i.op) {
                 case INICIO_FUNC:
-                   // PEDNIENTE iniciarFuncion(i.resultado);
+                    iniciarFuncion(i.resultado);
                     break;
                 case FIN_FUNC:
-                //PENDIENTE    finalizarFuncion(i.resultado);
+                    finalizarFuncion(i.resultado);
                     break;
                 case DECL:
                 case DECL_ARRAY:
                     break;
                 case FORMAL_PARAM:
-               //PENDIENTE     traducirParametroFormal(i);
+                    traducirParametroFormal(i);
                     break;
                 case LOAD:
                 case ASIG:
                 case STORE_ARRAY:
-                //PENDIENTE    traducirTransferencia(i);
+                    traducirTransferencia(i);
                     break;
                 case SUMA:
                 case RESTA:
@@ -716,11 +716,11 @@ public final class GeneradorMIPS {
                 case MAYOR:
                 case MENOR_IGUAL:
                 case MAYOR_IGUAL:
-                //PENDIENTE    traducirBinaria(i);
+                    traducirBinaria(i);
                     break;
                 case NEG:
                 case NOT:
-                 //PENDIENTE   traducirUnaria(i);
+                    traducirUnaria(i);
                     break;
                 case LABEL:
                     salida.add(etiquetaCodigo(i.resultado) + ":");
@@ -861,4 +861,145 @@ public final class GeneradorMIPS {
         } else {
             instruccion("lw " + registro + ", " + etiqueta(operando));
         }
+    }
+        /**
+     * <strong>Nombre:</strong> etiqueta
+     *
+     * <p><strong>Objetivo:</strong> Obtener la etiqueta {@code .data} de una variable o de la base de un acceso a arreglo.</p>
+     *
+     * <p><strong>Entrada:</strong> String operando.</p>
+     *
+     * <p><strong>Salida:</strong> String con la etiqueta en memoria.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
+    private String etiqueta(String operando) {
+        String base = esAccesoArreglo(operando) ? operando.substring(0, operando.indexOf('[')) : operando;
+        return direccionDato(clave(funcionActual, base));
+    }
+
+        /**
+     * <strong>Nombre:</strong> direccionArreglo
+     *
+     * <p><strong>Objetivo:</strong> Calcular en un registro la dirección de una celda {@code nombre[fila][col]}
+     * con la fórmula {@code base + (fila*columnas + col)*4}.</p>
+     *
+     * <p><strong>Entrada:</strong> String acceso, String registroDireccion.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor; deja la dirección en el registro indicado.</p>
+     *
+     * <p><strong>Restricciones:</strong> Usa {@code $t6}, {@code $t8} y {@code $t9} como auxiliares.</p>
+     */
+    private void direccionArreglo(String acceso, String registroDireccion) {
+        int primero = acceso.indexOf('[');
+        String nombre = acceso.substring(0, primero);
+        int cierreFila = acceso.indexOf(']', primero);
+        int inicioColumna = acceso.indexOf('[', cierreFila);
+        int cierreColumna = acceso.indexOf(']', inicioColumna);
+        String fila = acceso.substring(primero + 1, cierreFila);
+        String columna = acceso.substring(inicioColumna + 1, cierreColumna);
+        cargarEntero(fila, "$t8");
+        cargarEntero(columna, "$t9");
+        int columnas = columnasArreglo.getOrDefault(clave(funcionActual, nombre), 1);
+        instruccion("li $t6, " + columnas);
+        instruccion("mul $t8, $t8, $t6");
+        instruccion("add $t8, $t8, $t9");
+        instruccion("sll $t8, $t8, 2");
+        instruccion("la " + registroDireccion + ", " + etiqueta(nombre));
+        instruccion("add " + registroDireccion + ", " + registroDireccion + ", $t8");
+    }
+        /**
+     * <strong>Nombre:</strong> iniciarFuncion
+     *
+     * <p><strong>Objetivo:</strong> Emitir la etiqueta de la función y su prólogo (guardar {@code $ra} en la pila, salvo en main).</p>
+     *
+     * <p><strong>Entrada:</strong> String nombre.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
+    private void iniciarFuncion(String nombre) {
+        funcionActual = nombre;
+        indiceParametroFormal = 0;
+        salida.add("");
+        salida.add(etiquetaFuncion(nombre) + ":");
+        if (!"__main__".equals(nombre)) {
+            instruccion("addiu $sp, $sp, -4");
+            instruccion("sw $ra, 0($sp)");
+        }
+    }
+
+    /**
+     * <strong>Nombre:</strong> cargarFloat
+     *
+     * <p><strong>Objetivo:</strong> Cargar en un registro del coprocesador un valor flotante, convirtiendo
+     * desde entero o leyendo desde una celda de arreglo o variable según el caso.</p>
+     *
+     * <p><strong>Entrada:</strong> String operando, String registro.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
+    private void cargarFloat(String operando, String registro) {
+        if (esFloatLiteral(operando)) {
+            instruccion("l.s " + registro + ", " + flotantes.get(operando));
+        } else if (esEnteroLiteral(operando)) {
+            cargarEntero(operando, "$t6");
+            instruccion("mtc1 $t6, " + registro);
+            instruccion("cvt.s.w " + registro + ", " + registro);
+        } else if (esAccesoArreglo(operando)) {
+            direccionArreglo(operando, "$t7");
+            instruccion("l.s " + registro + ", 0($t7)");
+        } else {
+            instruccion("l.s " + registro + ", " + etiqueta(operando));
+        }
+    }
+
+    
+    /**
+     * <strong>Nombre:</strong> finalizarFuncion
+     *
+     * <p><strong>Objetivo:</strong> Emitir el epílogo: en main termina con {@code li $v0, 10} + {@code syscall};
+     * en las demás restaura {@code $ra} y retorna con {@code jr $ra}.</p>
+     *
+     * <p><strong>Entrada:</strong> String nombre.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
+    private void finalizarFuncion(String nombre) {
+        salida.add(etiquetaEpilogo(nombre) + ":");
+        if ("__main__".equals(nombre)) {
+            instruccion("li $v0, 10");
+            instruccion("syscall");
+        } else {
+            instruccion("lw $ra, 0($sp)");
+            instruccion("addiu $sp, $sp, 4");
+            instruccion("jr $ra");
+        }
+        funcionActual = null;
+    }
+
+    /**
+     * <strong>Nombre:</strong> traducirParametroFormal
+     *
+     * <p><strong>Objetivo:</strong> Copiar un parámetro recibido por la pila a la variable local que lo representa.</p>
+     *
+     * <p><strong>Entrada:</strong> Instruccion i.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Usa el orden de los parámetros para calcular el desplazamiento en la pila.</p>
+     */
+    private void traducirParametroFormal(Instruccion i) {
+        int total = parametrosFuncion.getOrDefault(funcionActual, 0);
+        int desplazamiento = 4 * (total - indiceParametroFormal);
+        String registro = registros.obtenerRegistro();
+        instruccion("lw " + registro + ", " + desplazamiento + "($sp)");
+        instruccion("sw " + registro + ", " + etiqueta(i.resultado));
+        registros.liberarRegistro(registro);
+        indiceParametroFormal++;
     }
