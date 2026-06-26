@@ -59,7 +59,7 @@ public final class GeneradorMIPS {
         emitirDatos();
         salida.add(".text");
         salida.add(".globl main");
-       // traducir(codigoIntermedio);
+       traducir(codigoIntermedio);
         return new ArrayList<>(salida);
     }
 
@@ -660,4 +660,205 @@ public final class GeneradorMIPS {
             return String.valueOf(Double.parseDouble(partes[0]) / Double.parseDouble(partes[1]));
         }
         return valor;
+    }
+
+        /**
+     * <strong>Nombre:</strong> traducir
+     *
+     * <p><strong>Objetivo:</strong> Segundo recorrido: traducir cada instrucción intermedia a sus
+     * líneas MIPS, fusionando comparación + salto cuando es posible.</p>
+     *
+     * <p><strong>Entrada:</strong> List&lt;Instruccion&gt; codigo.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor; agrega líneas a la salida.</p>
+     *
+     * <p><strong>Restricciones:</strong> Requiere que {@link #analizar} ya se haya ejecutado.</p>
+     */
+    private void traducir(List<Instruccion> codigo) {
+        funcionActual = null;
+        for (int indice = 0; indice < codigo.size(); indice++) {
+            Instruccion i = codigo.get(indice);
+            if (indice + 1 < codigo.size()
+                    && puedeFusionarSalto(i, codigo.get(indice + 1))) {
+                traducirSaltoComparacion(i, codigo.get(indice + 1).resultado);
+                indice++;
+                continue;
+            }
+            switch (i.op) {
+                case INICIO_FUNC:
+                   // PEDNIENTE iniciarFuncion(i.resultado);
+                    break;
+                case FIN_FUNC:
+                //PENDIENTE    finalizarFuncion(i.resultado);
+                    break;
+                case DECL:
+                case DECL_ARRAY:
+                    break;
+                case FORMAL_PARAM:
+               //PENDIENTE     traducirParametroFormal(i);
+                    break;
+                case LOAD:
+                case ASIG:
+                case STORE_ARRAY:
+                //PENDIENTE    traducirTransferencia(i);
+                    break;
+                case SUMA:
+                case RESTA:
+                case MULT:
+                case DIV:
+                case MOD:
+                case POW:
+                case AND:
+                case OR:
+                case IGUAL:
+                case DISTINTO:
+                case MENOR:
+                case MAYOR:
+                case MENOR_IGUAL:
+                case MAYOR_IGUAL:
+                //PENDIENTE    traducirBinaria(i);
+                    break;
+                case NEG:
+                case NOT:
+                 //PENDIENTE   traducirUnaria(i);
+                    break;
+                case LABEL:
+                    salida.add(etiquetaCodigo(i.resultado) + ":");
+                    break;
+                case GOTO:
+                    instruccion("j " + etiquetaCodigo(i.resultado));
+                    break;
+                case IF_FALSE:
+                    String condicion = cargarValor(i.op1);
+                    instruccion("beq " + condicion + ", $zero, " + etiquetaCodigo(i.resultado));
+                    registros.liberarRegistro(condicion);
+                    break;
+                case PARAM:
+                    String argumento = i.op1 != null ? i.op1 : i.resultado;
+                    String registroParametro = registros.obtenerRegistro();
+                    if (esFloat(tipoOperando(argumento, funcionActual))) {
+                        cargarFloat(argumento, "$f0");
+                        instruccion("mfc1 " + registroParametro + ", $f0");
+                    } else {
+                        cargarEntero(argumento, registroParametro);
+                    }
+                    instruccion("addiu $sp, $sp, -4");
+                    instruccion("sw " + registroParametro + ", 0($sp)");
+                    registros.liberarRegistro(registroParametro);
+                    break;
+                case CALL:
+                    traducirLlamada(i);
+                    break;
+                case RETURN:
+                    traducirRetorno(i);
+                    break;
+                case PRINT:
+                    traducirPrint(i.op1 != null ? i.op1 : i.resultado);
+                    break;
+                case READ:
+                    traducirRead(i.op1 != null ? i.op1 : i.resultado);
+                    break;
+                default:
+                    instruccion("# Operacion no implementada: " + i.op);
+            }
+        }
+    }
+
+    /**
+     * <strong>Nombre:</strong> puedeFusionarSalto
+     *
+     * <p><strong>Objetivo:</strong> Decidir si una comparación entera seguida de un IF_FALSE sobre su
+     * resultado puede traducirse como un único branch condicional.</p>
+     *
+     * <p><strong>Entrada:</strong> Instruccion comparacion, Instruccion salto.</p>
+     *
+     * <p><strong>Salida:</strong> boolean; true si pueden fusionarse.</p>
+     *
+     * <p><strong>Restricciones:</strong> No aplica a comparaciones de flotantes.</p>
+     */
+    private boolean puedeFusionarSalto(Instruccion comparacion, Instruccion salto) {
+        return esComparacion(comparacion.op)
+                && salto.op == Operacion.IF_FALSE
+                && comparacion.resultado != null
+                && comparacion.resultado.equals(salto.op1)
+                && !esFloat(tipoOperando(comparacion.op1, funcionActual))
+                && !esFloat(tipoOperando(comparacion.op2, funcionActual));
+    }
+
+    /**
+     * <strong>Nombre:</strong> traducirSaltoComparacion
+     *
+     * <p><strong>Objetivo:</strong> Traducir directamente el caso falso de una comparación hacia su
+     * etiqueta destino, usando el branch MIPS inverso ({@code bne}, {@code bge}, {@code ble}, ...).</p>
+     *
+     * <p><strong>Entrada:</strong> Instruccion comparacion, String destino.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Solo para comparaciones enteras.</p>
+     */
+    private void traducirSaltoComparacion(Instruccion comparacion, String destino) {
+        String izquierdo = cargarValor(comparacion.op1);
+        String derecho = cargarValor(comparacion.op2);
+        String operacion;
+        switch (comparacion.op) {
+            case IGUAL: operacion = "bne"; break;
+            case DISTINTO: operacion = "beq"; break;
+            case MENOR: operacion = "bge"; break;
+            case MENOR_IGUAL: operacion = "bgt"; break;
+            case MAYOR: operacion = "ble"; break;
+            case MAYOR_IGUAL: operacion = "blt"; break;
+            default: throw new IllegalStateException("Comparacion no soportada en salto: " + comparacion.op);
+        }
+        instruccion(operacion + " " + izquierdo + ", " + derecho + ", " + etiquetaCodigo(destino));
+        registros.liberarRegistro(derecho);
+        registros.liberarRegistro(izquierdo);
+    }
+
+        /**
+     * <strong>Nombre:</strong> cargarValor
+     *
+     * <p><strong>Objetivo:</strong> Obtener un registro temporal libre y cargar en él el valor entero solicitado.</p>
+     *
+     * <p><strong>Entrada:</strong> String operando.</p>
+     *
+     * <p><strong>Salida:</strong> String con el nombre del registro usado.</p>
+     *
+     * <p><strong>Restricciones:</strong> Quien lo llama debe liberar el registro.</p>
+     */
+    private String cargarValor(String operando) {
+        String registro = registros.obtenerRegistro();
+        cargarEntero(operando, registro);
+        return registro;
+    }
+
+    /**
+     * <strong>Nombre:</strong> cargarEntero
+     *
+     * <p><strong>Objetivo:</strong> Cargar en un registro un valor entero, según sea constante, carácter,
+     * booleano, cadena (dirección), celda de arreglo o variable en memoria.</p>
+     *
+     * <p><strong>Entrada:</strong> String operando, String registro.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Un operando {@code null} carga $zero.</p>
+     */
+    private void cargarEntero(String operando, String registro) {
+        if (operando == null) {
+            instruccion("move " + registro + ", $zero");
+        } else if (esCadena(operando)) {
+            instruccion("la " + registro + ", " + cadenas.get(operando));
+        } else if (esChar(operando)) {
+            instruccion("li " + registro + ", " + (int) valorChar(operando));
+        } else if ("true".equals(operando) || "false".equals(operando)) {
+            instruccion("li " + registro + ", " + ("true".equals(operando) ? 1 : 0));
+        } else if (esEnteroLiteral(operando)) {
+            instruccion("li " + registro + ", " + valorEntero(operando));
+        } else if (esAccesoArreglo(operando)) {
+            direccionArreglo(operando, "$t7");
+            instruccion("lw " + registro + ", 0($t7)");
+        } else {
+            instruccion("lw " + registro + ", " + etiqueta(operando));
+        }
     }
