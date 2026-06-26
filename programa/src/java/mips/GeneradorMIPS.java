@@ -1003,3 +1003,235 @@ public final class GeneradorMIPS {
         registros.liberarRegistro(registro);
         indiceParametroFormal++;
     }
+        /**
+     * <strong>Nombre:</strong> traducirTransferencia
+     *
+     * <p><strong>Objetivo:</strong> Traducir una transferencia (LOAD/ASIG/STORE_ARRAY) cargando el origen y guardándolo en el destino.</p>
+     *
+     * <p><strong>Entrada:</strong> Instruccion i.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Distingue entre enteros y flotantes.</p>
+     */
+    private void traducirTransferencia(Instruccion i) {
+        if (esFloat(tipoOperando(i.op1, funcionActual))) {
+            cargarFloat(i.op1, "$f0");
+            guardar(i.resultado, null, "$f0");
+            return;
+        }
+        String registro = cargarValor(i.op1);
+        guardar(i.resultado, registro, null);
+        registros.liberarRegistro(registro);
+    }
+
+    /**
+     * <strong>Nombre:</strong> guardar
+     *
+     * <p><strong>Objetivo:</strong> Guardar un valor (entero o flotante) en el destino, sea una celda de arreglo o una variable.</p>
+     *
+     * <p><strong>Entrada:</strong> String destino, String registroEntero, String registroFloat.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Usa el registro entero o el flotante según el tipo del destino.</p>
+     */
+    private void guardar(String destino, String registroEntero, String registroFloat) {
+        if (esAccesoArreglo(destino)) {
+            direccionArreglo(destino, "$t7");
+            instruccion((esFloat(tipoOperando(destino, funcionActual)) ? "s.s " + registroFloat
+                    : "sw " + registroEntero) + ", 0($t7)");
+        } else if (esFloat(tipoOperando(destino, funcionActual))) {
+            instruccion("s.s " + registroFloat + ", " + etiqueta(destino));
+        } else {
+            instruccion("sw " + registroEntero + ", " + etiqueta(destino));
+        }
+    }
+
+   /**
+     * <strong>Nombre:</strong> traducirBinaria
+     *
+     * <p><strong>Objetivo:</strong> Traducir una operación binaria (aritmética, lógica o de comparación),
+     * eligiendo la variante entera o flotante según los operandos.</p>
+     *
+     * <p><strong>Entrada:</strong> Instruccion i.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Para flotantes delega en rutinas específicas.</p>
+     */
+    private void traducirBinaria(Instruccion i) {
+        boolean flotante = esFloat(tipoOperando(i.op1, funcionActual))
+                || esFloat(tipoOperando(i.op2, funcionActual));
+        if (flotante && esComparacion(i.op)) {
+            traducirComparacionFloat(i);
+            return;
+        }
+        if (flotante && esAritmetica(i.op)) {
+            cargarFloat(i.op1, "$f0");
+            cargarFloat(i.op2, "$f2");
+            String operacion;
+            switch (i.op) {
+                case SUMA: operacion = "add.s"; break;
+                case RESTA: operacion = "sub.s"; break;
+                case MULT: operacion = "mul.s"; break;
+                case DIV: operacion = "div.s"; break;
+                case MOD:
+                    instruccion("div.s $f4, $f0, $f2");
+                    instruccion("trunc.w.s $f6, $f4");
+                    instruccion("cvt.s.w $f6, $f6");
+                    instruccion("mul.s $f6, $f6, $f2");
+                    instruccion("sub.s $f4, $f0, $f6");
+                    instruccion("s.s $f4, " + etiqueta(i.resultado));
+                    return;
+                case POW:
+                    traducirPotenciaFloat(i.resultado);
+                    return;
+                default: throw new IllegalStateException("Operacion flotante no soportada: " + i.op);
+            }
+            instruccion(operacion + " $f4, $f0, $f2");
+            instruccion("s.s $f4, " + etiqueta(i.resultado));
+            return;
+        }
+
+        String izquierdo = cargarValor(i.op1);
+        String derecho = cargarValor(i.op2);
+        String resultado = registros.obtenerRegistro();
+        switch (i.op) {
+            case SUMA: instruccion("add " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case RESTA: instruccion("sub " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case MULT: instruccion("mul " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case DIV:
+                instruccion("div " + izquierdo + ", " + derecho);
+                instruccion("mflo " + resultado);
+                break;
+            case MOD:
+                instruccion("div " + izquierdo + ", " + derecho);
+                instruccion("mfhi " + resultado);
+                break;
+            case POW:
+                traducirPotenciaEntera(izquierdo, derecho, resultado);
+                break;
+            case AND: instruccion("and " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case OR: instruccion("or " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case IGUAL: instruccion("seq " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case DISTINTO: instruccion("sne " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case MENOR: instruccion("slt " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case MAYOR: instruccion("sgt " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case MENOR_IGUAL: instruccion("sle " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case MAYOR_IGUAL: instruccion("sge " + resultado + ", " + izquierdo + ", " + derecho); break;
+            default: throw new IllegalStateException("Operacion binaria no soportada: " + i.op);
+        }
+        instruccion("sw " + resultado + ", " + etiqueta(i.resultado));
+        registros.liberarRegistro(resultado);
+        registros.liberarRegistro(derecho);
+        registros.liberarRegistro(izquierdo);
+    }
+
+
+       /**
+     * <strong>Nombre:</strong> traducirComparacionFloat
+     *
+     * <p><strong>Objetivo:</strong> Traducir una comparación entre flotantes usando {@code c.*.s} y los
+     * branches del coprocesador, dejando 0 o 1 en el resultado.</p>
+     *
+     * <p><strong>Entrada:</strong> Instruccion i.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
+    private void traducirComparacionFloat(Instruccion i) {
+        cargarFloat(i.op1, "$f0");
+        cargarFloat(i.op2, "$f2");
+        String verdadero = nuevaEtiquetaInterna("cmp_true");
+        String fin = nuevaEtiquetaInterna("cmp_fin");
+        String resultado = registros.obtenerRegistro();
+        instruccion("li " + resultado + ", 0");
+        switch (i.op) {
+            case IGUAL:
+                instruccion("c.eq.s $f0, $f2");
+                instruccion("bc1t " + verdadero);
+                break;
+            case DISTINTO:
+                instruccion("c.eq.s $f0, $f2");
+                instruccion("bc1f " + verdadero);
+                break;
+            case MENOR:
+                instruccion("c.lt.s $f0, $f2");
+                instruccion("bc1t " + verdadero);
+                break;
+            case MENOR_IGUAL:
+                instruccion("c.le.s $f0, $f2");
+                instruccion("bc1t " + verdadero);
+                break;
+            case MAYOR:
+                instruccion("c.lt.s $f2, $f0");
+                instruccion("bc1t " + verdadero);
+                break;
+            case MAYOR_IGUAL:
+                instruccion("c.le.s $f2, $f0");
+                instruccion("bc1t " + verdadero);
+                break;
+            default: throw new IllegalStateException("Comparacion flotante no soportada: " + i.op);
+        }
+        instruccion("j " + fin);
+        salida.add(verdadero + ":");
+        instruccion("li " + resultado + ", 1");
+        salida.add(fin + ":");
+        instruccion("sw " + resultado + ", " + etiqueta(i.resultado));
+        registros.liberarRegistro(resultado);
+    }
+
+        /**
+     * <strong>Nombre:</strong> traducirPotenciaEntera
+     *
+     * <p><strong>Objetivo:</strong> Calcular una potencia entera mediante un ciclo de multiplicaciones.</p>
+     *
+     * <p><strong>Entrada:</strong> String base, String exponente, String resultado (registros).</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Consume el registro del exponente como contador.</p>
+     */
+    private void traducirPotenciaEntera(String base, String exponente, String resultado) {
+        String ciclo = nuevaEtiquetaInterna("pow");
+        String fin = nuevaEtiquetaInterna("pow_fin");
+        instruccion("li " + resultado + ", 1");
+        salida.add(ciclo + ":");
+        instruccion("blez " + exponente + ", " + fin);
+        instruccion("mul " + resultado + ", " + resultado + ", " + base);
+        instruccion("addiu " + exponente + ", " + exponente + ", -1");
+        instruccion("j " + ciclo);
+        salida.add(fin + ":");
+    }
+
+   /**
+     * <strong>Nombre:</strong> traducirPotenciaFloat
+     *
+     * <p><strong>Objetivo:</strong> Calcular una potencia con base flotante mediante un ciclo de multiplicaciones.</p>
+     *
+     * <p><strong>Entrada:</strong> String resultado (etiqueta destino).</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> El exponente se toma truncado de {@code $f2}.</p>
+     */
+    private void traducirPotenciaFloat(String resultado) {
+        String ciclo = nuevaEtiquetaInterna("powf");
+        String fin = nuevaEtiquetaInterna("powf_fin");
+        String contador = registros.obtenerRegistro();
+        instruccion("li " + contador + ", 1");
+        instruccion("mtc1 " + contador + ", $f4");
+        instruccion("cvt.s.w $f4, $f4");
+        instruccion("trunc.w.s $f6, $f2");
+        instruccion("mfc1 " + contador + ", $f6");
+        salida.add(ciclo + ":");
+        instruccion("blez " + contador + ", " + fin);
+        instruccion("mul.s $f4, $f4, $f0");
+        instruccion("addiu " + contador + ", " + contador + ", -1");
+        instruccion("j " + ciclo);
+        salida.add(fin + ":");
+        instruccion("s.s $f4, " + etiqueta(resultado));
+        registros.liberarRegistro(contador);
+    }
