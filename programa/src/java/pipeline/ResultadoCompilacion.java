@@ -8,13 +8,16 @@ import lexico.MiLexer;
 import sintactico.Parser;
 
 /**
- * <strong>Objetivo:</strong> Resultado inmutable de una corrida del pipeline.
+ * <strong>Nombre:</strong> ResultadoCompilacion
  *
- * <p><strong>Entradas:</strong> Archivo fuente, lexer, parser y artefactos generados durante la compilacion.</p>
+ * <p><strong>Objetivo:</strong> Empaquetar de forma inmutable todo lo que produce una corrida del
+ * compilador: la ruta fuente, el lexer y el parser usados, si fue aceptado y el código intermedio y MIPS.</p>
  *
- * <p><strong>Salidas:</strong> Resultado de compilacion y estado de aceptacion del programa fuente.</p>
+ * <p><strong>Entrada:</strong> Los artefactos generados por el {@link Compilador}.</p>
  *
- * <p><strong>Restricciones:</strong> Debe coordinar fases sin duplicar la escritura de reportes de salida.</p>
+ * <p><strong>Salida:</strong> Objeto consultado por los escritores de reportes y de código.</p>
+ *
+ * <p><strong>Restricciones:</strong> Es inmutable; expone las listas como solo lectura.</p>
  */
 public class ResultadoCompilacion {
     private final Path fuente;
@@ -23,102 +26,133 @@ public class ResultadoCompilacion {
     private final boolean sintaxisCompleta;
     private final boolean aceptado;
     private final List<Instruccion> codigoIntermedio;
+    private final List<String> codigoMIPS;
 
     /**
-     * <strong>Objetivo:</strong> Crea el paquete de salida de una compilacion.
+     * <strong>Nombre:</strong> ResultadoCompilacion
      *
-     * <p><strong>Entradas:</strong> Path fuente, MiLexer lexerTokens, Parser parser, boolean sintaxisCompleta, boolean aceptado, List<Instruccion> codigoIntermedio</p>
+     * <p><strong>Objetivo:</strong> Reunir todos los artefactos de una compilación en un único resultado.</p>
      *
-     * <p><strong>Salidas:</strong> Instancia inicializada de ResultadoCompilacion.</p>
+     * <p><strong>Entrada:</strong> Path fuente, MiLexer lexerTokens, Parser parser, boolean sintaxisCompleta, boolean aceptado, List&lt;Instruccion&gt; codigoIntermedio, List&lt;String&gt; codigoMIPS.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> Nueva instancia de ResultadoCompilacion.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public ResultadoCompilacion(Path fuente, MiLexer lexerTokens, Parser parser,
                                 boolean sintaxisCompleta, boolean aceptado,
-                                List<Instruccion> codigoIntermedio) {
+                                List<Instruccion> codigoIntermedio, List<String> codigoMIPS) {
         this.fuente = fuente;
         this.lexerTokens = lexerTokens;
         this.parser = parser;
         this.sintaxisCompleta = sintaxisCompleta;
         this.aceptado = aceptado;
         this.codigoIntermedio = codigoIntermedio;
+        this.codigoMIPS = codigoMIPS;
     }
 
     /**
-     * <strong>Objetivo:</strong> Devuelve la ruta del archivo fuente procesado.
+     * <strong>Nombre:</strong> getFuente
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Devolver la ruta del archivo fuente procesado.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna Path.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> Path del archivo fuente.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public Path getFuente() {
         return fuente;
     }
 
     /**
-     * <strong>Objetivo:</strong> Devuelve el lexer que conserva el reporte completo de tokens.
+     * <strong>Nombre:</strong> getLexerTokens
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Devolver el lexer que conserva el reporte de tokens y los errores léxicos.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna MiLexer.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> MiLexer de la pasada de tokens.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public MiLexer getLexerTokens() {
         return lexerTokens;
     }
 
     /**
-     * <strong>Objetivo:</strong> Devuelve el parser con AST, tabla de simbolos y errores sintacticos.
+     * <strong>Nombre:</strong> getParser
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Devolver el parser con el AST, la tabla de símbolos y los errores sintácticos.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna Parser.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> Parser usado en la compilación.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public Parser getParser() {
         return parser;
     }
 
     /**
-     * <strong>Objetivo:</strong> Indica si el parser finalizo sin una excepcion irrecuperable.
+     * <strong>Nombre:</strong> isSintaxisCompleta
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Indicar si el parser terminó sin una excepción irrecuperable.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna boolean.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> boolean; true si el parseo concluyó.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public boolean isSintaxisCompleta() {
         return sintaxisCompleta;
     }
 
     /**
-     * <strong>Objetivo:</strong> Indica si el fuente supero analisis lexico, sintactico y semantico.
+     * <strong>Nombre:</strong> isAceptado
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Indicar si el fuente superó los análisis léxico, sintáctico y semántico.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna boolean.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> boolean; true si no hubo errores.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public boolean isAceptado() {
         return aceptado;
     }
 
     /**
-     * <strong>Objetivo:</strong> Devuelve una vista de solo lectura del codigo intermedio generado.
+     * <strong>Nombre:</strong> getCodigoIntermedio
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Devolver el código intermedio generado.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna List<Instruccion>.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> List&lt;Instruccion&gt; no modificable (vacía si no fue aceptado).</p>
+     *
+     * <p><strong>Restricciones:</strong> La lista no se puede modificar.</p>
      */
     public List<Instruccion> getCodigoIntermedio() {
         return Collections.unmodifiableList(codigoIntermedio);
+    }
+
+    /**
+     * <strong>Nombre:</strong> getCodigoMIPS
+     *
+     * <p><strong>Objetivo:</strong> Devolver el programa MIPS generado.</p>
+     *
+     * <p><strong>Entrada:</strong> Ninguna.</p>
+     *
+     * <p><strong>Salida:</strong> List&lt;String&gt; no modificable (vacía si no fue aceptado).</p>
+     *
+     * <p><strong>Restricciones:</strong> La lista no se puede modificar.</p>
+     */
+    public List<String> getCodigoMIPS() {
+        return Collections.unmodifiableList(codigoMIPS);
     }
 }

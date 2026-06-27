@@ -1235,3 +1235,159 @@ public final class GeneradorMIPS {
         instruccion("s.s $f4, " + etiqueta(resultado));
         registros.liberarRegistro(contador);
     }
+
+
+    /**
+     * <strong>Nombre:</strong> traducirLlamada
+     *
+     * <p><strong>Objetivo:</strong> Emitir la llamada ({@code jal}), recuperar el espacio de los parámetros y
+     * guardar el valor retornado ({@code $v0}) si la llamada produce resultado.</p>
+     *
+     * <p><strong>Entrada:</strong> Instruccion i.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Maneja por separado los retornos flotantes.</p>
+     */
+    private void traducirLlamada(Instruccion i) {
+        instruccion("jal " + etiquetaFuncion(i.op1));
+        int cantidad = parseEntero(i.op2, 0);
+        if (cantidad > 0) {
+            instruccion("addiu $sp, $sp, " + (cantidad * 4));
+        }
+        if (i.resultado != null) {
+            if (esFloat(tipoOperando(i.resultado, funcionActual))) {
+                instruccion("mtc1 $v0, $f0");
+                instruccion("s.s $f0, " + etiqueta(i.resultado));
+            } else {
+                instruccion("sw $v0, " + etiqueta(i.resultado));
+            }
+        }
+    }
+
+        /**
+     * <strong>Nombre:</strong> parseEntero
+     *
+     * <p><strong>Objetivo:</strong> Convertir un texto a int, devolviendo un valor por defecto si no es válido.</p>
+     *
+     * <p><strong>Entrada:</strong> String valor, int defecto.</p>
+     *
+     * <p><strong>Salida:</strong> int con el valor convertido o el defecto.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
+    private static int parseEntero(String valor, int defecto) {
+        try {
+            return Integer.parseInt(valor);
+        } catch (RuntimeException ex) {
+            return defecto;
+        }
+    }
+
+
+
+    /**
+     * <strong>Nombre:</strong> traducirRetorno
+     *
+     * <p><strong>Objetivo:</strong> Colocar el valor de retorno en {@code $v0} (o desde {@code $f0} si es flotante)
+     * y saltar al epílogo de la función.</p>
+     *
+     * <p><strong>Entrada:</strong> Instruccion i.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
+    private void traducirRetorno(Instruccion i) {
+        if (i.op1 != null) {
+            if (esFloat(tipoOperando(i.op1, funcionActual))) {
+                cargarFloat(i.op1, "$f0");
+                instruccion("mfc1 $v0, $f0");
+            } else {
+                cargarEntero(i.op1, "$v0");
+            }
+        }
+        instruccion("j " + etiquetaEpilogo(funcionActual));
+    }
+
+    /**
+     * <strong>Nombre:</strong> traducirPrint
+     *
+     * <p><strong>Objetivo:</strong> Emitir la impresión del operando con el syscall adecuado según su tipo
+     * (entero, cadena, carácter o flotante).</p>
+     *
+     * <p><strong>Entrada:</strong> String operando.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
+    private void traducirPrint(String operando) {
+        String tipo = tipoOperando(operando, funcionActual);
+        if ("string".equals(tipo)) {
+            cargarEntero(operando, "$a0");
+            instruccion("li $v0, 4");
+        } else if ("char".equals(tipo)) {
+            cargarEntero(operando, "$a0");
+            instruccion("li $v0, 11");
+        } else if (esFloat(tipo)) {
+            cargarFloat(operando, "$f12");
+            instruccion("li $v0, 2");
+        } else {
+            cargarEntero(operando, "$a0");
+            instruccion("li $v0, 1");
+        }
+        instruccion("syscall");
+    }
+    /**
+     * <strong>Nombre:</strong> traducirRead
+     *
+     * <p><strong>Objetivo:</strong> Emitir la lectura de un valor desde el usuario (syscall 5 o 6) y guardarlo en el destino.</p>
+     *
+     * <p><strong>Entrada:</strong> String destino.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Distingue entre lectura entera y flotante.</p>
+     */
+    private void traducirRead(String destino) {
+        if (esFloat(tipoOperando(destino, funcionActual))) {
+            instruccion("li $v0, 6");
+            instruccion("syscall");
+            guardar(destino, "$t0", "$f0");
+        } else {
+            instruccion("li $v0, 5");
+            instruccion("syscall");
+            guardar(destino, "$v0", "$f0");
+        }
+    }
+
+    /**
+     * <strong>Nombre:</strong> traducirUnaria
+     *
+     * <p><strong>Objetivo:</strong> Traducir una operación unaria: negación aritmética (entera o flotante) o negación lógica.</p>
+     *
+     * <p><strong>Entrada:</strong> Instruccion i.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
+    private void traducirUnaria(Instruccion i) {
+        if (i.op == Operacion.NEG && esFloat(tipoOperando(i.op1, funcionActual))) {
+            cargarFloat(i.op1, "$f0");
+            instruccion("neg.s $f2, $f0");
+            instruccion("s.s $f2, " + etiqueta(i.resultado));
+            return;
+        }
+        String operando = cargarValor(i.op1);
+        String resultado = registros.obtenerRegistro();
+        if (i.op == Operacion.NEG) {
+            instruccion("sub " + resultado + ", $zero, " + operando);
+        } else {
+            instruccion("seq " + resultado + ", " + operando + ", $zero");
+        }
+        instruccion("sw " + resultado + ", " + etiqueta(i.resultado));
+        registros.liberarRegistro(resultado);
+        registros.liberarRegistro(operando);
+    }
