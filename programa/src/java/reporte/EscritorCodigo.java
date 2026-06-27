@@ -11,37 +11,34 @@ import java.util.List;
 import pipeline.ResultadoCompilacion;
 
 /**
- * <strong>Objetivo:</strong> Escribe el archivo final de codigo intermedio del compilador.
+ * <strong>Nombre:</strong> EscritorCodigo
  *
- * <p><strong>Entradas:</strong> Resultados del analisis, errores, tokens, rutas de salida y metadatos de reporte.</p>
+ * <p><strong>Objetivo:</strong> Escribir en disco el archivo de código intermedio ({@code .ic}) del
+ * compilador, con un encabezado de metadatos y una instrucción por línea.</p>
  *
- * <p><strong>Salidas:</strong> Mensajes formateados o archivos de reporte escritos en UTF-8.</p>
+ * <p><strong>Entrada:</strong> El directorio de salida, el resultado de la compilación o una lista de instrucciones.</p>
  *
- * <p><strong>Restricciones:</strong> No debe recalcular analisis; solo formatea o persiste informacion recibida.</p>
+ * <p><strong>Salida:</strong> Un archivo {@code .ic} escrito en UTF-8.</p>
+ *
+ * <p><strong>Restricciones:</strong> Solo formatea y persiste información ya calculada; no analiza.</p>
  */
 public final class EscritorCodigo {
     private static final String INTEGRANTES = "Geovanni Gonzalez";
 
-    /**
-     * <strong>Objetivo:</strong> Evita crear instancias de una clase utilitaria.
-     *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
-     *
-     * <p><strong>Salidas:</strong> Instancia inicializada de EscritorCodigo.</p>
-     *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
-     */
     private EscritorCodigo() {
     }
 
     /**
-     * <strong>Objetivo:</strong> Genera el archivo .ic correspondiente a un resultado de compilacion.
+     * <strong>Nombre:</strong> escribir
      *
-     * <p><strong>Entradas:</strong> Path directorioSalida, ResultadoCompilacion resultado</p>
+     * <p><strong>Objetivo:</strong> Generar el archivo {@code .ic} correspondiente a un resultado de
+     * compilación. Si el fuente no fue aceptado, borra cualquier {@code .ic} previo y no genera salida.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna Path.</p>
+     * <p><strong>Entrada:</strong> Path directorioSalida, ResultadoCompilacion resultado.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> Path del archivo destino (exista o no).</p>
+     *
+     * <p><strong>Restricciones:</strong> Crea el directorio de salida si no existe.</p>
      */
     public static Path escribir(Path directorioSalida, ResultadoCompilacion resultado) throws Exception {
         Files.createDirectories(directorioSalida);
@@ -56,13 +53,16 @@ public final class EscritorCodigo {
     }
 
     /**
-     * <strong>Objetivo:</strong> Escribe instrucciones ya generadas en un archivo concreto.
+     * <strong>Nombre:</strong> escribir
      *
-     * <p><strong>Entradas:</strong> Path archivoSalida, Path fuente, List<Instruccion> instrucciones</p>
+     * <p><strong>Objetivo:</strong> Escribir las instrucciones intermedias en un archivo concreto, con
+     * encabezado. Las etiquetas van sin sangría y el resto con tabulación.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> Path archivoSalida, Path fuente, List&lt;Instruccion&gt; instrucciones.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public static void escribir(Path archivoSalida, Path fuente, List<Instruccion> instrucciones)
             throws Exception {
@@ -80,13 +80,16 @@ public final class EscritorCodigo {
     }
 
     /**
-     * <strong>Objetivo:</strong> Calcula el nombre del archivo .ic a partir del nombre del fuente.
+     * <strong>Nombre:</strong> resolverArchivoSalida
      *
-     * <p><strong>Entradas:</strong> Path directorioSalida, Path fuente</p>
+     * <p><strong>Objetivo:</strong> Calcular la ruta destino: el mismo nombre base que el fuente pero
+     * con extensión {@code .ic}.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna Path.</p>
+     * <p><strong>Entrada:</strong> Path directorioSalida, Path fuente.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> Path del archivo {@code .ic} destino.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public static Path resolverArchivoSalida(Path directorioSalida, Path fuente) {
         String nombreFuente = fuente.getFileName().toString();
@@ -96,13 +99,15 @@ public final class EscritorCodigo {
     }
 
     /**
-     * <strong>Objetivo:</strong> Agrega metadatos humanos al inicio del codigo intermedio generado.
+     * <strong>Nombre:</strong> escribirEncabezado
      *
-     * <p><strong>Entradas:</strong> BufferedWriter writer, Path fuente</p>
+     * <p><strong>Objetivo:</strong> Escribir el encabezado con fecha, archivo fuente e integrantes.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> BufferedWriter writer, Path fuente.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static void escribirEncabezado(BufferedWriter writer, Path fuente) throws Exception {
         writer.write("// Codigo intermedio");

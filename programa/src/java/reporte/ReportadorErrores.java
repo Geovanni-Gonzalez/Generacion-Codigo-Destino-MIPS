@@ -1,148 +1,158 @@
 package reporte;
 
 /**
- * <strong>Objetivo:</strong> Fabrica centralizada para mensajes de error del compilador.
+ * <strong>Nombre:</strong> ReportadorErrores
  *
- * <p><strong>Entradas:</strong> Resultados del analisis, errores, tokens, rutas de salida y metadatos de reporte.</p>
+ * <p><strong>Objetivo:</strong> Dar un formato uniforme a los mensajes de error de las tres fases
+ * (léxica, sintáctica y semántica), con su tipo, posición y descripción.</p>
  *
- * <p><strong>Salidas:</strong> Mensajes formateados o archivos de reporte escritos en UTF-8.</p>
+ * <p><strong>Entrada:</strong> Tipo de error, línea, columna y descripción.</p>
  *
- * <p><strong>Restricciones:</strong> No debe recalcular analisis; solo formatea o persiste informacion recibida.</p>
+ * <p><strong>Salida:</strong> Texto del error; los métodos {@code reportar*} además lo imprimen en la salida de error.</p>
+ *
+ * <p><strong>Restricciones:</strong> Clase utilitaria; no se instancia.</p>
  */
 public final class ReportadorErrores {
     /**
-     * <strong>Objetivo:</strong> Fases del compilador que pueden producir diagnosticos.
+     * <strong>Nombre:</strong> Tipo
      *
-     * <p><strong>Entradas:</strong> Resultados del analisis, errores, tokens, rutas de salida y metadatos de reporte.</p>
+     * <p><strong>Objetivo:</strong> Indicar la fase del compilador que produjo el diagnóstico.</p>
      *
-     * <p><strong>Salidas:</strong> Mensajes formateados o archivos de reporte escritos en UTF-8.</p>
+     * <p><strong>Entrada:</strong> Ninguna; son constantes fijas del enum.</p>
      *
-     * <p><strong>Restricciones:</strong> No debe recalcular analisis; solo formatea o persiste informacion recibida.</p>
+     * <p><strong>Salida:</strong> Valor de tipo de error con su etiqueta textual.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public enum Tipo {
-        /** Error producido durante el analisis lexico. */
+        /** Error producido durante el análisis léxico. */
         LEXICO("lexico"),
-        /** Error producido durante el analisis sintactico. */
+        /** Error producido durante el análisis sintáctico. */
         SINTACTICO("sintactico"),
-        /** Error producido durante el analisis semantico. */
+        /** Error producido durante el análisis semántico. */
         SEMANTICO("semantico");
 
         private final String etiqueta;
 
         /**
-         * <strong>Objetivo:</strong> Inicializar la etiqueta textual asociada a
-         * un tipo de error.
+         * <strong>Nombre:</strong> Tipo
          *
-         * <p><strong>Entradas:</strong> String etiqueta</p>
+         * <p><strong>Objetivo:</strong> Asociar a cada tipo su etiqueta textual, usada en los reportes.</p>
          *
-         * <p><strong>Salidas:</strong> Instancia inicializada de Tipo.</p>
+         * <p><strong>Entrada:</strong> String etiqueta.</p>
          *
-         * <p><strong>Restricciones:</strong> La etiqueta debe mantenerse estable
-         * porque se usa en los reportes generados.</p>
+         * <p><strong>Salida:</strong> Constante del enum inicializada.</p>
+         *
+         * <p><strong>Restricciones:</strong> La etiqueta debe mantenerse estable porque aparece en los reportes.</p>
          */
         Tipo(String etiqueta) {
             this.etiqueta = etiqueta;
         }
     }
 
-    /**
-     * <strong>Objetivo:</strong> Evita crear instancias de una clase utilitaria.
-     *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
-     *
-     * <p><strong>Salidas:</strong> Instancia inicializada de ReportadorErrores.</p>
-     *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
-     */
     private ReportadorErrores() {
     }
 
     /**
-     * <strong>Objetivo:</strong> Formatea un error lexico sin imprimirlo.
+     * <strong>Nombre:</strong> lexico
      *
-     * <p><strong>Entradas:</strong> int linea, int columna, String descripcion</p>
+     * <p><strong>Objetivo:</strong> Dar formato a un error léxico sin imprimirlo.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> int linea, int columna, String descripcion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el mensaje formateado.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public static String lexico(int linea, int columna, String descripcion) {
         return formatear(Tipo.LEXICO, linea, columna, descripcion);
     }
 
     /**
-     * <strong>Objetivo:</strong> Formatea un error sintactico sin imprimirlo.
+     * <strong>Nombre:</strong> sintactico
      *
-     * <p><strong>Entradas:</strong> int linea, int columna, String descripcion</p>
+     * <p><strong>Objetivo:</strong> Dar formato a un error sintáctico sin imprimirlo.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> int linea, int columna, String descripcion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el mensaje formateado.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public static String sintactico(int linea, int columna, String descripcion) {
         return formatear(Tipo.SINTACTICO, linea, columna, descripcion);
     }
 
     /**
-     * <strong>Objetivo:</strong> Formatea un error semantico sin imprimirlo.
+     * <strong>Nombre:</strong> semantico
      *
-     * <p><strong>Entradas:</strong> int linea, int columna, String descripcion</p>
+     * <p><strong>Objetivo:</strong> Dar formato a un error semántico sin imprimirlo.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> int linea, int columna, String descripcion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el mensaje formateado.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public static String semantico(int linea, int columna, String descripcion) {
         return formatear(Tipo.SEMANTICO, linea, columna, descripcion);
     }
 
     /**
-     * <strong>Objetivo:</strong> Formatea e imprime un error lexico.
+     * <strong>Nombre:</strong> reportarLexico
      *
-     * <p><strong>Entradas:</strong> int linea, int columna, String descripcion</p>
+     * <p><strong>Objetivo:</strong> Dar formato a un error léxico y además imprimirlo en la salida de error.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> int linea, int columna, String descripcion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el mensaje formateado.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public static String reportarLexico(int linea, int columna, String descripcion) {
         return reportar(Tipo.LEXICO, linea, columna, descripcion);
     }
 
     /**
-     * <strong>Objetivo:</strong> Formatea e imprime un error sintactico.
+     * <strong>Nombre:</strong> reportarSintactico
      *
-     * <p><strong>Entradas:</strong> int linea, int columna, String descripcion</p>
+     * <p><strong>Objetivo:</strong> Dar formato a un error sintáctico y además imprimirlo en la salida de error.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> int linea, int columna, String descripcion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el mensaje formateado.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public static String reportarSintactico(int linea, int columna, String descripcion) {
         return reportar(Tipo.SINTACTICO, linea, columna, descripcion);
     }
 
     /**
-     * <strong>Objetivo:</strong> Formatea e imprime un error semantico.
+     * <strong>Nombre:</strong> reportarSemantico
      *
-     * <p><strong>Entradas:</strong> int linea, int columna, String descripcion</p>
+     * <p><strong>Objetivo:</strong> Dar formato a un error semántico y además imprimirlo en la salida de error.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> int linea, int columna, String descripcion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el mensaje formateado.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public static String reportarSemantico(int linea, int columna, String descripcion) {
         return reportar(Tipo.SEMANTICO, linea, columna, descripcion);
     }
 
     /**
-     * <strong>Objetivo:</strong> Imprime en stderr un diagnostico de la fase indicada y lo devuelve.
+     * <strong>Nombre:</strong> reportar
      *
-     * <p><strong>Entradas:</strong> Tipo tipo, int linea, int columna, String descripcion</p>
+     * <p><strong>Objetivo:</strong> Dar formato al diagnóstico de la fase indicada, imprimirlo en stderr y devolverlo.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> Tipo tipo, int linea, int columna, String descripcion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el mensaje formateado.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public static String reportar(Tipo tipo, int linea, int columna, String descripcion) {
         String mensaje = formatear(tipo, linea, columna, descripcion);
@@ -151,13 +161,16 @@ public final class ReportadorErrores {
     }
 
     /**
-     * <strong>Objetivo:</strong> Construye el mensaje canonico de error con coordenadas normalizadas.
+     * <strong>Nombre:</strong> formatear
      *
-     * <p><strong>Entradas:</strong> Tipo tipo, int linea, int columna, String descripcion</p>
+     * <p><strong>Objetivo:</strong> Construir el mensaje canónico de error con la forma
+     * {@code "Error <tipo> [linea L, col C]: descripcion"}.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> Tipo tipo, int linea, int columna, String descripcion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el mensaje formateado.</p>
+     *
+     * <p><strong>Restricciones:</strong> Normaliza línea y columna a un mínimo de 1.</p>
      */
     public static String formatear(Tipo tipo, int linea, int columna, String descripcion) {
         int lineaNormalizada = linea > 0 ? linea : 1;
