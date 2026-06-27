@@ -1,21 +1,24 @@
 package semantico;
 
 /**
- * <strong>Objetivo:</strong> Clasifica el rol de un simbolo dentro de la tabla de simbolos.
+ * <strong>Nombre:</strong> CategoriaSimb
  *
- * <p><strong>Entradas:</strong> Simbolos, tipos, nodos y ubicaciones producidos por las fases previas.</p>
+ * <p><strong>Objetivo:</strong> Clasificar el rol de un símbolo dentro de la tabla de símbolos:
+ * distingue variables, arreglos, parámetros y funciones.</p>
  *
- * <p><strong>Salidas:</strong> Estado semantico actualizado, simbolos resueltos o diagnosticos acumulados.</p>
+ * <p><strong>Entrada:</strong> Ninguna; son constantes fijas del enum.</p>
  *
- * <p><strong>Restricciones:</strong> No debe generar codigo intermedio ni escribir reportes directamente.</p>
+ * <p><strong>Salida:</strong> Valores de categoría usados por la tabla de símbolos.</p>
+ *
+ * <p><strong>Restricciones:</strong> Ninguna.</p>
  */
 public enum CategoriaSimb {
     /** Variable escalar declarada en un alcance. */
     VAR,
     /** Arreglo bidimensional declarado en un alcance. */
     ARREGLO,
-    /** Parametro formal de una funcion. */
+    /** Parámetro formal de una función. */
     PARAMETRO,
-    /** Funcion de nivel superior. */
+    /** Función de nivel superior. */
     FUNCION
 }

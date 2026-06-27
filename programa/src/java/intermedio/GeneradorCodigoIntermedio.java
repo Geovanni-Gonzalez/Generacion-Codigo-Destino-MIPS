@@ -31,41 +31,36 @@ import java.util.Deque;
 import java.util.List;
 
 /**
- * <strong>Objetivo:</strong> Recorre el AST aceptado y emite instrucciones de tres direcciones.
+ * <strong>Nombre:</strong> GeneradorCodigoIntermedio
  *
- * <p><strong>Entradas:</strong> AST validado, operaciones u operandos necesarios para representar codigo intermedio.</p>
+ * <p><strong>Objetivo:</strong> Recorrer el AST ya aceptado y emitir el código intermedio de tres
+ * direcciones, generando temporales y etiquetas a medida que descompone expresiones y estructuras
+ * de control.</p>
  *
- * <p><strong>Salidas:</strong> Instrucciones, operaciones o texto de codigo intermedio.</p>
+ * <p><strong>Entrada:</strong> El nodo raíz del programa ({@link ProgramaNodo}).</p>
  *
- * <p><strong>Restricciones:</strong> Debe asumir programas ya aceptados y no reemplazar las validaciones semanticas.</p>
+ * <p><strong>Salida:</strong> Una lista de instrucciones intermedias.</p>
+ *
+ * <p><strong>Restricciones:</strong> Asume programas ya validados; no vuelve a comprobar tipos.</p>
  */
 public class GeneradorCodigoIntermedio {
-    /**
-     * <strong>Objetivo:</strong> Acumular las instrucciones emitidas durante una
-     * corrida de generacion.
-     *
-     * <p><strong>Entradas:</strong> Instrucciones agregadas por los metodos de
-     * generacion.</p>
-     *
-     * <p><strong>Salidas:</strong> Lista usada para construir la copia devuelta
-     * por {@code generar}.</p>
-     *
-     * <p><strong>Restricciones:</strong> Debe limpiarse al iniciar cada nueva
-     * generacion para no mezclar resultados de programas distintos.</p>
-     */
+    /** Instrucciones emitidas durante la generación; se limpia en cada corrida. */
     private final List<Instruccion> instrucciones = new ArrayList<>();
     private int contadorTemporales;
     private int contadorEtiquetas;
+    /** Pila con la etiqueta de fin del switch actual, destino de los {@code break}. */
     private final Deque<String> destinosBreak = new ArrayDeque<>();
 
     /**
-     * <strong>Objetivo:</strong> Genera la representacion correspondiente dentro del compilador.
+     * <strong>Nombre:</strong> generar
      *
-     * <p><strong>Entradas:</strong> ProgramaNodo programa</p>
+     * <p><strong>Objetivo:</strong> Generar y devolver el código intermedio de todo el programa.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna List<Instruccion>.</p>
+     * <p><strong>Entrada:</strong> ProgramaNodo programa.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> List&lt;Instruccion&gt; con el código intermedio.</p>
+     *
+     * <p><strong>Restricciones:</strong> Reinicia los acumuladores en cada llamada.</p>
      */
     public List<Instruccion> generar(ProgramaNodo programa) {
         instrucciones.clear();
@@ -79,13 +74,15 @@ public class GeneradorCodigoIntermedio {
     }
 
     /**
-     * <strong>Objetivo:</strong> Genera la representacion correspondiente dentro del compilador.
+     * <strong>Nombre:</strong> generarFuncion
      *
-     * <p><strong>Entradas:</strong> FuncionNodo funcion</p>
+     * <p><strong>Objetivo:</strong> Emitir el inicio de función, sus parámetros formales, su cuerpo y el fin.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> FuncionNodo funcion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private void generarFuncion(FuncionNodo funcion) {
         instrucciones.add(new Instruccion(Operacion.INICIO_FUNC, funcion.getNombre()));
@@ -98,13 +95,15 @@ public class GeneradorCodigoIntermedio {
     }
 
     /**
-     * <strong>Objetivo:</strong> Genera la representacion correspondiente dentro del compilador.
+     * <strong>Nombre:</strong> generarBloque
      *
-     * <p><strong>Entradas:</strong> BloqueNodo bloque</p>
+     * <p><strong>Objetivo:</strong> Generar, en orden, el código de cada instrucción de un bloque.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> BloqueNodo bloque.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private void generarBloque(BloqueNodo bloque) {
         for (Nodo nodo : bloque.getInstrucciones()) {
@@ -113,13 +112,15 @@ public class GeneradorCodigoIntermedio {
     }
 
     /**
-     * <strong>Objetivo:</strong> Genera la representacion correspondiente dentro del compilador.
+     * <strong>Nombre:</strong> generarNodo
      *
-     * <p><strong>Entradas:</strong> Nodo nodo</p>
+     * <p><strong>Objetivo:</strong> Despachar un nodo de sentencia al método de generación que le corresponde.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> Nodo nodo.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ignora tipos de nodo no manejados.</p>
      */
     private void generarNodo(Nodo nodo) {
         if (nodo instanceof AsignacionNodo) {
@@ -148,13 +149,15 @@ public class GeneradorCodigoIntermedio {
     }
 
     /**
-     * <strong>Objetivo:</strong> Genera la representacion correspondiente dentro del compilador.
+     * <strong>Nombre:</strong> generarDeclaracionVariable
      *
-     * <p><strong>Entradas:</strong> DeclaracionVariableNodo declaracion</p>
+     * <p><strong>Objetivo:</strong> Declarar una variable escalar y, si tiene inicializador, asignarle su valor.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> DeclaracionVariableNodo declaracion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Si la declaración es de arreglo, delega en {@link #generarDeclaracionArreglo}.</p>
      */
     private void generarDeclaracionVariable(DeclaracionVariableNodo declaracion) {
         if (declaracion.esArreglo()) {
@@ -169,6 +172,17 @@ public class GeneradorCodigoIntermedio {
         }
     }
 
+    /**
+     * <strong>Nombre:</strong> generarDeclaracionArreglo
+     *
+     * <p><strong>Objetivo:</strong> Declarar un arreglo con sus dimensiones y, si los hay, almacenar sus valores iniciales.</p>
+     *
+     * <p><strong>Entrada:</strong> DeclaracionVariableNodo declaracion.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
     private void generarDeclaracionArreglo(DeclaracionVariableNodo declaracion) {
         String filas = generarExpresionSinCarga(declaracion.getFilas());
         String columnas = generarExpresionSinCarga(declaracion.getColumnas());
@@ -189,13 +203,15 @@ public class GeneradorCodigoIntermedio {
     }
 
     /**
-     * <strong>Objetivo:</strong> Genera la representacion correspondiente dentro del compilador.
+     * <strong>Nombre:</strong> generarAsignacion
      *
-     * <p><strong>Entradas:</strong> AsignacionNodo asignacion</p>
+     * <p><strong>Objetivo:</strong> Evaluar el valor, resolver el destino y emitir la asignación (a variable o a celda de arreglo).</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> AsignacionNodo asignacion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private void generarAsignacion(AsignacionNodo asignacion) {
         String valor = generarExpresion(asignacion.getValor());
@@ -206,13 +222,15 @@ public class GeneradorCodigoIntermedio {
     }
 
     /**
-     * <strong>Objetivo:</strong> Genera la representacion correspondiente dentro del compilador.
+     * <strong>Nombre:</strong> generarReturn
      *
-     * <p><strong>Entradas:</strong> ReturnNodo retorno</p>
+     * <p><strong>Objetivo:</strong> Emitir el retorno de la función, con o sin valor.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> ReturnNodo retorno.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private void generarReturn(ReturnNodo retorno) {
         String valor = retorno.getValor() == null ? null : generarExpresion(retorno.getValor());
@@ -220,41 +238,79 @@ public class GeneradorCodigoIntermedio {
     }
 
     /**
-     * <strong>Objetivo:</strong> Genera la representacion correspondiente dentro del compilador.
+     * <strong>Nombre:</strong> generarExpresionSentencia
      *
-     * <p><strong>Entradas:</strong> ExpresionSentenciaNodo sentencia</p>
+     * <p><strong>Objetivo:</strong> Generar una expresión usada como sentencia (por su efecto, descartando el resultado).</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> ExpresionSentenciaNodo sentencia.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private void generarExpresionSentencia(ExpresionSentenciaNodo sentencia) {
         generarExpresion(sentencia.getExpresion());
     }
 
     /**
-     * <strong>Objetivo:</strong> Genera la representacion correspondiente dentro del compilador.
+     * <strong>Nombre:</strong> generarSalida
      *
-     * <p><strong>Entradas:</strong> SalidaNodo salida</p>
+     * <p><strong>Objetivo:</strong> Emitir la impresión del valor de la expresión de salida ({@code cout}).</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> SalidaNodo salida.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private void generarSalida(SalidaNodo salida) {
         instrucciones.add(new Instruccion(Operacion.PRINT, generarExpresion(salida.getValor())));
     }
 
+    /**
+     * <strong>Nombre:</strong> generarEntrada
+     *
+     * <p><strong>Objetivo:</strong> Emitir la lectura de un valor hacia la variable destino ({@code cin}).</p>
+     *
+     * <p><strong>Entrada:</strong> EntradaNodo entrada.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
     private void generarEntrada(EntradaNodo entrada) {
         instrucciones.add(new Instruccion(Operacion.READ, entrada.getDestino()));
     }
 
+    /**
+     * <strong>Nombre:</strong> generarBreak
+     *
+     * <p><strong>Objetivo:</strong> Emitir un salto a la etiqueta de fin del switch actual.</p>
+     *
+     * <p><strong>Entrada:</strong> Ninguna.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> No hace nada si no hay un switch activo.</p>
+     */
     private void generarBreak() {
         if (!destinosBreak.isEmpty()) {
             instrucciones.add(new Instruccion(Operacion.GOTO, destinosBreak.peek()));
         }
     }
 
+    /**
+     * <strong>Nombre:</strong> generarSwitch
+     *
+     * <p><strong>Objetivo:</strong> Generar un switch: comparar el selector contra cada caso saltando
+     * al bloque que coincida (o al default), y luego emitir los bloques de los casos.</p>
+     *
+     * <p><strong>Entrada:</strong> SwitchNodo sentencia.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Apila la etiqueta de fin para que los {@code break} salgan del switch.</p>
+     */
     private void generarSwitch(SwitchNodo sentencia) {
         String selector = generarExpresion(sentencia.getExpresion());
         String etiquetaFin = nuevaEtiqueta();
@@ -294,13 +350,16 @@ public class GeneradorCodigoIntermedio {
     }
 
     /**
-     * <strong>Objetivo:</strong> Genera la representacion correspondiente dentro del compilador.
+     * <strong>Nombre:</strong> generarIf
      *
-     * <p><strong>Entradas:</strong> IfNodo sentencia</p>
+     * <p><strong>Objetivo:</strong> Generar un if/else: saltar sobre el bloque verdadero cuando la
+     * condición es falsa y, si hay rama else, colocarla tras un salto que omite el bloque verdadero.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> IfNodo sentencia.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private void generarIf(IfNodo sentencia) {
         String condicion = generarExpresion(sentencia.getCondicion());
@@ -322,13 +381,16 @@ public class GeneradorCodigoIntermedio {
     }
 
     /**
-     * <strong>Objetivo:</strong> Genera la representacion correspondiente dentro del compilador.
+     * <strong>Nombre:</strong> generarWhile
      *
-     * <p><strong>Entradas:</strong> WhileNodo sentencia</p>
+     * <p><strong>Objetivo:</strong> Generar un ciclo. En {@code do-while} ejecuta el cuerpo antes de
+     * evaluar la condición; en {@code while} la evalúa antes. En ambos vuelve al inicio mientras sea verdadera.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> WhileNodo sentencia.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private void generarWhile(WhileNodo sentencia) {
         String etiquetaInicio = nuevaEtiqueta();
@@ -353,13 +415,16 @@ public class GeneradorCodigoIntermedio {
     }
 
     /**
-     * <strong>Objetivo:</strong> Genera la representacion correspondiente dentro del compilador.
+     * <strong>Nombre:</strong> generarExpresion
      *
-     * <p><strong>Entradas:</strong> ExpresionNodo expresion</p>
+     * <p><strong>Objetivo:</strong> Generar el código de una expresión y devolver el operando (temporal
+     * o literal) que contiene su resultado.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> ExpresionNodo expresion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el operando del resultado.</p>
+     *
+     * <p><strong>Restricciones:</strong> Devuelve {@code "<expr>"} para tipos de expresión no implementados.</p>
      */
     private String generarExpresion(ExpresionNodo expresion) {
         if (expresion instanceof IdentificadorNodo) {
@@ -395,6 +460,18 @@ public class GeneradorCodigoIntermedio {
         return "<expr>";
     }
 
+    /**
+     * <strong>Nombre:</strong> generarDestino
+     *
+     * <p><strong>Objetivo:</strong> Resolver el destino de una asignación: el nombre de la variable o
+     * la referencia indexada {@code nombre[fila][col]} de un arreglo.</p>
+     *
+     * <p><strong>Entrada:</strong> ExpresionNodo expresion.</p>
+     *
+     * <p><strong>Salida:</strong> String con la referencia del destino.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
     private String generarDestino(ExpresionNodo expresion) {
         if (expresion instanceof IdentificadorNodo) {
             return ((IdentificadorNodo) expresion).getNombre();
@@ -407,6 +484,18 @@ public class GeneradorCodigoIntermedio {
         return generarExpresion(expresion);
     }
 
+    /**
+     * <strong>Nombre:</strong> generarExpresionSinCarga
+     *
+     * <p><strong>Objetivo:</strong> Como {@link #generarExpresion}, pero usa el nombre directo de un
+     * identificador (sin emitir un LOAD); útil para las dimensiones de un arreglo.</p>
+     *
+     * <p><strong>Entrada:</strong> ExpresionNodo expresion.</p>
+     *
+     * <p><strong>Salida:</strong> String con el operando.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
     private String generarExpresionSinCarga(ExpresionNodo expresion) {
         if (expresion instanceof IdentificadorNodo) {
             return ((IdentificadorNodo) expresion).getNombre();
@@ -414,6 +503,18 @@ public class GeneradorCodigoIntermedio {
         return generarExpresion(expresion);
     }
 
+    /**
+     * <strong>Nombre:</strong> formatearLiteral
+     *
+     * <p><strong>Objetivo:</strong> Dar formato a un literal como operando: entre comillas las cadenas,
+     * entre apóstrofos los caracteres.</p>
+     *
+     * <p><strong>Entrada:</strong> LiteralNodo literal.</p>
+     *
+     * <p><strong>Salida:</strong> String con el literal formateado.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
     private String formatearLiteral(LiteralNodo literal) {
         Object valor = literal.getValor();
         if (valor == null) {
@@ -431,13 +532,15 @@ public class GeneradorCodigoIntermedio {
     }
 
     /**
-     * <strong>Objetivo:</strong> Genera la representacion correspondiente dentro del compilador.
+     * <strong>Nombre:</strong> generarBinaria
      *
-     * <p><strong>Entradas:</strong> ExpresionBinariaNodo expresion</p>
+     * <p><strong>Objetivo:</strong> Generar una operación binaria: evaluar ambos operandos y guardar el resultado en un temporal.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> ExpresionBinariaNodo expresion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el temporal del resultado.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private String generarBinaria(ExpresionBinariaNodo expresion) {
         String izquierda = generarExpresion(expresion.getIzquierda());
@@ -448,13 +551,16 @@ public class GeneradorCodigoIntermedio {
     }
 
     /**
-     * <strong>Objetivo:</strong> Genera la representacion correspondiente dentro del compilador.
+     * <strong>Nombre:</strong> generarUnaria
      *
-     * <p><strong>Entradas:</strong> ExpresionUnariaNodo expresion</p>
+     * <p><strong>Objetivo:</strong> Generar una operación unaria. Para {@code ++}/{@code --} calcula el
+     * nuevo valor y lo vuelve a guardar; para las demás, emite la operación sobre un temporal.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> ExpresionUnariaNodo expresion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el temporal del resultado.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private String generarUnaria(ExpresionUnariaNodo expresion) {
         if ("++".equals(expresion.getOperador()) || "--".equals(expresion.getOperador())) {
@@ -475,13 +581,16 @@ public class GeneradorCodigoIntermedio {
     }
 
     /**
-     * <strong>Objetivo:</strong> Genera la representacion correspondiente dentro del compilador.
+     * <strong>Nombre:</strong> generarLlamada
      *
-     * <p><strong>Entradas:</strong> LlamadaFuncionNodo llamada</p>
+     * <p><strong>Objetivo:</strong> Generar una llamada a función: emitir un PARAM por cada argumento y
+     * luego el CALL. Si la función es void no usa temporal; si retorna valor, lo deja en uno.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> LlamadaFuncionNodo llamada.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el temporal del resultado, o {@code null} si es void.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private String generarLlamada(LlamadaFuncionNodo llamada) {
         for (ExpresionNodo argumento : llamada.getArgumentos()) {
@@ -499,52 +608,60 @@ public class GeneradorCodigoIntermedio {
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta una condicion booleana del objeto.
+     * <strong>Nombre:</strong> esLlamadaVoid
      *
-     * <p><strong>Entradas:</strong> LlamadaFuncionNodo llamada</p>
+     * <p><strong>Objetivo:</strong> Indicar si la llamada no produce valor (función void/empty).</p>
      *
-     * <p><strong>Salidas:</strong> Retorna boolean.</p>
+     * <p><strong>Entrada:</strong> LlamadaFuncionNodo llamada.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> boolean; true si la llamada es void.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private boolean esLlamadaVoid(LlamadaFuncionNodo llamada) {
         return llamada.getTipo() == TipoDato.VOID || llamada.getTipo() == TipoDato.EMPTY;
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> nuevoTemporal
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Generar un nombre de temporal nuevo y único ({@code _t0}, {@code _t1}, ...).</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el temporal.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private String nuevoTemporal() {
         return "_t" + contadorTemporales++;
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> nuevaEtiqueta
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Generar un nombre de etiqueta nuevo y único ({@code _L0}, {@code _L1}, ...).</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con la etiqueta.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private String nuevaEtiqueta() {
         return "_L" + contadorEtiquetas++;
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> operacionBinaria
      *
-     * <p><strong>Entradas:</strong> String operador</p>
+     * <p><strong>Objetivo:</strong> Traducir el símbolo de un operador binario (incluidos los relacionales) a su {@link Operacion}.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna Operacion.</p>
+     * <p><strong>Entrada:</strong> String operador.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> Operacion correspondiente.</p>
+     *
+     * <p><strong>Restricciones:</strong> Lanza excepción si el operador no está soportado.</p>
      */
     private Operacion operacionBinaria(String operador) {
         switch (operador) {
@@ -582,13 +699,15 @@ public class GeneradorCodigoIntermedio {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> operacionUnaria
      *
-     * <p><strong>Entradas:</strong> String operador</p>
+     * <p><strong>Objetivo:</strong> Traducir el símbolo de un operador unario a su {@link Operacion} ({@code -} → NEG, {@code $} → NOT).</p>
      *
-     * <p><strong>Salidas:</strong> Retorna Operacion.</p>
+     * <p><strong>Entrada:</strong> String operador.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> Operacion correspondiente.</p>
+     *
+     * <p><strong>Restricciones:</strong> Lanza excepción si el operador no está soportado.</p>
      */
     private Operacion operacionUnaria(String operador) {
         switch (operador) {

@@ -1,13 +1,16 @@
 package intermedio;
 
 /**
- * <strong>Objetivo:</strong> Instruccion atomica del codigo intermedio.
+ * <strong>Nombre:</strong> Instruccion (intermedio)
  *
- * <p><strong>Entradas:</strong> AST validado, operaciones u operandos necesarios para representar codigo intermedio.</p>
+ * <p><strong>Objetivo:</strong> Representar una instrucción del código de tres direcciones, con una
+ * {@link Operacion} y hasta tres operandos de texto ({@code resultado}, {@code op1}, {@code op2}).</p>
  *
- * <p><strong>Salidas:</strong> Instrucciones, operaciones o texto de codigo intermedio.</p>
+ * <p><strong>Entrada:</strong> La operación y los operandos que correspondan.</p>
  *
- * <p><strong>Restricciones:</strong> Debe asumir programas ya aceptados y no reemplazar las validaciones semanticas.</p>
+ * <p><strong>Salida:</strong> Objeto inmutable que {@link #toString()} imprime como una línea legible.</p>
+ *
+ * <p><strong>Restricciones:</strong> No todos los operandos se usan en cada operación.</p>
  */
 public class Instruccion {
     public final Operacion op;
@@ -16,13 +19,15 @@ public class Instruccion {
     public final String op2;
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> Instruccion
      *
-     * <p><strong>Entradas:</strong> Operacion op, String resultado, String op1, String op2</p>
+     * <p><strong>Objetivo:</strong> Crear una instrucción con sus tres operandos.</p>
      *
-     * <p><strong>Salidas:</strong> Instancia inicializada de Instruccion.</p>
+     * <p><strong>Entrada:</strong> Operacion op, String resultado, String op1, String op2.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> Nueva instancia de Instruccion.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public Instruccion(Operacion op, String resultado, String op1, String op2) {
         this.op = op;
@@ -32,109 +37,122 @@ public class Instruccion {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> Instruccion
      *
-     * <p><strong>Entradas:</strong> Operacion op, String resultado, String op1</p>
+     * <p><strong>Objetivo:</strong> Crear una instrucción con resultado y un operando ({@code op2 = null}).</p>
      *
-     * <p><strong>Salidas:</strong> Instancia inicializada de Instruccion.</p>
+     * <p><strong>Entrada:</strong> Operacion op, String resultado, String op1.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> Nueva instancia de Instruccion.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public Instruccion(Operacion op, String resultado, String op1) {
         this(op, resultado, op1, null);
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> Instruccion
      *
-     * <p><strong>Entradas:</strong> Operacion op, String resultado</p>
+     * <p><strong>Objetivo:</strong> Crear una instrucción con un único operando en {@code resultado}.</p>
      *
-     * <p><strong>Salidas:</strong> Instancia inicializada de Instruccion.</p>
+     * <p><strong>Entrada:</strong> Operacion op, String resultado.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> Nueva instancia de Instruccion.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public Instruccion(Operacion op, String resultado) {
         this(op, resultado, null, null);
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * <strong>Nombre:</strong> getOp
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Devolver la operación que realiza la instrucción.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna Operacion.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> Operacion de la instrucción.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public Operacion getOp() {
         return op;
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * <strong>Nombre:</strong> getResultado
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Devolver el operando de resultado (destino, etiqueta u operando único).</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el resultado, o {@code null}.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public String getResultado() {
         return resultado;
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * <strong>Nombre:</strong> getOp1
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Devolver el primer operando.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con op1, o {@code null} si no aplica.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public String getOp1() {
         return op1;
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * <strong>Nombre:</strong> getOp2
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Devolver el segundo operando.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con op2, o {@code null} si no aplica.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public String getOp2() {
         return op2;
     }
 
-    /** Formatea la instruccion como una linea de codigo intermedio. */
-    @Override
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> toString
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Dar formato a la instrucción como una línea de código intermedio.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con la instrucción legible.</p>
+     *
+     * <p><strong>Restricciones:</strong> Lanza excepción si la operación no está soportada.</p>
      */
+    @Override
     public String toString() {
         switch (op) {
             case DECL:
-                return "declare " + op1 + " " + resultado;
+                return "declare " + op1 + " " + resultado; // declare <tipo> <variable> : declare int x
             case DECL_ARRAY:
-                return "declare " + op1 + " " + resultado + op2;
+                return "declare " + op1 + " " + resultado + op2; // declare <tipo> <variable>[<tamaño>] : declare int arr[10]
             case FORMAL_PARAM:
-                return "parameter " + op1 + " " + resultado;
+                return "parameter " + op1 + " " + resultado; // parameter <tipo> <variable> : parameter int x
             case LOAD:
-                return resultado + " = load " + op1;
+                return resultado + " = load " + op1;    // <variable> = load <variable> : x = load y
             case STORE_ARRAY:
-                return "store " + op1 + " -> " + resultado;
+                return "store " + op1 + " -> " + resultado; // store <variable> -> <variable> : store x -> y
             case ASIG:
-                return resultado + " = " + op1;
-            case SUMA:
+                return resultado + " = " + op1; // <variable> = <variable> : x = y
+            case SUMA:  
             case RESTA:
             case MULT:
             case DIV:
@@ -178,26 +196,31 @@ public class Instruccion {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> operandoUnico
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Devolver el operando de las operaciones de un solo argumento
+     * (en {@code op1} o, si falta, en {@code resultado}).</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el operando único.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private String operandoUnico() {
         return op1 != null ? op1 : resultado;
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> formatearCall
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Dar formato a una llamada, con o sin variable que recibe el valor retornado.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con la llamada formateada.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private String formatearCall() {
         String llamada = op2 == null ? "call " + op1 : "call " + op1 + ", " + op2;
@@ -205,13 +228,15 @@ public class Instruccion {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> simboloBinario
      *
-     * <p><strong>Entradas:</strong> Operacion op</p>
+     * <p><strong>Objetivo:</strong> Traducir una operación binaria a su símbolo ({@code +}, {@code <}, {@code ==}, ...).</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> Operacion op.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el símbolo.</p>
+     *
+     * <p><strong>Restricciones:</strong> Lanza excepción si la operación no es binaria.</p>
      */
     private static String simboloBinario(Operacion op) {
         switch (op) {
@@ -249,13 +274,15 @@ public class Instruccion {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> simboloUnario
      *
-     * <p><strong>Entradas:</strong> Operacion op</p>
+     * <p><strong>Objetivo:</strong> Traducir una operación unaria a su símbolo ({@code -} para NEG, {@code !} para NOT).</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> Operacion op.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el símbolo.</p>
+     *
+     * <p><strong>Restricciones:</strong> Lanza excepción si la operación no es unaria.</p>
      */
     private static String simboloUnario(Operacion op) {
         switch (op) {

@@ -1,77 +1,80 @@
 package intermedio;
 
 /**
- * <strong>Objetivo:</strong> Operaciones soportadas por el codigo de tres direcciones del proyecto.
+ * <strong>Nombre:</strong> Operacion
  *
- * <p><strong>Entradas:</strong> AST validado, operaciones u operandos necesarios para representar codigo intermedio.</p>
+ * <p><strong>Objetivo:</strong> Enumerar las operaciones que puede representar una instrucción
+ * del código de tres direcciones (declarar, operar, saltar, llamar, imprimir, etc.).</p>
  *
- * <p><strong>Salidas:</strong> Instrucciones, operaciones o texto de codigo intermedio.</p>
+ * <p><strong>Entrada:</strong> Ninguna; son constantes fijas del enum.</p>
  *
- * <p><strong>Restricciones:</strong> Debe asumir programas ya aceptados y no reemplazar las validaciones semanticas.</p>
+ * <p><strong>Salida:</strong> Valores que identifican qué hace cada instrucción intermedia.</p>
+ *
+ * <p><strong>Restricciones:</strong> Ninguna.</p>
  */
 public enum Operacion {
-    /** Declaracion de variable escalar. */
+    /** Declaración de variable escalar. */
     DECL,
-    /** Declaracion de arreglo bidimensional. */
+    /** Declaración de arreglo bidimensional. */
     DECL_ARRAY,
-    /** Declaracion de parametro formal. */
+    /** Declaración de parámetro formal. */
     FORMAL_PARAM,
     /** Carga de una variable o celda hacia un temporal. */
     LOAD,
-    /** Escritura explicita de una celda de arreglo. */
+    /** Escritura explícita de una celda de arreglo. */
     STORE_ARRAY,
-    /** Asignacion simple: destino = valor. */
+    /** Asignación simple: destino = valor. */
     ASIG,
     /** Suma binaria. */
     SUMA,
     /** Resta binaria. */
     RESTA,
-    /** Multiplicacion binaria. */
+    /** Multiplicación binaria. */
     MULT,
-    /** Division binaria. */
+    /** División binaria. */
     DIV,
-    /** Modulo binario. */
+    /** Módulo binario. */
     MOD,
     /** Potencia binaria. */
     POW,
-    /** Negacion aritmetica unaria. */
+    /** Negación aritmética unaria. */
     NEG,
-    /** Conjuncion logica. */
+    /** Conjunción lógica. */
     AND,
-    /** Disyuncion logica. */
+    /** Disyunción lógica. */
     OR,
-    /** Negacion logica unaria. */
+    /** Negación lógica unaria. */
     NOT,
-    /** Comparacion de igualdad. */
+    /** Comparación de igualdad. */
     IGUAL,
-    /** Comparacion menor que. */
+    /** Comparación menor que. */
     MENOR,
-    /** Comparacion mayor que. */
+    /** Comparación mayor que. */
     MAYOR,
-    /** Comparacion menor o igual. */
+    /** Comparación menor o igual. */
     MENOR_IGUAL,
-    /** Comparacion mayor o igual. */
+    /** Comparación mayor o igual. */
     MAYOR_IGUAL,
-    /** Comparacion de desigualdad. */
+    /** Comparación de desigualdad. */
     DISTINTO,
     /** Salto incondicional. */
     GOTO,
-    /** Salto condicional cuando la condicion es falsa. */
+    /** Salto condicional cuando la condición es falsa. */
     IF_FALSE,
-    /** Paso de parametro previo a llamada. */
+    /** Paso de parámetro previo a una llamada. */
     PARAM,
-    /** Llamada a funcion. */
+    /** Llamada a función. */
     CALL,
-    /** Impresion de salida. */
+    /** Impresión de salida. */
     PRINT,
     /** Lectura de entrada. */
     READ,
-    /** Retorno . */
+    /** Retorno de una función. */
     RETURN,
     /** Etiqueta de salto. */
     LABEL,
-    /** Marcador de inicio . */
+    /** Marcador de inicio de función. */
     INICIO_FUNC,
-    /** Marcador de fin . */
+    /** Marcador de fin de función. */
     FIN_FUNC
 }

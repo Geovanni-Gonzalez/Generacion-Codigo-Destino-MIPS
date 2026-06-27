@@ -28,13 +28,17 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * <strong>Objetivo:</strong> Ejecuta las validaciones semanticas mientras el parser construye el AST.
+ * <strong>Nombre:</strong> AnalizadorSemantico
  *
- * <p><strong>Entradas:</strong> Simbolos, tipos, nodos y ubicaciones producidos por las fases previas.</p>
+ * <p><strong>Objetivo:</strong> Ejecutar las validaciones semánticas mientras el parser construye el
+ * AST: manejo de alcances, declaración y uso de símbolos, verificación de tipos en expresiones,
+ * asignaciones, condiciones, return, switch, arreglos y llamadas a función.</p>
  *
- * <p><strong>Salidas:</strong> Estado semantico actualizado, simbolos resueltos o diagnosticos acumulados.</p>
+ * <p><strong>Entrada:</strong> Nodos del AST, nombres, tipos y posiciones que el parser le entrega.</p>
  *
- * <p><strong>Restricciones:</strong> No debe generar codigo intermedio ni escribir reportes directamente.</p>
+ * <p><strong>Salida:</strong> El tipo de las expresiones y errores semánticos acumulados en la tabla de símbolos.</p>
+ *
+ * <p><strong>Restricciones:</strong> No genera código intermedio ni escribe archivos de reporte.</p>
  */
 public class AnalizadorSemantico {
     private final TablaDeSimbolos tablaSimbolos;
@@ -43,14 +47,17 @@ public class AnalizadorSemantico {
     private TipoDato tipoRetornoActual = TipoDato.DESCONOCIDO;
     private String funcionActual;
     private int lineaFuncionActual;
+
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> AnalizadorSemantico
      *
-     * <p><strong>Entradas:</strong> TablaDeSimbolos tablaSimbolos, Consumer<String> reportadorSintactico</p>
+     * <p><strong>Objetivo:</strong> Crear el analizador enlazándolo a la tabla de símbolos y al reportador de errores sintácticos.</p>
      *
-     * <p><strong>Salidas:</strong> Instancia inicializada de AnalizadorSemantico.</p>
+     * <p><strong>Entrada:</strong> TablaDeSimbolos tablaSimbolos, Consumer&lt;String&gt; reportadorSintactico.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> Nueva instancia de AnalizadorSemantico.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public AnalizadorSemantico(TablaDeSimbolos tablaSimbolos, Consumer<String> reportadorSintactico) {
         this.tablaSimbolos = tablaSimbolos;
@@ -58,26 +65,30 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> registrarMain
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Contar una declaración del procedimiento principal main.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public void registrarMain() {
         cantidadMain++;
     }
 
     /**
-     * <strong>Objetivo:</strong> Valida una regla o escenario especifico del compilador.
+     * <strong>Nombre:</strong> verificarMain
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Verificar que el programa contenga el procedimiento main.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Reporta error si no hay ningún main.</p>
      */
     public void verificarMain() {
         if (cantidadMain == 0) {
@@ -86,39 +97,46 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> abrirPrograma
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Abrir el alcance global del programa.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public void abrirPrograma() {
         tablaSimbolos.abrirAlcance();
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> cerrarPrograma
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Cerrar el alcance global del programa.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public void cerrarPrograma() {
         tablaSimbolos.cerrarAlcance();
     }
 
     /**
-     * <strong>Objetivo:</strong> Registra una funcion antes de analizar su cuerpo. Registrar la funcion temprano permite llamadas recursivas. Tambien guarda el tipo de retorno esperado para validar sentencias return.
+     * <strong>Nombre:</strong> abrirFuncion
      *
-     * <p><strong>Entradas:</strong> String nombre, TipoDato tipoRetorno, int linea</p>
+     * <p><strong>Objetivo:</strong> Registrar una función antes de analizar su cuerpo (para permitir
+     * recursión), guardar su tipo de retorno esperado y abrir su alcance.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> String nombre, TipoDato tipoRetorno, int linea.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public void abrirFuncion(String nombre, TipoDato tipoRetorno, int linea) {
         registrarFuncion(nombre, tipoRetorno, linea);
@@ -129,13 +147,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Cierra el alcance de la funcion actual.
+     * <strong>Nombre:</strong> cerrarFuncion
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Cerrar el alcance de la función actual y limpiar su estado de contexto.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public void cerrarFuncion() {
         tablaSimbolos.cerrarAlcance();
@@ -145,39 +165,45 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> abrirBloque
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Abrir un alcance para un bloque interno (if, ciclo, etc.).</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public void abrirBloque() {
         tablaSimbolos.abrirAlcance();
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> cerrarBloque
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * <p><strong>Objetivo:</strong> Cerrar el alcance de un bloque interno.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> Ninguna.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public void cerrarBloque() {
         tablaSimbolos.cerrarAlcance();
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> actualizarFirmaFuncion
      *
-     * <p><strong>Entradas:</strong> String nombre, TipoDato tipoRetorno, List parametros, int linea</p>
+     * <p><strong>Objetivo:</strong> Completar la firma de una función con los tipos de sus parámetros y su retorno.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> String nombre, TipoDato tipoRetorno, List parametros, int linea.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Los elementos de {@code parametros} deben ser {@link ParametroNodo}.</p>
      */
     public void actualizarFirmaFuncion(String nombre, TipoDato tipoRetorno, List parametros, int linea) {
         List<TipoDato> tiposParametros = new ArrayList<>();
@@ -188,13 +214,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> registrarParametro
      *
-     * <p><strong>Entradas:</strong> String nombre, TipoDato tipo, int linea</p>
+     * <p><strong>Objetivo:</strong> Registrar un parámetro como símbolo inicializado en el alcance de la función y sumarlo a su firma.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> String nombre, TipoDato tipo, int linea.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public void registrarParametro(String nombre, TipoDato tipo, int linea) {
         insertarSimbolo(new Simbolo(nombre, tipo, CategoriaSimb.PARAMETRO, linea, true));
@@ -204,26 +232,31 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> registrarVariable
      *
-     * <p><strong>Entradas:</strong> String nombre, TipoDato tipo, int linea</p>
+     * <p><strong>Objetivo:</strong> Registrar una variable escalar como símbolo sin inicializar.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> String nombre, TipoDato tipo, int linea.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public void registrarVariable(String nombre, TipoDato tipo, int linea) {
         insertarSimbolo(new Simbolo(nombre, tipo, CategoriaSimb.VAR, linea, false));
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> registrarDeclaracionVariable
      *
-     * <p><strong>Entradas:</strong> String nombre, TipoDato tipo, ExpresionNodo inicializador, int linea</p>
+     * <p><strong>Objetivo:</strong> Declarar una variable validando que el tipo sea declarable y que el
+     * inicializador (si lo hay) sea compatible.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> String nombre, TipoDato tipo, ExpresionNodo inicializador, int linea.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> No inserta el símbolo si detecta un error.</p>
      */
     public void registrarDeclaracionVariable(String nombre, TipoDato tipo,
             ExpresionNodo inicializador, int linea) {
@@ -245,13 +278,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> registrarDeclaracionArreglo
      *
-     * <p><strong>Entradas:</strong> String nombre, TipoDato tipo, ExpresionNodo filas, ExpresionNodo columnas, InicializacionArregloNodo inicializacion, int linea</p>
+     * <p><strong>Objetivo:</strong> Declarar un arreglo validando su tipo, sus dimensiones y, si la hay, su inicialización.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> String nombre, TipoDato tipo, ExpresionNodo filas, ExpresionNodo columnas, InicializacionArregloNodo inicializacion, int linea.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> No inserta el símbolo si el tipo no es declarable.</p>
      */
     public void registrarDeclaracionArreglo(String nombre, TipoDato tipo, ExpresionNodo filas,
                                             ExpresionNodo columnas,
@@ -274,13 +309,16 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> usarIdentificador
      *
-     * <p><strong>Entradas:</strong> String nombre, int linea</p>
+     * <p><strong>Objetivo:</strong> Validar el uso de un identificador escalar: que exista, que no sea un
+     * arreglo y que esté inicializado.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> String nombre, int linea.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public void usarIdentificador(String nombre, int linea) {
         Simbolo simbolo = tablaSimbolos.buscar(nombre, linea);
@@ -297,13 +335,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Valida una regla o escenario especifico del compilador.
+     * <strong>Nombre:</strong> verificarAsignacion
      *
-     * <p><strong>Entradas:</strong> AsignacionNodo asignacion</p>
+     * <p><strong>Objetivo:</strong> Validar que el tipo del valor sea compatible con el del destino y marcar el destino como inicializado.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> AsignacionNodo asignacion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public void verificarAsignacion(AsignacionNodo asignacion) {
         TipoDato tipoDestino = evaluarTipoDestino(asignacion.getDestino());
@@ -324,13 +364,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Valida una regla o escenario especifico del compilador.
+     * <strong>Nombre:</strong> verificarSwitch
      *
-     * <p><strong>Entradas:</strong> SwitchNodo switchNodo</p>
+     * <p><strong>Objetivo:</strong> Validar que la expresión del switch tenga un tipo permitido y que cada case coincida con ese tipo.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> SwitchNodo switchNodo.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public void verificarSwitch(SwitchNodo switchNodo) {
         TipoDato tipoSwitch = evaluarTipo(switchNodo.getExpresion());
@@ -356,13 +398,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Valida una regla o escenario especifico del compilador.
+     * <strong>Nombre:</strong> verificarEntrada
      *
-     * <p><strong>Entradas:</strong> EntradaNodo entrada</p>
+     * <p><strong>Objetivo:</strong> Validar que {@code cin} se aplique a una variable escalar int o float, y marcarla como inicializada.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> EntradaNodo entrada.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public void verificarEntrada(EntradaNodo entrada) {
         Simbolo simbolo = tablaSimbolos.buscar(entrada.getDestino(), entrada.getLinea());
@@ -379,13 +423,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Valida una regla o escenario especifico del compilador.
+     * <strong>Nombre:</strong> verificarSalida
      *
-     * <p><strong>Entradas:</strong> SalidaNodo salida</p>
+     * <p><strong>Objetivo:</strong> Validar que {@code cout} imprima una expresión de un tipo imprimible.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> SalidaNodo salida.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public void verificarSalida(SalidaNodo salida) {
         TipoDato tipo = evaluarTipo(salida.getValor());
@@ -399,13 +445,16 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Calcula el tipo semantico de cualquier expresion. El resultado se guarda en el nodo para reutilizarlo. Si se detecta un error, se retorna {@link TipoDato#ERROR} para evitar cascadas innecesarias.
+     * <strong>Nombre:</strong> evaluarTipo
      *
-     * <p><strong>Entradas:</strong> ExpresionNodo expresion</p>
+     * <p><strong>Objetivo:</strong> Calcular el tipo semántico de cualquier expresión, guardándolo en el nodo
+     * para reutilizarlo. Ante un error devuelve {@link TipoDato#ERROR} para evitar cascadas.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna TipoDato.</p>
+     * <p><strong>Entrada:</strong> ExpresionNodo expresion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> TipoDato de la expresión.</p>
+     *
+     * <p><strong>Restricciones:</strong> Una expresión {@code null} se considera ERROR.</p>
      */
     public TipoDato evaluarTipo(ExpresionNodo expresion) {
         if (expresion == null) {
@@ -447,26 +496,30 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> tipoExpresion
      *
-     * <p><strong>Entradas:</strong> ExpresionNodo expresion</p>
+     * <p><strong>Objetivo:</strong> Obtener el tipo de una expresión (alias de {@link #evaluarTipo}).</p>
      *
-     * <p><strong>Salidas:</strong> Retorna TipoDato.</p>
+     * <p><strong>Entrada:</strong> ExpresionNodo expresion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> TipoDato de la expresión.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public TipoDato tipoExpresion(ExpresionNodo expresion) {
         return evaluarTipo(expresion);
     }
 
     /**
-     * <strong>Objetivo:</strong> Valida una regla o escenario especifico del compilador.
+     * <strong>Nombre:</strong> verificarCondicionBooleana
      *
-     * <p><strong>Entradas:</strong> ExpresionNodo condicion</p>
+     * <p><strong>Objetivo:</strong> Validar que una condición (de if, while, etc.) sea de tipo bool.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> ExpresionNodo condicion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public void verificarCondicionBooleana(ExpresionNodo condicion) {
         TipoDato tipo = evaluarTipo(condicion);
@@ -479,13 +532,16 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Valida una regla o escenario especifico del compilador.
+     * <strong>Nombre:</strong> verificarReturn
      *
-     * <p><strong>Entradas:</strong> ReturnNodo retorno</p>
+     * <p><strong>Objetivo:</strong> Validar que un return sea coherente con el tipo de la función: sin valor en
+     * void, con valor del tipo correcto en las demás.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> ReturnNodo retorno.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     public void verificarReturn(ReturnNodo retorno) {
         TipoDato tipoEsperado = tipoRetornoActual;
@@ -515,14 +571,34 @@ public class AnalizadorSemantico {
         }
     }
 
-    /** Valida que cada break se encuentre dentro de un ciclo o switch, como en C. */
+    /**
+     * <strong>Nombre:</strong> verificarContextoBreak
+     *
+     * <p><strong>Objetivo:</strong> Validar que cada break esté dentro de un ciclo o switch, recorriendo todas las funciones.</p>
+     *
+     * <p><strong>Entrada:</strong> ProgramaNodo programa.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
     public void verificarContextoBreak(ProgramaNodo programa) {
         for (FuncionNodo funcion : programa.getFunciones()) {
             verificarBreakEnBloque(funcion.getCuerpo(), false);
         }
     }
 
-    /** Exige retorno con valor en todas las rutas de cada funcion no void/empty. */
+    /**
+     * <strong>Nombre:</strong> verificarRutasRetorno
+     *
+     * <p><strong>Objetivo:</strong> Exigir que cada función no void/empty retorne un valor en todas sus rutas de ejecución.</p>
+     *
+     * <p><strong>Entrada:</strong> ProgramaNodo programa.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
     public void verificarRutasRetorno(ProgramaNodo programa) {
         for (FuncionNodo funcion : programa.getFunciones()) {
             TipoDato tipo = funcion.getTipoRetorno();
@@ -534,6 +610,18 @@ public class AnalizadorSemantico {
         }
     }
 
+    /**
+     * <strong>Nombre:</strong> bloqueGarantizaRetorno
+     *
+     * <p><strong>Objetivo:</strong> Determinar si un bloque retorna un valor con certeza por todas sus rutas
+     * (return con valor, if/else completos, do-while o switch con default que retornan).</p>
+     *
+     * <p><strong>Entrada:</strong> BloqueNodo bloque.</p>
+     *
+     * <p><strong>Salida:</strong> boolean; true si el bloque garantiza retorno.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
     private boolean bloqueGarantizaRetorno(BloqueNodo bloque) {
         if (bloque == null) {
             return false;
@@ -568,6 +656,17 @@ public class AnalizadorSemantico {
         return false;
     }
 
+    /**
+     * <strong>Nombre:</strong> switchGarantizaRetorno
+     *
+     * <p><strong>Objetivo:</strong> Determinar si un switch retorna en todos sus casos y además tiene un caso default.</p>
+     *
+     * <p><strong>Entrada:</strong> SwitchNodo seleccion.</p>
+     *
+     * <p><strong>Salida:</strong> boolean; true si el switch garantiza retorno.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
     private boolean switchGarantizaRetorno(SwitchNodo seleccion) {
         boolean tieneDefault = false;
         for (CasoSwitchNodo caso : seleccion.getCasos()) {
@@ -579,6 +678,18 @@ public class AnalizadorSemantico {
         return tieneDefault;
     }
 
+    /**
+     * <strong>Nombre:</strong> verificarBreakEnBloque
+     *
+     * <p><strong>Objetivo:</strong> Recorrer un bloque comprobando que los break aparezcan solo donde están permitidos
+     * (dentro de ciclos o switch).</p>
+     *
+     * <p><strong>Entrada:</strong> BloqueNodo bloque, boolean permitido.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
     private void verificarBreakEnBloque(BloqueNodo bloque, boolean permitido) {
         if (bloque == null) {
             return;
@@ -605,26 +716,30 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> registrarFuncion
      *
-     * <p><strong>Entradas:</strong> String nombre, TipoDato tipoRetorno, int linea</p>
+     * <p><strong>Objetivo:</strong> Insertar el símbolo de una función con su tipo de retorno y aún sin parámetros.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> String nombre, TipoDato tipoRetorno, int linea.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private void registrarFuncion(String nombre, TipoDato tipoRetorno, int linea) {
         insertarSimbolo(new Simbolo(nombre, new ArrayList<TipoDato>(), tipoRetorno, linea));
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> insertarSimbolo
      *
-     * <p><strong>Entradas:</strong> Simbolo simbolo</p>
+     * <p><strong>Objetivo:</strong> Insertar un símbolo en la tabla, derivando al reportador sintáctico si la inserción falla.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> Simbolo simbolo.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private void insertarSimbolo(Simbolo simbolo) {
         try {
@@ -635,13 +750,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> evaluarTipoLlamada
      *
-     * <p><strong>Entradas:</strong> LlamadaFuncionNodo llamada</p>
+     * <p><strong>Objetivo:</strong> Validar una llamada a función (existencia, cantidad y tipos de argumentos) y devolver su tipo de retorno.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna TipoDato.</p>
+     * <p><strong>Entrada:</strong> LlamadaFuncionNodo llamada.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> TipoDato de retorno de la función, o ERROR si hay incompatibilidades.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private TipoDato evaluarTipoLlamada(LlamadaFuncionNodo llamada) {
         Simbolo funcion = tablaSimbolos.buscarFuncion(llamada.getNombre(), llamada.getLinea());
@@ -674,13 +791,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> evaluarTipoBinaria
      *
-     * <p><strong>Entradas:</strong> ExpresionBinariaNodo expresion</p>
+     * <p><strong>Objetivo:</strong> Calcular y validar el tipo resultante de una operación binaria según el operador y los tipos de sus operandos.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna TipoDato.</p>
+     * <p><strong>Entrada:</strong> ExpresionBinariaNodo expresion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> TipoDato del resultado, o ERROR si los operandos no son compatibles.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private TipoDato evaluarTipoBinaria(ExpresionBinariaNodo expresion) {
         TipoDato izquierda = evaluarTipo(expresion.getIzquierda());
@@ -743,13 +862,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> evaluarTipoUnaria
      *
-     * <p><strong>Entradas:</strong> ExpresionUnariaNodo expresion</p>
+     * <p><strong>Objetivo:</strong> Calcular y validar el tipo resultante de una operación unaria (negación lógica, signo, ++/--).</p>
      *
-     * <p><strong>Salidas:</strong> Retorna TipoDato.</p>
+     * <p><strong>Entrada:</strong> ExpresionUnariaNodo expresion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> TipoDato del resultado, o ERROR si el operando no es válido.</p>
+     *
+     * <p><strong>Restricciones:</strong> {@code -} solo aplica a literales; {@code ++}/{@code --} solo a operandos modificables.</p>
      */
     private TipoDato evaluarTipoUnaria(ExpresionUnariaNodo expresion) {
         TipoDato tipo = evaluarTipo(expresion.getExpresion());
@@ -785,13 +906,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> nombreDestino
      *
-     * <p><strong>Entradas:</strong> ExpresionNodo destino</p>
+     * <p><strong>Objetivo:</strong> Obtener el nombre del destino de una asignación (variable o arreglo) para los mensajes de error.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * <p><strong>Entrada:</strong> ExpresionNodo destino.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> String con el nombre, o {@code "<desconocido>"}.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private String nombreDestino(ExpresionNodo destino) {
         if (destino instanceof IdentificadorNodo) {
@@ -804,13 +927,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> evaluarTipoDestino
      *
-     * <p><strong>Entradas:</strong> ExpresionNodo destino</p>
+     * <p><strong>Objetivo:</strong> Determinar el tipo del destino de una asignación, reportando si se asigna a un arreglo completo.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna TipoDato.</p>
+     * <p><strong>Entrada:</strong> ExpresionNodo destino.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> TipoDato del destino, o ERROR.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private TipoDato evaluarTipoDestino(ExpresionNodo destino) {
         if (destino instanceof IdentificadorNodo) {
@@ -832,13 +957,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> evaluarTipoAccesoArreglo
      *
-     * <p><strong>Entradas:</strong> AccesoArregloNodo acceso, boolean requiereInicializado</p>
+     * <p><strong>Objetivo:</strong> Validar un acceso {@code arreglo[fila][col]} (que sea arreglo, índices enteros y en rango) y devolver el tipo de sus celdas.</p>
      *
-     * <p><strong>Salidas:</strong> Retorna TipoDato.</p>
+     * <p><strong>Entrada:</strong> AccesoArregloNodo acceso, boolean requiereInicializado.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> TipoDato de las celdas, o ERROR.</p>
+     *
+     * <p><strong>Restricciones:</strong> Solo comprueba inicialización cuando {@code requiereInicializado} es true.</p>
      */
     private TipoDato evaluarTipoAccesoArreglo(AccesoArregloNodo acceso, boolean requiereInicializado) {
         Simbolo simbolo = tablaSimbolos.buscar(acceso.getNombre(), acceso.getLinea());
@@ -862,13 +989,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> validarIndiceArreglo
      *
-     * <p><strong>Entradas:</strong> ExpresionNodo indice</p>
+     * <p><strong>Objetivo:</strong> Verificar que un índice de arreglo sea de tipo int.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> ExpresionNodo indice.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private void validarIndiceArreglo(ExpresionNodo indice) {
         TipoDato tipo = evaluarTipo(indice);
@@ -878,13 +1007,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> validarDimensionArreglo
      *
-     * <p><strong>Entradas:</strong> String nombre, String dimension, ExpresionNodo expresion</p>
+     * <p><strong>Objetivo:</strong> Verificar que una dimensión declarada de un arreglo sea int y, si es literal, mayor que cero.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> String nombre, String dimension, ExpresionNodo expresion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private void validarDimensionArreglo(String nombre, String dimension, ExpresionNodo expresion) {
         TipoDato tipo = evaluarTipo(expresion);
@@ -899,6 +1030,17 @@ public class AnalizadorSemantico {
         }
     }
 
+    /**
+     * <strong>Nombre:</strong> validarRangoIndice
+     *
+     * <p><strong>Objetivo:</strong> Si el índice es un literal y se conoce el límite, verificar que esté dentro del rango del arreglo.</p>
+     *
+     * <p><strong>Entrada:</strong> String nombre, String dimension, ExpresionNodo indice, Integer limite.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Solo aplica a índices literales con límite conocido.</p>
+     */
     private void validarRangoIndice(String nombre, String dimension, ExpresionNodo indice,
                                     Integer limite) {
         Integer valor = valorEnteroLiteral(indice);
@@ -908,6 +1050,17 @@ public class AnalizadorSemantico {
         }
     }
 
+    /**
+     * <strong>Nombre:</strong> valorEnteroLiteral
+     *
+     * <p><strong>Objetivo:</strong> Obtener el valor entero de una expresión cuando es un literal int (con signo +/-), o {@code null} en otro caso.</p>
+     *
+     * <p><strong>Entrada:</strong> ExpresionNodo expresion.</p>
+     *
+     * <p><strong>Salida:</strong> Integer con el valor, o {@code null}.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
     private Integer valorEnteroLiteral(ExpresionNodo expresion) {
         if (expresion == null || expresion.getTipo() != TipoDato.INT) {
             return null;
@@ -929,6 +1082,17 @@ public class AnalizadorSemantico {
         return null;
     }
 
+    /**
+     * <strong>Nombre:</strong> validarDimensionesInicializacion
+     *
+     * <p><strong>Objetivo:</strong> Verificar que la inicialización de un arreglo sea regular (mismas columnas por fila) y coincida con las dimensiones declaradas.</p>
+     *
+     * <p><strong>Entrada:</strong> String nombre, Integer filasEsperadas, Integer columnasEsperadas, InicializacionArregloNodo inicializacion.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
     private void validarDimensionesInicializacion(String nombre, Integer filasEsperadas,
                                                   Integer columnasEsperadas,
                                                   InicializacionArregloNodo inicializacion) {
@@ -956,13 +1120,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> validarInicializacionArreglo
      *
-     * <p><strong>Entradas:</strong> String nombre, TipoDato tipoEsperado, InicializacionArregloNodo inicializacion</p>
+     * <p><strong>Objetivo:</strong> Verificar que cada valor de inicialización de un arreglo sea del tipo esperado.</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> String nombre, TipoDato tipoEsperado, InicializacionArregloNodo inicializacion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private void validarInicializacionArreglo(String nombre, TipoDato tipoEsperado,
                                               InicializacionArregloNodo inicializacion) {
@@ -979,13 +1145,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * <strong>Nombre:</strong> marcarDestinoInicializado
      *
-     * <p><strong>Entradas:</strong> ExpresionNodo destino</p>
+     * <p><strong>Objetivo:</strong> Marcar como inicializado el símbolo destino de una asignación (variable o arreglo).</p>
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * <p><strong>Entrada:</strong> ExpresionNodo destino.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private void marcarDestinoInicializado(ExpresionNodo destino) {
         if (destino instanceof IdentificadorNodo) {
@@ -996,13 +1164,15 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta una condicion booleana del objeto.
+     * <strong>Nombre:</strong> esModificable
      *
-     * <p><strong>Entradas:</strong> ExpresionNodo expresion</p>
+     * <p><strong>Objetivo:</strong> Indicar si una expresión puede ser destino de una modificación (variable o celda de arreglo).</p>
      *
-     * <p><strong>Salidas:</strong> Retorna boolean.</p>
+     * <p><strong>Entrada:</strong> ExpresionNodo expresion.</p>
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * <p><strong>Salida:</strong> boolean; true si es modificable.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private boolean esModificable(ExpresionNodo expresion) {
         return expresion instanceof IdentificadorNodo || expresion instanceof AccesoArregloNodo;
