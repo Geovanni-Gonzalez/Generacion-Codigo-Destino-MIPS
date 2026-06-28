@@ -32,8 +32,6 @@ public final class GeneradorMIPS {
     private final Map<String, Integer> parametrosFuncion = new LinkedHashMap<>();
     private final Map<String, String> retornosFuncion = new LinkedHashMap<>();
     private final Map<String, Integer> dimensionesDeclaradas = new LinkedHashMap<>();
-    private int contadorCadena;
-    private int contadorFlotante;
     private int contadorEtiquetaInterna;
     private String funcionActual;
     private int indiceParametroFormal;
@@ -53,7 +51,7 @@ public final class GeneradorMIPS {
      */
     public List<String> generarCodigo(List<Instruccion> codigoIntermedio) {
         reiniciar();
-        analizar(codigoIntermedio);
+        aplicarAnalisis(new AnalizadorIRMIPS().analizar(codigoIntermedio));
         emitirDatos();
         salida.add(".text");
         salida.add(".globl main");
@@ -83,11 +81,20 @@ public final class GeneradorMIPS {
         flotantes.clear();
         parametrosFuncion.clear();
         retornosFuncion.clear();
-        contadorCadena = 0;
-        contadorFlotante = 0;
         contadorEtiquetaInterna = 0;
         funcionActual = null;
         indiceParametroFormal = 0;
+    }
+
+    private void aplicarAnalisis(ResultadoAnalisisMIPS analisis) {
+        tipos.putAll(analisis.tipos);
+        direcciones.putAll(analisis.direcciones);
+        columnasArreglo.putAll(analisis.columnasArreglo);
+        dimensionesDeclaradas.putAll(analisis.dimensionesDeclaradas);
+        cadenas.putAll(analisis.cadenas);
+        flotantes.putAll(analisis.flotantes);
+        parametrosFuncion.putAll(analisis.parametrosFuncion);
+        retornosFuncion.putAll(analisis.retornosFuncion);
     }
 
      /**
@@ -102,66 +109,6 @@ public final class GeneradorMIPS {
      *
      * <p><strong>Restricciones:</strong> Debe ejecutarse antes de traducir.</p>
      */
-    private void analizar(List<Instruccion> codigo) {
-        String funcion = null;
-        for (Instruccion instruccion : codigo) {
-            if (instruccion.op == Operacion.INICIO_FUNC) { //Si es inicio de funcion, se guarda el nombre de la funcion y se inicializa el contador de parametros
-                funcion = instruccion.resultado;    //Se guarda el nombre de la funcion
-                parametrosFuncion.put(funcion, 0);  //Se inicializa el contador de parametros en 0
-                continue;   //Se continua con la siguiente instruccion
-            }
-            if (instruccion.op == Operacion.FIN_FUNC) {// Si es fin de funcion, se reinicia el nombre de la funcion
-                funcion = null; //Se reinicia el nombre de la funcion
-                continue;   //Se continua con la siguiente instruccion
-            }
-            if (funcion == null) {
-                continue;
-            }
-            if (instruccion.op == Operacion.DECL || instruccion.op == Operacion.FORMAL_PARAM) { //Si es declaracion o parametro formal, se guarda el tipo de la variable en la tabla de tipos
-                tipos.put(clave(funcion, instruccion.resultado), normalizarTipo(instruccion.op1)); // Se guarda el tipo de la variable
-                if (instruccion.op == Operacion.FORMAL_PARAM) { //Si es parametro formal, se incrementa el contador de parametros de la funcion
-                    parametrosFuncion.put(funcion, parametrosFuncion.get(funcion) + 1);
-                }
-            } else if (instruccion.op == Operacion.DECL_ARRAY) { //Si es declaracion de arreglo, se guarda el tipo y las dimensiones del arreglo
-                tipos.put(clave(funcion, instruccion.resultado), normalizarTipo(instruccion.op1)); // Se guarda el tipo del arreglo
-                int[] dimensiones = dimensiones(instruccion.op2); // Se obtienen las dimensiones del arreglo
-                columnasArreglo.put(clave(funcion, instruccion.resultado), dimensiones[1]); // Se guarda el numero de columnas del arreglo
-                dimensionesDeclaradas.put(clave(funcion, instruccion.resultado), // Se guarda el numero de celdas del arreglo
-                        dimensiones[0] * dimensiones[1]);
-            }
-            registrarConstante(instruccion.op1);    // Se registran las constantes literales de cadena y flotante
-            registrarConstante(instruccion.op2);    // Se registran las constantes literales de cadena y flotante
-            // PRINT/READ guardan su operando en resultado; sin esto los literales
-            // de cadena o flotante impresos directamente nunca se reservan en .data.
-            registrarConstante(instruccion.resultado);  // Se registran las constantes literales de cadena y flotante
-        }
-
-        // Propaga tipos de temporales y resultados hasta alcanzar un punto fijo.
-        for (int vuelta = 0; vuelta < 4; vuelta++) { // Se hacen 4 vueltas para propagar los tipos de los resultados y operandos
-            funcion = null;                         // Se reinicia el nombre de la funcion
-            for (Instruccion i : codigo) {      // Se recorre el codigo intermedio
-                if (i.op == Operacion.INICIO_FUNC) {    // Si es inicio de funcion, se guarda el nombre de la funcion
-                    funcion = i.resultado;              // Se guarda el nombre de la funcion
-                    continue;
-                }
-                if (i.op == Operacion.FIN_FUNC) {           // Si es fin de funcion, se reinicia el nombre de la funcion
-                    funcion = null;                     // Se reinicia el nombre de la funcion
-                    continue;
-                }
-                if (funcion == null || i.resultado == null) {       // Si no hay funcion o no hay resultado, se continua con la siguiente instruccion
-                    if (funcion != null && i.op == Operacion.RETURN && i.op1 != null) { // Si hay funcion y es RETURN con operando, se guarda el tipo de retorno de la funcion
-                        retornosFuncion.put(funcion, tipoOperando(i.op1, funcion)); // Se guarda el tipo de retorno de la funcion
-                    }
-                    continue;
-                }
-                String tipo = tipoResultado(i, funcion);        // Se obtiene el tipo del resultado de la instruccion
-                if (tipo != null) {                             // Si hay tipo, se guarda en la tabla de tipos
-                    tipos.put(clave(funcion, i.resultado), tipo);   // Se guarda el tipo del resultado de la instruccion
-                }
-            }
-        }
-        construirTablaDirecciones();
-    }
   /**
      * <strong>Nombre:</strong> construirTablaDirecciones
      *
@@ -174,16 +121,6 @@ public final class GeneradorMIPS {
      *
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
-    private void construirTablaDirecciones() {
-        Map<String, Integer> repeticiones = new LinkedHashMap<>();
-        for (String clave : tipos.keySet()) {
-            String base = etiquetaDato(clave);
-            int repeticion = repeticiones.getOrDefault(base, 0);
-            repeticiones.put(base, repeticion + 1);
-            direcciones.put(clave, repeticion == 0 ? base : base + "_" + repeticion);
-        }
-    }
-
     
     /**
      * <strong>Nombre:</strong> espacioArreglo
@@ -196,11 +133,6 @@ public final class GeneradorMIPS {
      *
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
-    private int espacioArreglo(String clave) {
-        return dimensionesDeclaradas.getOrDefault(clave, 1) * 4;
-    }
-
-
       /**
      * <strong>Nombre:</strong> tipoResultado
      *
@@ -212,37 +144,6 @@ public final class GeneradorMIPS {
      *
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
-    private String tipoResultado(Instruccion i, String funcion) {
-        switch (i.op) {
-            case LOAD:
-            case NEG:
-                return tipoOperando(i.op1, funcion);
-            case CALL:
-                return retornosFuncion.getOrDefault(i.op1, "int");
-            case SUMA:
-            case RESTA:
-            case MULT:
-            case DIV:
-            case MOD:
-            case POW:
-                return esFloat(tipoOperando(i.op1, funcion))
-                        || esFloat(tipoOperando(i.op2, funcion)) ? "float" : "int";
-            case AND:
-            case OR:
-            case NOT:
-            case IGUAL:
-            case DISTINTO:
-            case MENOR:
-            case MAYOR:
-            case MENOR_IGUAL:
-            case MAYOR_IGUAL:
-                return "bool";
-            default:
-                return null;
-        }
-    }
-
-
     /**
      * <strong>Nombre:</strong> clave
      *
@@ -532,14 +433,6 @@ public final class GeneradorMIPS {
      *
      * <p><strong>Restricciones:</strong> Ignora valores que no son cadena ni flotante literal.</p>
      */
-    private void registrarConstante(String valor) {
-        if (esCadena(valor)) {
-            cadenas.computeIfAbsent(valor, k -> "_str_" + contadorCadena++);
-        } else if (esFloatLiteral(valor)) {
-            flotantes.computeIfAbsent(valor, k -> "_flt_" + contadorFlotante++);
-        }
-    }
-
         /**
      * <strong>Nombre:</strong> dimensiones
      *
@@ -551,36 +444,9 @@ public final class GeneradorMIPS {
      *
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
-    private int[] dimensiones(String texto) {
-        if (texto != null && texto.matches("\\[[0-9]+\\]\\[[0-9]+\\]")) {
-            int medio = texto.indexOf("][");
-            int filas = Integer.parseInt(texto.substring(1, medio));
-            int columnas = Integer.parseInt(texto.substring(medio + 2, texto.length() - 1));
-            return new int[] { filas, columnas };
-        }
-        return new int[] { 1, 1 };
-    }
-
     private void emitirDatos() {
-        salida.add(".data");
-        for (Map.Entry<String, String> entrada : tipos.entrySet()) {
-            String etiqueta = direccionDato(entrada.getKey());
-            if (columnasArreglo.containsKey(entrada.getKey())) {
-                // El espacio exacto se reemplaza durante el segundo recorrido de declaraciones.
-                salida.add(etiqueta + ": .space " + espacioArreglo(entrada.getKey()));
-            } else if (esFloat(entrada.getValue())) {
-                salida.add(etiqueta + ": .float 0.0");
-            } else {
-                salida.add(etiqueta + ": .word 0");
-            }
-        }
-        for (Map.Entry<String, String> entrada : cadenas.entrySet()) {
-            salida.add(entrada.getValue() + ": .asciiz " + entrada.getKey());
-        }
-        for (Map.Entry<String, String> entrada : flotantes.entrySet()) {
-            salida.add(entrada.getValue() + ": .float " + valorFloat(entrada.getKey()));
-        }
-        salida.add("");
+        new EmisorDatosMIPS().emitir(salida, tipos, direcciones, columnasArreglo,
+                dimensionesDeclaradas, cadenas, flotantes);
     }
 
 
