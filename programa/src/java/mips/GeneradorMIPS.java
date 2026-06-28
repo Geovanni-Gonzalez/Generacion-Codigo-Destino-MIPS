@@ -2,10 +2,8 @@ package mips;
 
 import intermedio.Instruccion;
 import intermedio.Operacion;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -23,7 +21,7 @@ import java.util.Map;
  * para conversiones y direccionamiento de arreglos.</p>
  */
 public final class GeneradorMIPS {
-    private final List<String> salida = new ArrayList<>();
+    private final EmisorMIPS salida = new EmisorMIPS();
     private final AdministradorRegistros registros = new AdministradorRegistros();
     private final Map<String, String> tipos = new LinkedHashMap<>();
     /** Relacion estable entre cada variable/temporal 3D y su etiqueta en .data. */
@@ -39,7 +37,7 @@ public final class GeneradorMIPS {
     private int contadorEtiquetaInterna;
     private String funcionActual;
     private int indiceParametroFormal;
-}
+
 
 
 /**
@@ -60,7 +58,7 @@ public final class GeneradorMIPS {
         salida.add(".text");
         salida.add(".globl main");
        traducir(codigoIntermedio);
-        return new ArrayList<>(salida);
+        return salida.lineas();
     }
 
     /**
@@ -75,7 +73,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private void reiniciar() {
-        salida.clear();
+        salida.limpiar();
         registros.reiniciar();
         tipos.clear();
         direcciones.clear();
@@ -257,7 +255,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Si la función es {@code null}, usa "global".</p>
      */
     private static String clave(String funcion, String nombre) {
-        return (funcion == null ? "global" : funcion) + "::" + nombre;
+        return EtiquetasMIPS.clave(funcion, nombre);
     }
 
      /**
@@ -272,7 +270,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static String etiquetaDato(String clave) {
-        return "_d_" + limpiar(clave.replace("::", "__"));
+        return EtiquetasMIPS.etiquetaDato(clave);
     }
 
     /**
@@ -287,7 +285,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static String etiquetaFuncion(String nombre) {
-        return "__main__".equals(nombre) ? "main" : "_fn_" + limpiar(nombre);
+        return EtiquetasMIPS.etiquetaFuncion(nombre);
     }
 
     /**
@@ -302,7 +300,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static String etiquetaEpilogo(String nombre) {
-        return etiquetaFuncion(nombre) + "__fin";
+        return EtiquetasMIPS.etiquetaEpilogo(nombre);
     }
 
     /**
@@ -317,7 +315,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static String etiquetaCodigo(String nombre) {
-        return "_ic_" + limpiar(nombre);
+        return EtiquetasMIPS.etiquetaCodigo(nombre);
     }
 
     /**
@@ -332,7 +330,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private String nuevaEtiquetaInterna(String prefijo) {
-        return "_mips_" + prefijo + "_" + contadorEtiquetaInterna++;
+        return EtiquetasMIPS.etiquetaInterna(prefijo, contadorEtiquetaInterna++);
     }
 
     /**
@@ -347,22 +345,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private void instruccion(String texto) {
-        salida.add("\t" + texto);
-    }
-
-    /**
-     * <strong>Nombre:</strong> limpiar
-     *
-     * <p><strong>Objetivo:</strong> Reemplazar por {@code _} los caracteres no válidos en una etiqueta MIPS.</p>
-     *
-     * <p><strong>Entrada:</strong> String texto.</p>
-     *
-     * <p><strong>Salida:</strong> String saneado.</p>
-     *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
-     */
-    private static String limpiar(String texto) {
-        return texto.replaceAll("[^A-Za-z0-9_]", "_");
+        salida.instruccion(texto);
     }
 
     /**
@@ -377,7 +360,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static String normalizarTipo(String tipo) {
-        return tipo == null ? "int" : tipo.toLowerCase(Locale.ROOT);
+        return OperandosMIPS.normalizarTipo(tipo);
     }
 
     /**
@@ -392,7 +375,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static boolean esFloat(String tipo) {
-        return "float".equals(tipo);
+        return OperandosMIPS.esFloat(tipo);
     }
 
     /**
@@ -407,8 +390,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static boolean esAritmetica(Operacion op) {
-        return op == Operacion.SUMA || op == Operacion.RESTA || op == Operacion.MULT
-                || op == Operacion.DIV || op == Operacion.MOD || op == Operacion.POW;
+        return OperandosMIPS.esAritmetica(op);
     }
 
     /**
@@ -423,9 +405,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static boolean esComparacion(Operacion op) {
-        return op == Operacion.IGUAL || op == Operacion.DISTINTO || op == Operacion.MENOR
-                || op == Operacion.MAYOR || op == Operacion.MENOR_IGUAL
-                || op == Operacion.MAYOR_IGUAL;
+        return OperandosMIPS.esComparacion(op);
     }
 
     /**
@@ -440,7 +420,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static boolean esCadena(String valor) {
-        return valor != null && valor.length() >= 2 && valor.startsWith("\"") && valor.endsWith("\"");
+        return OperandosMIPS.esCadena(valor);
     }
 
     /**
@@ -455,7 +435,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static boolean esChar(String valor) {
-        return valor != null && valor.length() >= 3 && valor.startsWith("'") && valor.endsWith("'");
+        return OperandosMIPS.esChar(valor);
     }
 
     /**
@@ -470,7 +450,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static char valorChar(String valor) {
-        return valor.charAt(1);
+        return OperandosMIPS.valorChar(valor);
     }
 
     /**
@@ -485,8 +465,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static boolean esFloatLiteral(String valor) {
-        return valor != null && (valor.matches("[0-9]+\\.[0-9]+")
-                || valor.matches("[0-9]+/[1-9][0-9]*"));
+        return OperandosMIPS.esFloatLiteral(valor);
     }
         /**
      * <strong>Nombre:</strong> esEnteroLiteral
@@ -500,7 +479,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static boolean esEnteroLiteral(String valor) {
-        return valor != null && (valor.matches("[0-9]+") || valor.matches("[0-9]+e[1-9][0-9]*"));
+        return OperandosMIPS.esEnteroLiteral(valor);
     }
 
     /**
@@ -515,7 +494,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static boolean esAccesoArreglo(String valor) {
-        return valor != null && valor.matches("[A-Za-z_][A-Za-z0-9_]*\\[[^]]+\\]\\[[^]]+\\]");
+        return OperandosMIPS.esAccesoArreglo(valor);
     }
 
 
@@ -635,12 +614,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static int valorEntero(String valor) {
-        if (valor.contains("e")) {
-            String[] partes = valor.split("e", 2);
-            double calculado = Double.parseDouble(partes[0]) * Math.pow(10, Integer.parseInt(partes[1]));
-            return (int) calculado;
-        }
-        return Integer.parseInt(valor);
+        return OperandosMIPS.valorEntero(valor);
     }
 
     /**
@@ -655,11 +629,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static String valorFloat(String valor) {
-        if (valor.contains("/")) {
-            String[] partes = valor.split("/", 2);
-            return String.valueOf(Double.parseDouble(partes[0]) / Double.parseDouble(partes[1]));
-        }
-        return valor;
+        return OperandosMIPS.valorFloat(valor);
     }
 
         /**
@@ -1277,11 +1247,7 @@ public final class GeneradorMIPS {
      * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
     private static int parseEntero(String valor, int defecto) {
-        try {
-            return Integer.parseInt(valor);
-        } catch (RuntimeException ex) {
-            return defecto;
-        }
+        return OperandosMIPS.parseEntero(valor, defecto);
     }
 
 
@@ -1391,3 +1357,4 @@ public final class GeneradorMIPS {
         registros.liberarRegistro(resultado);
         registros.liberarRegistro(operando);
     }
+}

@@ -51,7 +51,8 @@ parser code {:
         analizadorSemantico.cerrarBloque();
     }
 
-    public void actualizarFirmaFuncion(String nombre, TipoDato tipoRetorno, java.util.List parametros, int linea) {
+    public void actualizarFirmaFuncion(String nombre, TipoDato tipoRetorno,
+                                        java.util.List<ParametroNodo> parametros, int linea) {
         analizadorSemantico.actualizarFirmaFuncion(nombre, tipoRetorno, parametros, linea);
     }
 

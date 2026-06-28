@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -47,19 +48,6 @@ public class Main {
             return;
         }
 
-        if (!Files.exists(fuente)) {
-            System.err.println("No existe el archivo fuente: " + fuente);
-            return;
-        }
-        if (!Files.isRegularFile(fuente)) {
-            System.err.println("La ruta no corresponde a un archivo regular: " + fuente);
-            return;
-        }
-        if (!Files.isReadable(fuente)) {
-            System.err.println("No se puede leer el archivo fuente: " + fuente);
-            return;
-        }
-
         try {
             Path salida = args.length > 1
                     ? Paths.get(args[1]).toAbsolutePath().normalize()
@@ -97,8 +85,18 @@ public class Main {
                     : "Codigo MIPS no generado por errores de analisis.");
         } catch (InvalidPathException ex) {
             System.err.println("La ruta del directorio de salida no es valida: " + ex.getInput());
+        } catch (IOException ex) {
+            System.err.println("Error de entrada/salida: " + ex.getMessage());
+        } catch (RuntimeException ex) {
+            System.err.println("Error interno durante la compilacion: " + ex.getMessage());
+            if (Boolean.getBoolean("compilador.debug")) {
+                ex.printStackTrace(System.err);
+            }
         } catch (Exception ex) {
             System.err.println("No se pudo procesar el archivo fuente: " + ex.getMessage());
+            if (Boolean.getBoolean("compilador.debug")) {
+                ex.printStackTrace(System.err);
+            }
         }
     }
 }

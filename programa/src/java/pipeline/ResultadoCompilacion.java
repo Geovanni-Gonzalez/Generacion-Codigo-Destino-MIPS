@@ -2,6 +2,7 @@ package pipeline;
 
 import intermedio.Instruccion;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import lexico.MiLexer;
@@ -47,8 +48,8 @@ public class ResultadoCompilacion {
         this.parser = parser;
         this.sintaxisCompleta = sintaxisCompleta;
         this.aceptado = aceptado;
-        this.codigoIntermedio = codigoIntermedio;
-        this.codigoMIPS = codigoMIPS;
+        this.codigoIntermedio = new ArrayList<>(codigoIntermedio);
+        this.codigoMIPS = new ArrayList<>(codigoMIPS);
     }
 
     /**

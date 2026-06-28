@@ -199,16 +199,17 @@ public class AnalizadorSemantico {
      *
      * <p><strong>Objetivo:</strong> Completar la firma de una función con los tipos de sus parámetros y su retorno.</p>
      *
-     * <p><strong>Entrada:</strong> String nombre, TipoDato tipoRetorno, List parametros, int linea.</p>
+     * <p><strong>Entrada:</strong> String nombre, TipoDato tipoRetorno, List&lt;ParametroNodo&gt; parametros, int linea.</p>
      *
      * <p><strong>Salida:</strong> No retorna valor.</p>
      *
-     * <p><strong>Restricciones:</strong> Los elementos de {@code parametros} deben ser {@link ParametroNodo}.</p>
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
      */
-    public void actualizarFirmaFuncion(String nombre, TipoDato tipoRetorno, List parametros, int linea) {
+    public void actualizarFirmaFuncion(String nombre, TipoDato tipoRetorno,
+                                       List<ParametroNodo> parametros, int linea) {
         List<TipoDato> tiposParametros = new ArrayList<>();
-        for (Object parametro : parametros) {
-            tiposParametros.add(((ParametroNodo) parametro).getTipo());
+        for (ParametroNodo parametro : parametros) {
+            tiposParametros.add(parametro.getTipo());
         }
         tablaSimbolos.actualizarFirmaFuncion(nombre, tiposParametros, tipoRetorno, linea);
     }

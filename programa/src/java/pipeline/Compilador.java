@@ -45,19 +45,26 @@ public class Compilador {
      */
     public ResultadoCompilacion compilar(Path fuente) throws Exception {
         validarFuente(fuente);
-        MiLexer lexerTokens = crearLexer(fuente);
-        consumirTokens(lexerTokens);
 
-        MiLexer lexerParser = crearLexer(fuente);
-        lexerParser.setImprimirErrores(false);
-        Parser parser = new Parser(lexerParser);
+        MiLexer lexerTokens;
+        try (Reader reader = abrirFuente(fuente)) {
+            lexerTokens = new MiLexer(reader);
+            consumirTokens(lexerTokens);
+        }
+
+        Parser parser;
         boolean sintaxisCompleta = true;
-        try {
-            parser.parse();
-        } catch (Exception ex) {
-            sintaxisCompleta = false;
-            parser.erroresSintacticos.add(ReportadorErrores.reportarSintactico(0, 0,
-                    "error fatal del parser: " + ex.getMessage()));
+        try (Reader reader = abrirFuente(fuente)) {
+            MiLexer lexerParser = new MiLexer(reader);
+            lexerParser.setImprimirErrores(false);
+            parser = new Parser(lexerParser);
+            try {
+                parser.parse();
+            } catch (Exception ex) {
+                sintaxisCompleta = false;
+                parser.erroresSintacticos.add(ReportadorErrores.reportarSintactico(0, 0,
+                        "error fatal del parser: " + ex.getMessage()));
+            }
         }
 
         boolean aceptado = sintaxisCompleta
@@ -103,19 +110,18 @@ public class Compilador {
     }
 
     /**
-     * <strong>Nombre:</strong> crearLexer
+     * <strong>Nombre:</strong> abrirFuente
      *
-     * <p><strong>Objetivo:</strong> Abrir el archivo como UTF-8 y crear un lexer nuevo para una pasada.</p>
+     * <p><strong>Objetivo:</strong> Abrir el archivo como UTF-8 para una pasada del lexer.</p>
      *
      * <p><strong>Entrada:</strong> Path fuente.</p>
      *
-     * <p><strong>Salida:</strong> MiLexer listo para recorrer el archivo.</p>
+     * <p><strong>Salida:</strong> Reader listo para recorrer el archivo.</p>
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * <p><strong>Restricciones:</strong> El llamador debe cerrarlo.</p>
      */
-    private MiLexer crearLexer(Path fuente) throws Exception {
-        Reader reader = Files.newBufferedReader(fuente, StandardCharsets.UTF_8);
-        return new MiLexer(reader);
+    private Reader abrirFuente(Path fuente) throws IOException {
+        return Files.newBufferedReader(fuente, StandardCharsets.UTF_8);
     }
 
     /**

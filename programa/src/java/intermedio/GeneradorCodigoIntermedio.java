@@ -427,6 +427,9 @@ public class GeneradorCodigoIntermedio {
      * <p><strong>Restricciones:</strong> Devuelve {@code "<expr>"} para tipos de expresión no implementados.</p>
      */
     private String generarExpresion(ExpresionNodo expresion) {
+        if (expresion == null) {
+            throw new IllegalArgumentException("No se puede generar codigo para una expresion nula.");
+        }
         if (expresion instanceof IdentificadorNodo) {
             String temporal = nuevoTemporal();
             instrucciones.add(new Instruccion(Operacion.LOAD, temporal,
@@ -452,12 +455,8 @@ public class GeneradorCodigoIntermedio {
         if (expresion instanceof LlamadaFuncionNodo) {
             return generarLlamada((LlamadaFuncionNodo) expresion);
         }
-        /*
-         * Valor defensivo para expresiones aun no implementadas en el IR. En un
-         * programa aceptado no deberia aparecer, pero facilita detectar huecos
-         * durante nuevas extensiones.
-         */
-        return "<expr>";
+        throw new UnsupportedOperationException("Expresion no soportada en codigo intermedio: "
+                + expresion.getClass().getSimpleName() + " (linea " + expresion.getLinea() + ")");
     }
 
     /**
@@ -481,7 +480,8 @@ public class GeneradorCodigoIntermedio {
             return acceso.getNombre() + "[" + generarExpresion(acceso.getFila()) + "]"
                     + "[" + generarExpresion(acceso.getColumnaIndice()) + "]";
         }
-        return generarExpresion(expresion);
+        throw new IllegalArgumentException("Destino de asignacion no soportado: "
+                + (expresion == null ? "<null>" : expresion.getClass().getSimpleName()));
     }
 
     /**
