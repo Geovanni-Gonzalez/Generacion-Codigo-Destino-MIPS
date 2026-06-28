@@ -2,6 +2,7 @@ package pipeline;
 
 import intermedio.GeneradorCodigoIntermedio;
 import intermedio.Instruccion;
+import intermedio.OptimizadorIR;
 import mips.GeneradorMIPS;
 import java.io.Reader;
 import java.io.IOException;
@@ -47,23 +48,20 @@ public class Compilador {
         validarFuente(fuente);
 
         MiLexer lexerTokens;
-        try (Reader reader = abrirFuente(fuente)) {
-            lexerTokens = new MiLexer(reader);
-            consumirTokens(lexerTokens);
-        }
-
         Parser parser;
         boolean sintaxisCompleta = true;
         try (Reader reader = abrirFuente(fuente)) {
-            MiLexer lexerParser = new MiLexer(reader);
-            lexerParser.setImprimirErrores(false);
-            parser = new Parser(lexerParser);
+            lexerTokens = new MiLexer(reader);
+            parser = new Parser(lexerTokens);
             try {
                 parser.parse();
             } catch (Exception ex) {
                 sintaxisCompleta = false;
                 parser.erroresSintacticos.add(ReportadorErrores.reportarSintactico(0, 0,
                         "error fatal del parser: " + ex.getMessage()));
+                // El parser se detuvo antes del fin de archivo: consumir el resto del flujo
+                // léxico para que el reporte de tokens y los errores léxicos queden completos.
+                consumirTokens(lexerTokens);
             }
         }
 
@@ -77,10 +75,13 @@ public class Compilador {
         if (aceptado && parser.ast != null) {
             try {
                 codigoIntermedio = new GeneradorCodigoIntermedio().generar(parser.ast);
+                codigoIntermedio = new OptimizadorIR().optimizar(codigoIntermedio);
                 codigoMIPS = new GeneradorMIPS().generarCodigo(codigoIntermedio);
             } catch (CompiladorInternoException ex) {
                 aceptado = false;
-                parser.tablaSimbolos.getErroresSemanticos().add(ReportadorErrores.semantico(1, 1,
+                int linea = ex.tieneUbicacion() ? ex.getLinea() : 1;
+                int columna = ex.tieneUbicacion() ? ex.getColumna() : 1;
+                parser.tablaSimbolos.getErroresSemanticos().add(ReportadorErrores.semantico(linea, columna,
                         "error interno de generacion: " + ex.getMessage()));
                 codigoIntermedio = Collections.emptyList();
                 codigoMIPS = Collections.emptyList();
@@ -135,11 +136,12 @@ public class Compilador {
     /**
      * <strong>Nombre:</strong> consumirTokens
      *
-     * <p><strong>Objetivo:</strong> Recorrer una pasada léxica completa hasta el fin de archivo para
-     * registrar tokens y errores léxicos. El parser usa otro lexer limpio, por eso esta pasada se
-     * consume aparte sin construir el AST.</p>
+     * <p><strong>Objetivo:</strong> Drenar el resto del flujo léxico hasta el fin de archivo. Como el
+     * lexer registra cada token y error léxico al ser leído, el parser ya recolecta los tokens conforme
+     * avanza; esta pasada solo completa el reporte cuando el parser se detiene antes del EOF por un
+     * error fatal.</p>
      *
-     * <p><strong>Entrada:</strong> MiLexer lexer.</p>
+     * <p><strong>Entrada:</strong> MiLexer lexer (el mismo que usó el parser).</p>
      *
      * <p><strong>Salida:</strong> No retorna valor.</p>
      *

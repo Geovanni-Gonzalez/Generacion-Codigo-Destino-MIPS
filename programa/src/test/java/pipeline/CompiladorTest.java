@@ -3,7 +3,10 @@ package pipeline;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import intermedio.Instruccion;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -43,6 +46,52 @@ class CompiladorTest {
         assertFalse(resultado.isAceptado());
         assertTrue(resultado.getCodigoIntermedio().isEmpty());
         assertTrue(resultado.getCodigoMIPS().isEmpty());
+    }
+
+    @Test
+    void generaCodigoIntermedioEsperado() throws Exception {
+        ResultadoCompilacion resultado =
+                new Compilador().compilar(Path.of("test", "04_aritmeticas.chip"));
+
+        String ir = irComoTexto(resultado.getCodigoIntermedio());
+
+        assertTrue(ir.contains("begin_function __main__"), ir);
+        assertTrue(ir.contains("declare int x"), ir);
+        assertTrue(ir.contains("declare float f"), ir);
+        assertTrue(ir.contains("end_function __main__"), ir);
+
+        // El optimizador debe plegar las constantes enteras y eliminar los temporales muertos.
+        assertTrue(ir.contains("x = 20"), ir);   // 10 + 5 * 2
+        assertTrue(ir.contains("y = 30"), ir);   // <|10 + 5|> * 2
+        assertTrue(ir.contains("z = 2"), ir);    // 2 ^ 3 % 3
+        assertFalse(ir.contains("_t0 ="), ir);   // temporal plegado y eliminado
+    }
+
+    @Test
+    void generaMipsConEstructuraEsperada() throws Exception {
+        ResultadoCompilacion resultado =
+                new Compilador().compilar(Path.of("test", "04_aritmeticas.chip"));
+
+        String mips = String.join("\n", resultado.getCodigoMIPS());
+
+        assertTrue(mips.contains(".data"), mips);
+        assertTrue(mips.contains(".text"), mips);
+        assertTrue(mips.contains(".globl main"), mips);
+        assertTrue(mips.contains("main:"), mips);
+        assertTrue(mips.contains("d___main___x: .word 0"), mips);
+        // Epilogo de salida del programa (syscall 10).
+        assertTrue(mips.contains("li $v0, 10"), mips);
+        assertTrue(mips.contains("syscall"), mips);
+
+        // El peephole convierte los store/load redundantes en move (entero y flotante).
+        assertTrue(mips.contains("move $t0, $t2"), mips);
+        assertTrue(mips.contains("mov.s $f0, $f4"), mips);
+        // El store/load redundante al mismo registro debe haberse eliminado.
+        assertFalse(mips.contains("sw $t0, d___main____t9\n\tlw $t0, d___main____t9"), mips);
+    }
+
+    private static String irComoTexto(List<Instruccion> codigo) {
+        return codigo.stream().map(Instruccion::toString).collect(Collectors.joining("\n"));
     }
 
     private static Stream<Arguments> programasValidos() {

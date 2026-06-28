@@ -23,6 +23,12 @@ import reporte.EscritorReportes;
  * <p><strong>Restricciones:</strong> Valida el archivo antes de compilar y maneja rutas inválidas.</p>
  */
 public class Main {
+    private static final String DIR_SALIDA_POR_DEFECTO = "salida";
+    private static final String REPORTE_TOKENS = "tokens_report.txt";
+    private static final String REPORTE_TABLA_SIMBOLOS = "tabla_simbolos.txt";
+    private static final String REPORTE_ERRORES = "errores_report.txt";
+    private static final String REPORTE_SINTACTICO = "resultado_sintactico.txt";
+
     /**
      * <strong>Nombre:</strong> main
      *
@@ -51,20 +57,20 @@ public class Main {
         try {
             Path salida = args.length > 1
                     ? Paths.get(args[1]).toAbsolutePath().normalize()
-                    : Paths.get("salida").toAbsolutePath().normalize();
+                    : Paths.get(DIR_SALIDA_POR_DEFECTO).toAbsolutePath().normalize();
             Files.createDirectories(salida);
 
             ResultadoCompilacion resultado = new Compilador().compilar(fuente);
 
-            EscritorReportes.escribirTokens(salida.resolve("tokens_report.txt"),
+            EscritorReportes.escribirTokens(salida.resolve(REPORTE_TOKENS),
                     resultado.getLexerTokens().getTokens());
-            EscritorReportes.escribirTablaSimbolos(salida.resolve("tabla_simbolos.txt"),
+            EscritorReportes.escribirTablaSimbolos(salida.resolve(REPORTE_TABLA_SIMBOLOS),
                     resultado.getLexerTokens().getTokens());
-            EscritorReportes.escribirErrores(salida.resolve("errores_report.txt"),
+            EscritorReportes.escribirErrores(salida.resolve(REPORTE_ERRORES),
                     resultado.getLexerTokens().getErroresLexicos(),
                     resultado.getParser().erroresSintacticos,
                     resultado.getParser().tablaSimbolos.getErroresSemanticos());
-            EscritorReportes.escribirResultado(salida.resolve("resultado_sintactico.txt"),
+            EscritorReportes.escribirResultado(salida.resolve(REPORTE_SINTACTICO),
                     fuente, resultado.isAceptado());
             Path codigoIntermedio = EscritorCodigo.escribir(salida, resultado);
             Path codigoMIPS = EscritorMIPS.escribir(salida, resultado);
@@ -73,10 +79,10 @@ public class Main {
             System.out.println(resultado.isAceptado()
                     ? "El archivo fuente puede ser generado por la gramatica."
                     : "El archivo fuente NO puede ser generado por la gramatica.");
-            System.out.println("Reporte de tokens: " + salida.resolve("tokens_report.txt"));
-            System.out.println("Tabla de simbolos: " + salida.resolve("tabla_simbolos.txt"));
-            System.out.println("Reporte de errores: " + salida.resolve("errores_report.txt"));
-            System.out.println("Resultado sintactico: " + salida.resolve("resultado_sintactico.txt"));
+            System.out.println("Reporte de tokens: " + salida.resolve(REPORTE_TOKENS));
+            System.out.println("Tabla de simbolos: " + salida.resolve(REPORTE_TABLA_SIMBOLOS));
+            System.out.println("Reporte de errores: " + salida.resolve(REPORTE_ERRORES));
+            System.out.println("Resultado sintactico: " + salida.resolve(REPORTE_SINTACTICO));
             System.out.println(resultado.isAceptado()
                     ? "Codigo intermedio: " + codigoIntermedio
                     : "Codigo intermedio no generado por errores de analisis.");

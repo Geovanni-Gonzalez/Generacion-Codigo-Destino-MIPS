@@ -22,6 +22,15 @@ import sintactico.sym;
 private final List<TokenInfo> tokens = new ArrayList<>();
 private final List<String> erroresLexicos = new ArrayList<>();
 private boolean imprimirErrores = true;
+private boolean comentarioSinCerrarReportado = false;
+
+private void reportarComentarioSinCerrar() {
+    if (comentarioSinCerrarReportado) {
+        return;
+    }
+    comentarioSinCerrarReportado = true;
+    errorLexico("comentario multilinea sin cerrar");
+}
 
 public List<TokenInfo> getTokens() {
     return Collections.unmodifiableList(tokens);
@@ -116,12 +125,7 @@ private String informacionPara(int type, String lexema, Object value) {
 
 %eofval{
     if (yystate() == COMMENT) {
-        String error = ReportadorErrores.lexico(yyline + 1, yycolumn + 1,
-                "comentario multilinea sin cerrar");
-        erroresLexicos.add(error);
-        if (imprimirErrores) {
-            System.err.println(error);
-        }
+        reportarComentarioSinCerrar();
     }
     return new Symbol(sym.EOF, yyline + 1, yycolumn + 1, "<EOF>");
 %eofval}
@@ -247,7 +251,7 @@ STRING = [^\r\n\"]*
 <COMMENT> \r|\n { }
 
 <COMMENT><<EOF>> {
-    errorLexico("comentario multilinea sin cerrar");
+    reportarComentarioSinCerrar();
     return new Symbol(sym.EOF, yyline + 1, yycolumn + 1, "<EOF>");
 }
 

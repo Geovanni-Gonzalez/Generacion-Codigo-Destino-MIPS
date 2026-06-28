@@ -457,7 +457,8 @@ public class GeneradorCodigoIntermedio {
             return generarLlamada((LlamadaFuncionNodo) expresion);
         }
         throw new CompiladorInternoException("Expresion no soportada en codigo intermedio: "
-                + expresion.getClass().getSimpleName() + " (linea " + expresion.getLinea() + ")");
+                + expresion.getClass().getSimpleName(),
+                expresion.getLinea(), expresion.getColumna());
     }
 
     /**

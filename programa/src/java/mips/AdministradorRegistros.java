@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import pipeline.CompiladorInternoException;
 
 /**
  * <strong>Nombre:</strong> AdministradorRegistros
@@ -19,7 +20,7 @@ import java.util.Set;
  * <p><strong>Restricciones:</strong> Si se piden más registros de los disponibles, lanza un error.</p>
  */
 public final class AdministradorRegistros {
-    private static final String[] REGISTROS = {"$t0", "$t1", "$t2", "$t3", "$t4", "$t5"};
+    private static final String[] REGISTROS = RegistrosMIPS.POOL_TEMPORALES;
     private final Deque<String> disponibles = new ArrayDeque<>();
     private final Set<String> ocupados = new LinkedHashSet<>();
 
@@ -47,12 +48,15 @@ public final class AdministradorRegistros {
      *
      * <p><strong>Salida:</strong> String con el nombre del registro.</p>
      *
-     * <p><strong>Restricciones:</strong> Lanza excepción si no hay registros disponibles.</p>
+     * <p><strong>Restricciones:</strong> Lanza {@link CompiladorInternoException} si no hay registros
+     * disponibles, de modo que el pipeline lo reporte como error de generación en vez de abortar.</p>
      */
     public String obtenerRegistro() {
         String registro = disponibles.pollFirst();
         if (registro == null) {
-            throw new IllegalStateException("No hay registros temporales MIPS disponibles");
+            throw new CompiladorInternoException("No hay registros temporales MIPS disponibles; "
+                    + "la expresion es demasiado compleja para el banco de "
+                    + REGISTROS.length + " registros ($t0-$t5)");
         }
         ocupados.add(registro);
         return registro;

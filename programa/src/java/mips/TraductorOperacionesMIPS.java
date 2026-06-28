@@ -69,9 +69,11 @@ final class TraductorOperacionesMIPS {
 
     void traducirUnaria(Instruccion i, String funcion) {
         if (i.op == Operacion.NEG && OperandosMIPS.esFloat(memoria.tipoOperando(i.op1, funcion))) {
-            memoria.cargarFloat(i.op1, "$f0", funcion);
-            salida.instruccion("neg.s $f2, $f0");
-            salida.instruccion("s.s $f2, " + memoria.etiqueta(i.resultado, funcion));
+            String a = RegistrosMIPS.SCRATCH_FLOAT_A;
+            String b = RegistrosMIPS.SCRATCH_FLOAT_B;
+            memoria.cargarFloat(i.op1, a, funcion);
+            salida.instruccion("neg.s " + b + ", " + a);
+            salida.instruccion("s.s " + b + ", " + memoria.etiqueta(i.resultado, funcion));
             return;
         }
         String operando = memoria.cargarValor(i.op1, funcion);
@@ -87,8 +89,12 @@ final class TraductorOperacionesMIPS {
     }
 
     private void traducirBinariaFloat(Instruccion i, String funcion) {
-        memoria.cargarFloat(i.op1, "$f0", funcion);
-        memoria.cargarFloat(i.op2, "$f2", funcion);
+        String a = RegistrosMIPS.SCRATCH_FLOAT_A;
+        String b = RegistrosMIPS.SCRATCH_FLOAT_B;
+        String r = RegistrosMIPS.SCRATCH_FLOAT_RES;
+        String aux = RegistrosMIPS.SCRATCH_FLOAT_AUX;
+        memoria.cargarFloat(i.op1, a, funcion);
+        memoria.cargarFloat(i.op2, b, funcion);
         String operacion;
         switch (i.op) {
             case SUMA: operacion = "add.s"; break;
@@ -96,52 +102,54 @@ final class TraductorOperacionesMIPS {
             case MULT: operacion = "mul.s"; break;
             case DIV: operacion = "div.s"; break;
             case MOD:
-                salida.instruccion("div.s $f4, $f0, $f2");
-                salida.instruccion("trunc.w.s $f6, $f4");
-                salida.instruccion("cvt.s.w $f6, $f6");
-                salida.instruccion("mul.s $f6, $f6, $f2");
-                salida.instruccion("sub.s $f4, $f0, $f6");
-                salida.instruccion("s.s $f4, " + memoria.etiqueta(i.resultado, funcion));
+                salida.instruccion("div.s " + r + ", " + a + ", " + b);
+                salida.instruccion("trunc.w.s " + aux + ", " + r);
+                salida.instruccion("cvt.s.w " + aux + ", " + aux);
+                salida.instruccion("mul.s " + aux + ", " + aux + ", " + b);
+                salida.instruccion("sub.s " + r + ", " + a + ", " + aux);
+                salida.instruccion("s.s " + r + ", " + memoria.etiqueta(i.resultado, funcion));
                 return;
             case POW:
                 traducirPotenciaFloat(i.resultado, funcion);
                 return;
             default: throw new IllegalStateException("Operacion flotante no soportada: " + i.op);
         }
-        salida.instruccion(operacion + " $f4, $f0, $f2");
-        salida.instruccion("s.s $f4, " + memoria.etiqueta(i.resultado, funcion));
+        salida.instruccion(operacion + " " + r + ", " + a + ", " + b);
+        salida.instruccion("s.s " + r + ", " + memoria.etiqueta(i.resultado, funcion));
     }
 
     private void traducirComparacionFloat(Instruccion i, String funcion) {
-        memoria.cargarFloat(i.op1, "$f0", funcion);
-        memoria.cargarFloat(i.op2, "$f2", funcion);
+        String a = RegistrosMIPS.SCRATCH_FLOAT_A;
+        String b = RegistrosMIPS.SCRATCH_FLOAT_B;
+        memoria.cargarFloat(i.op1, a, funcion);
+        memoria.cargarFloat(i.op2, b, funcion);
         String verdadero = nuevaEtiqueta.apply("cmp_true");
         String fin = nuevaEtiqueta.apply("cmp_fin");
         String resultado = registros.obtenerRegistro();
         salida.instruccion("li " + resultado + ", 0");
         switch (i.op) {
             case IGUAL:
-                salida.instruccion("c.eq.s $f0, $f2");
+                salida.instruccion("c.eq.s " + a + ", " + b);
                 salida.instruccion("bc1t " + verdadero);
                 break;
             case DISTINTO:
-                salida.instruccion("c.eq.s $f0, $f2");
+                salida.instruccion("c.eq.s " + a + ", " + b);
                 salida.instruccion("bc1f " + verdadero);
                 break;
             case MENOR:
-                salida.instruccion("c.lt.s $f0, $f2");
+                salida.instruccion("c.lt.s " + a + ", " + b);
                 salida.instruccion("bc1t " + verdadero);
                 break;
             case MENOR_IGUAL:
-                salida.instruccion("c.le.s $f0, $f2");
+                salida.instruccion("c.le.s " + a + ", " + b);
                 salida.instruccion("bc1t " + verdadero);
                 break;
             case MAYOR:
-                salida.instruccion("c.lt.s $f2, $f0");
+                salida.instruccion("c.lt.s " + b + ", " + a);
                 salida.instruccion("bc1t " + verdadero);
                 break;
             case MAYOR_IGUAL:
-                salida.instruccion("c.le.s $f2, $f0");
+                salida.instruccion("c.le.s " + b + ", " + a);
                 salida.instruccion("bc1t " + verdadero);
                 break;
             default: throw new IllegalStateException("Comparacion flotante no soportada: " + i.op);
@@ -167,21 +175,25 @@ final class TraductorOperacionesMIPS {
     }
 
     private void traducirPotenciaFloat(String resultado, String funcion) {
+        String base = RegistrosMIPS.SCRATCH_FLOAT_A;
+        String exponente = RegistrosMIPS.SCRATCH_FLOAT_B;
+        String acumulador = RegistrosMIPS.SCRATCH_FLOAT_RES;
+        String aux = RegistrosMIPS.SCRATCH_FLOAT_AUX;
         String ciclo = nuevaEtiqueta.apply("powf");
         String fin = nuevaEtiqueta.apply("powf_fin");
         String contador = registros.obtenerRegistro();
         salida.instruccion("li " + contador + ", 1");
-        salida.instruccion("mtc1 " + contador + ", $f4");
-        salida.instruccion("cvt.s.w $f4, $f4");
-        salida.instruccion("trunc.w.s $f6, $f2");
-        salida.instruccion("mfc1 " + contador + ", $f6");
+        salida.instruccion("mtc1 " + contador + ", " + acumulador);
+        salida.instruccion("cvt.s.w " + acumulador + ", " + acumulador);
+        salida.instruccion("trunc.w.s " + aux + ", " + exponente);
+        salida.instruccion("mfc1 " + contador + ", " + aux);
         salida.add(ciclo + ":");
         salida.instruccion("blez " + contador + ", " + fin);
-        salida.instruccion("mul.s $f4, $f4, $f0");
+        salida.instruccion("mul.s " + acumulador + ", " + acumulador + ", " + base);
         salida.instruccion("addiu " + contador + ", " + contador + ", -1");
         salida.instruccion("j " + ciclo);
         salida.add(fin + ":");
-        salida.instruccion("s.s $f4, " + memoria.etiqueta(resultado, funcion));
+        salida.instruccion("s.s " + acumulador + ", " + memoria.etiqueta(resultado, funcion));
         registros.liberarRegistro(contador);
     }
 }

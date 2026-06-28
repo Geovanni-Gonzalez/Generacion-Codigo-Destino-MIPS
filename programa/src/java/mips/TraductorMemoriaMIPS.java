@@ -69,8 +69,8 @@ final class TraductorMemoriaMIPS {
         } else if (OperandosMIPS.esEnteroLiteral(operando)) {
             salida.instruccion("li " + registro + ", " + OperandosMIPS.valorEntero(operando));
         } else if (OperandosMIPS.esAccesoArreglo(operando)) {
-            direccionArreglo(operando, "$t7", funcion);
-            salida.instruccion("lw " + registro + ", 0($t7)");
+            direccionArreglo(operando, RegistrosMIPS.SCRATCH_DIRECCION, funcion);
+            salida.instruccion("lw " + registro + ", 0(" + RegistrosMIPS.SCRATCH_DIRECCION + ")");
         } else {
             salida.instruccion("lw " + registro + ", " + etiqueta(operando, funcion));
         }
@@ -80,12 +80,12 @@ final class TraductorMemoriaMIPS {
         if (OperandosMIPS.esFloatLiteral(operando)) {
             salida.instruccion("l.s " + registro + ", " + flotantes.get(operando));
         } else if (OperandosMIPS.esEnteroLiteral(operando)) {
-            cargarEntero(operando, "$t6", funcion);
-            salida.instruccion("mtc1 $t6, " + registro);
+            cargarEntero(operando, RegistrosMIPS.SCRATCH_ENTERO_A, funcion);
+            salida.instruccion("mtc1 " + RegistrosMIPS.SCRATCH_ENTERO_A + ", " + registro);
             salida.instruccion("cvt.s.w " + registro + ", " + registro);
         } else if (OperandosMIPS.esAccesoArreglo(operando)) {
-            direccionArreglo(operando, "$t7", funcion);
-            salida.instruccion("l.s " + registro + ", 0($t7)");
+            direccionArreglo(operando, RegistrosMIPS.SCRATCH_DIRECCION, funcion);
+            salida.instruccion("l.s " + registro + ", 0(" + RegistrosMIPS.SCRATCH_DIRECCION + ")");
         } else {
             salida.instruccion("l.s " + registro + ", " + etiqueta(operando, funcion));
         }
@@ -93,9 +93,10 @@ final class TraductorMemoriaMIPS {
 
     void guardar(String destino, String registroEntero, String registroFloat, String funcion) {
         if (OperandosMIPS.esAccesoArreglo(destino)) {
-            direccionArreglo(destino, "$t7", funcion);
+            direccionArreglo(destino, RegistrosMIPS.SCRATCH_DIRECCION, funcion);
             salida.instruccion((OperandosMIPS.esFloat(tipoOperando(destino, funcion))
-                    ? "s.s " + registroFloat : "sw " + registroEntero) + ", 0($t7)");
+                    ? "s.s " + registroFloat : "sw " + registroEntero)
+                    + ", 0(" + RegistrosMIPS.SCRATCH_DIRECCION + ")");
         } else if (OperandosMIPS.esFloat(tipoOperando(destino, funcion))) {
             salida.instruccion("s.s " + registroFloat + ", " + etiqueta(destino, funcion));
         } else {
@@ -118,15 +119,18 @@ final class TraductorMemoriaMIPS {
         String fila = acceso.substring(primero + 1, cierreFila);
         String columna = acceso.substring(inicioColumna + 1, cierreColumna);
 
-        cargarEntero(fila, "$t8", funcion);
-        cargarEntero(columna, "$t9", funcion);
+        String fil = RegistrosMIPS.SCRATCH_INDICE_FILA;
+        String col = RegistrosMIPS.SCRATCH_INDICE_COL;
+        String aux = RegistrosMIPS.SCRATCH_ENTERO_A;
+        cargarEntero(fila, fil, funcion);
+        cargarEntero(columna, col, funcion);
         int columnas = columnasArreglo.getOrDefault(EtiquetasMIPS.clave(funcion, nombre), 1);
-        salida.instruccion("li $t6, " + columnas);
-        salida.instruccion("mul $t8, $t8, $t6");
-        salida.instruccion("add $t8, $t8, $t9");
-        salida.instruccion("sll $t8, $t8, 2");
+        salida.instruccion("li " + aux + ", " + columnas);
+        salida.instruccion("mul " + fil + ", " + fil + ", " + aux);
+        salida.instruccion("add " + fil + ", " + fil + ", " + col);
+        salida.instruccion("sll " + fil + ", " + fil + ", 2");
         salida.instruccion("la " + registroDireccion + ", " + etiqueta(nombre, funcion));
-        salida.instruccion("add " + registroDireccion + ", " + registroDireccion + ", $t8");
+        salida.instruccion("add " + registroDireccion + ", " + registroDireccion + ", " + fil);
     }
 
     private String direccionDato(String clave) {

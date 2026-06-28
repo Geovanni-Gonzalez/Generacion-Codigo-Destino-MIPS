@@ -53,8 +53,8 @@ final class TraductorFuncionesMIPS {
         String argumento = i.op1 != null ? i.op1 : i.resultado;
         String registroParametro = registros.obtenerRegistro();
         if (OperandosMIPS.esFloat(memoria.tipoOperando(argumento, funcion))) {
-            memoria.cargarFloat(argumento, "$f0", funcion);
-            salida.instruccion("mfc1 " + registroParametro + ", $f0");
+            memoria.cargarFloat(argumento, RegistrosMIPS.SCRATCH_FLOAT_A, funcion);
+            salida.instruccion("mfc1 " + registroParametro + ", " + RegistrosMIPS.SCRATCH_FLOAT_A);
         } else {
             memoria.cargarEntero(argumento, registroParametro, funcion);
         }
@@ -74,8 +74,9 @@ final class TraductorFuncionesMIPS {
         }
 
         if (OperandosMIPS.esFloat(memoria.tipoOperando(i.resultado, funcion))) {
-            salida.instruccion("mtc1 $v0, $f0");
-            salida.instruccion("s.s $f0, " + memoria.etiqueta(i.resultado, funcion));
+            salida.instruccion("mtc1 $v0, " + RegistrosMIPS.SCRATCH_FLOAT_A);
+            salida.instruccion("s.s " + RegistrosMIPS.SCRATCH_FLOAT_A + ", "
+                    + memoria.etiqueta(i.resultado, funcion));
         } else {
             salida.instruccion("sw $v0, " + memoria.etiqueta(i.resultado, funcion));
         }
@@ -84,8 +85,8 @@ final class TraductorFuncionesMIPS {
     void traducirRetorno(Instruccion i, String funcion) {
         if (i.op1 != null) {
             if (OperandosMIPS.esFloat(memoria.tipoOperando(i.op1, funcion))) {
-                memoria.cargarFloat(i.op1, "$f0", funcion);
-                salida.instruccion("mfc1 $v0, $f0");
+                memoria.cargarFloat(i.op1, RegistrosMIPS.SCRATCH_FLOAT_A, funcion);
+                salida.instruccion("mfc1 $v0, " + RegistrosMIPS.SCRATCH_FLOAT_A);
             } else {
                 memoria.cargarEntero(i.op1, "$v0", funcion);
             }

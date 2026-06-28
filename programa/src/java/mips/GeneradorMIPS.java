@@ -45,7 +45,7 @@ public final class GeneradorMIPS {
         salida.add(".text");
         salida.add(".globl main");
         traducir(codigoIntermedio);
-        return salida.lineas();
+        return new OptimizadorMIPS().optimizar(salida.lineas());
     }
 
     private void reiniciar() {

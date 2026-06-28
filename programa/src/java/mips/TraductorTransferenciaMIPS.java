@@ -13,8 +13,8 @@ final class TraductorTransferenciaMIPS {
 
     void traducir(Instruccion i, String funcion) {
         if (OperandosMIPS.esFloat(memoria.tipoOperando(i.op1, funcion))) {
-            memoria.cargarFloat(i.op1, "$f0", funcion);
-            memoria.guardar(i.resultado, null, "$f0", funcion);
+            memoria.cargarFloat(i.op1, RegistrosMIPS.SCRATCH_FLOAT_A, funcion);
+            memoria.guardar(i.resultado, null, RegistrosMIPS.SCRATCH_FLOAT_A, funcion);
             return;
         }
 
