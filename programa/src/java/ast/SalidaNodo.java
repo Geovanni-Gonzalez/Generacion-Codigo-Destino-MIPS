@@ -1,24 +1,28 @@
 package ast;
 
 /**
- * <strong>Objetivo:</strong> Sentencia de salida del lenguaje, equivalente a imprimir una expresion.
+ * Nombre: SalidaNodo
  *
- * <p><strong>Entradas:</strong> Datos sintacticos reconocidos por el parser, posiciones de fuente y subnodos relacionados.</p>
+ * Objetivo: Representar SalidaNodo dentro del arbol sintactico abstracto del lenguaje.
  *
- * <p><strong>Salidas:</strong> Nodos, valores o metadatos consultables por las fases semantica e intermedia.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Restricciones:</strong> No debe ejecutar validaciones globales ni escribir archivos; solo conserva estructura y metadatos.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public class SalidaNodo extends SentenciaNodo {
     private final ExpresionNodo valor;
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * Nombre: SalidaNodo
      *
-     * <p><strong>Entradas:</strong> int linea, int columna, ExpresionNodo valor</p>
+     * Objetivo: Inicializar una instancia de SalidaNodo con los datos requeridos.
      *
-     * <p><strong>Salidas:</strong> Instancia inicializada de SalidaNodo.</p>
+     * Entrada: int linea; int columna; ExpresionNodo valor.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Nueva instancia de SalidaNodo.
+     *
+     * Restricciones: Ninguna.
      */
     public SalidaNodo(int linea, int columna, ExpresionNodo valor) {
         super(linea, columna);
@@ -26,13 +30,15 @@ public class SalidaNodo extends SentenciaNodo {
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * Nombre: getValor
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Obtener el valor de Valor almacenado en la instancia.
      *
-     * <p><strong>Salidas:</strong> Retorna ExpresionNodo.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo ExpresionNodo.
+     *
+     * Restricciones: Ninguna.
      */
     public ExpresionNodo getValor() {
         return valor;

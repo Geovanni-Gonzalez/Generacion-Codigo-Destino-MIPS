@@ -4,23 +4,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <strong>Nombre:</strong> OptimizadorMIPS
+ * Nombre: OptimizadorMIPS
  *
- * <p><strong>Objetivo:</strong> Aplicar un peephole conservador sobre el MIPS emitido que elimina los
- * viajes redundantes a memoria: cuando una instrucción guarda un registro en una etiqueta de datos y la
- * instrucción inmediatamente siguiente vuelve a cargar esa misma etiqueta, el valor todavía está en el
- * registro de origen. La carga se elimina (si es el mismo registro) o se reemplaza por un {@code move}.</p>
+ * Objetivo: Analizar, traducir, emitir u optimizar codigo destino MIPS.
  *
- * <p><strong>Entrada:</strong> Lista de líneas MIPS generadas por {@link GeneradorMIPS}.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Salida:</strong> Nueva lista de líneas equivalente y, en general, más corta.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
  *
- * <p><strong>Restricciones:</strong> Solo actúa sobre pares <em>adyacentes</em> {@code store}/{@code load}
- * a una <em>etiqueta de datos directa</em> (no sobre formas con desplazamiento como {@code 0($t7)}, para
- * evitar cualquier supuesto de aliasing). El {@code store} siempre se conserva.</p>
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 final class OptimizadorMIPS {
 
+    /**
+     * Nombre: optimizar
+     *
+     * Objetivo: Aplicar optimizaciones sobre el codigo recibido.
+     *
+     * Entrada: List<String> lineas.
+     *
+     * Salida: Valor de tipo List<String>.
+     *
+     * Restricciones: Ninguna.
+     */
     List<String> optimizar(List<String> lineas) {
         List<String> resultado = new ArrayList<>(lineas.size());
         int i = 0;
@@ -43,8 +49,15 @@ final class OptimizadorMIPS {
     }
 
     /**
-     * Devuelve la línea con la que reemplazar la carga (cadena vacía si debe eliminarse), o {@code null}
-     * si el par no es un store/load redundante a la misma etiqueta directa.
+     * Nombre: fusionarStoreLoad
+     *
+     * Objetivo: Ejecutar la operacion fusionarStoreLoad definida por OptimizadorMIPS.
+     *
+     * Entrada: String store; String load.
+     *
+     * Salida: Valor de tipo String.
+     *
+     * Restricciones: Uso interno de la clase.
      */
     private String fusionarStoreLoad(String store, String load) {
         String[] guardar = instruccion(store);
@@ -84,6 +97,17 @@ final class OptimizadorMIPS {
     }
 
     /** Separa una línea de instrucción (con tabulador) en [mnemónico, operandos]; {@code null} si no es instrucción. */
+    /**
+     * Nombre: instruccion
+     *
+     * Objetivo: Ejecutar la operacion instruccion definida por OptimizadorMIPS.
+     *
+     * Entrada: String linea.
+     *
+     * Salida: Valor de tipo String[].
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private String[] instruccion(String linea) {
         if (linea == null || !linea.startsWith("\t")) {
             return null;
@@ -97,6 +121,17 @@ final class OptimizadorMIPS {
     }
 
     /** Separa "reg, direccion" en sus dos partes; {@code null} si no tiene exactamente dos operandos. */
+    /**
+     * Nombre: operandos
+     *
+     * Objetivo: Ejecutar la operacion operandos definida por OptimizadorMIPS.
+     *
+     * Entrada: String texto.
+     *
+     * Salida: Valor de tipo String[].
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private String[] operandos(String texto) {
         int coma = texto.indexOf(',');
         if (coma < 0) {

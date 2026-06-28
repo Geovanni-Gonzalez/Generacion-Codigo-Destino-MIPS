@@ -1,35 +1,41 @@
 package ast;
 
 /**
- * <strong>Objetivo:</strong> Clase base para todos los nodos que producen un valor.
+ * Nombre: ExpresionNodo
  *
- * <p><strong>Entradas:</strong> Datos sintacticos reconocidos por el parser, posiciones de fuente y subnodos relacionados.</p>
+ * Objetivo: Representar ExpresionNodo dentro del arbol sintactico abstracto del lenguaje.
  *
- * <p><strong>Salidas:</strong> Nodos, valores o metadatos consultables por las fases semantica e intermedia.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Restricciones:</strong> No debe ejecutar validaciones globales ni escribir archivos; solo conserva estructura y metadatos.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public abstract class ExpresionNodo extends Nodo {
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * Nombre: ExpresionNodo
      *
-     * <p><strong>Entradas:</strong> int linea, int columna</p>
+     * Objetivo: Inicializar una instancia de ExpresionNodo con los datos requeridos.
      *
-     * <p><strong>Salidas:</strong> Instancia inicializada de ExpresionNodo.</p>
+     * Entrada: int linea; int columna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Nueva instancia de ExpresionNodo.
+     *
+     * Restricciones: Ninguna.
      */
     protected ExpresionNodo(int linea, int columna) {
         super(linea, columna);
     }
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * Nombre: ExpresionNodo
      *
-     * <p><strong>Entradas:</strong> int linea, int columna, TipoDato tipo</p>
+     * Objetivo: Inicializar una instancia de ExpresionNodo con los datos requeridos.
      *
-     * <p><strong>Salidas:</strong> Instancia inicializada de ExpresionNodo.</p>
+     * Entrada: int linea; int columna; TipoDato tipo.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Nueva instancia de ExpresionNodo.
+     *
+     * Restricciones: Ninguna.
      */
     protected ExpresionNodo(int linea, int columna, TipoDato tipo) {
         super(linea, columna, tipo);

@@ -1,24 +1,28 @@
 package ast;
 
 /**
- * <strong>Objetivo:</strong> Sentencia de entrada del lenguaje, equivalente a leer hacia una variable.
+ * Nombre: EntradaNodo
  *
- * <p><strong>Entradas:</strong> Datos sintacticos reconocidos por el parser, posiciones de fuente y subnodos relacionados.</p>
+ * Objetivo: Representar EntradaNodo dentro del arbol sintactico abstracto del lenguaje.
  *
- * <p><strong>Salidas:</strong> Nodos, valores o metadatos consultables por las fases semantica e intermedia.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Restricciones:</strong> No debe ejecutar validaciones globales ni escribir archivos; solo conserva estructura y metadatos.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public class EntradaNodo extends SentenciaNodo {
     private final String destino;
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * Nombre: EntradaNodo
      *
-     * <p><strong>Entradas:</strong> int linea, int columna, String destino</p>
+     * Objetivo: Inicializar una instancia de EntradaNodo con los datos requeridos.
      *
-     * <p><strong>Salidas:</strong> Instancia inicializada de EntradaNodo.</p>
+     * Entrada: int linea; int columna; String destino.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Nueva instancia de EntradaNodo.
+     *
+     * Restricciones: Ninguna.
      */
     public EntradaNodo(int linea, int columna, String destino) {
         super(linea, columna);
@@ -26,13 +30,15 @@ public class EntradaNodo extends SentenciaNodo {
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * Nombre: getDestino
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Obtener el valor de Destino almacenado en la instancia.
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo String.
+     *
+     * Restricciones: Ninguna.
      */
     public String getDestino() {
         return destino;

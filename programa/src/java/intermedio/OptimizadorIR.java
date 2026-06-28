@@ -9,47 +9,46 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * <strong>Nombre:</strong> OptimizadorIR
+ * Nombre: OptimizadorIR
  *
- * <p><strong>Objetivo:</strong> Mejorar el código de tres direcciones antes de generar MIPS mediante
- * dos optimizaciones conservadoras:</p>
- * <ol>
- *   <li><b>Plegado y propagación de constantes</b> sobre temporales: evalúa en tiempo de compilación
- *       las operaciones aritméticas enteras cuyos dos operandos son literales (por ejemplo
- *       {@code _t0 = 5 * 2} pasa a {@code _t0 = 10}) y propaga ese valor a los usos posteriores del
- *       temporal.</li>
- *   <li><b>Eliminación de temporales muertos</b>: descarta las definiciones de temporales que, tras
- *       la propagación, ya no se leen en ninguna instrucción.</li>
- * </ol>
+ * Objetivo: Representar, generar u optimizar instrucciones de codigo intermedio.
  *
- * <p><strong>Entrada:</strong> Lista de {@link Instruccion} generada por {@link GeneradorCodigoIntermedio}.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Salida:</strong> Una nueva lista equivalente y, en general, más corta.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
  *
- * <p><strong>Restricciones:</strong> Solo pliega enteros no negativos (para no emitir literales que el
- * traductor MIPS no sabe leer) y nunca elimina instrucciones con efectos (llamadas, lecturas, saltos).
- * Los temporales son de asignación única, por lo que la propagación es segura entre bloques.</p>
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public final class OptimizadorIR {
 
     private static final Pattern ENTERO = Pattern.compile("[0-9]+");
 
     /**
-     * <strong>Nombre:</strong> optimizar
+     * Nombre: optimizar
      *
-     * <p><strong>Objetivo:</strong> Aplicar el plegado de constantes seguido de la eliminación de
-     * temporales muertos.</p>
+     * Objetivo: Aplicar optimizaciones sobre el codigo recibido.
      *
-     * <p><strong>Entrada:</strong> List&lt;Instruccion&gt; codigo.</p>
+     * Entrada: List<Instruccion> codigo.
      *
-     * <p><strong>Salida:</strong> Nueva lista optimizada.</p>
+     * Salida: Valor de tipo List<Instruccion>.
      *
-     * <p><strong>Restricciones:</strong> No modifica la lista de entrada.</p>
+     * Restricciones: Ninguna.
      */
     public List<Instruccion> optimizar(List<Instruccion> codigo) {
         return eliminarTemporalesMuertos(plegarConstantes(codigo));
     }
 
+    /**
+     * Nombre: plegarConstantes
+     *
+     * Objetivo: Ejecutar la operacion plegarConstantes definida por OptimizadorIR.
+     *
+     * Entrada: List<Instruccion> codigo.
+     *
+     * Salida: Valor de tipo List<Instruccion>.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private List<Instruccion> plegarConstantes(List<Instruccion> codigo) {
         Map<String, String> constantes = new HashMap<>();
         List<Instruccion> resultado = new ArrayList<>(codigo.size());
@@ -77,14 +76,31 @@ public final class OptimizadorIR {
         return resultado;
     }
 
+    /**
+     * Nombre: sustituir
+     *
+     * Objetivo: Ejecutar la operacion sustituir definida por OptimizadorIR.
+     *
+     * Entrada: String operando; Map<String; String> constantes.
+     *
+     * Salida: Valor de tipo String.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private String sustituir(String operando, Map<String, String> constantes) {
         return constantes.getOrDefault(operando, operando);
     }
 
     /**
-     * Evalúa una operación binaria entera con dos literales y devuelve el resultado, o {@code null} si
-     * no se puede o no se debe plegar (operación no aritmética, operandos no enteros, división por cero
-     * o resultado negativo que el traductor MIPS no representaría como literal).
+     * Nombre: evaluar
+     *
+     * Objetivo: Calcular el tipo, valor o resultado auxiliar solicitado.
+     *
+     * Entrada: Operacion op; String op1; String op2.
+     *
+     * Salida: Valor de tipo Integer.
+     *
+     * Restricciones: Uso interno de la clase.
      */
     private Integer evaluar(Operacion op, String op1, String op2) {
         if (!esEntero(op1) || !esEntero(op2)) {
@@ -106,6 +122,17 @@ public final class OptimizadorIR {
     }
 
     /** Potencia entera con la misma semántica que el bucle generado en MIPS (exponente &le; 0 da 1). */
+    /**
+     * Nombre: potencia
+     *
+     * Objetivo: Ejecutar la operacion potencia definida por OptimizadorIR.
+     *
+     * Entrada: int base; int exponente.
+     *
+     * Salida: Valor de tipo int.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private int potencia(int base, int exponente) {
         int acumulado = 1;
         for (int n = exponente; n > 0; n--) {
@@ -114,6 +141,17 @@ public final class OptimizadorIR {
         return acumulado;
     }
 
+    /**
+     * Nombre: eliminarTemporalesMuertos
+     *
+     * Objetivo: Ejecutar la operacion eliminarTemporalesMuertos definida por OptimizadorIR.
+     *
+     * Entrada: List<Instruccion> codigo.
+     *
+     * Salida: Valor de tipo List<Instruccion>.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private List<Instruccion> eliminarTemporalesMuertos(List<Instruccion> codigo) {
         Set<String> leidos = recolectarLecturas(codigo);
         List<Instruccion> resultado = new ArrayList<>(codigo.size());
@@ -127,6 +165,17 @@ public final class OptimizadorIR {
     }
 
     /** Conjunto de temporales que se leen en alguna instrucción (operandos y destinos que son lecturas). */
+    /**
+     * Nombre: recolectarLecturas
+     *
+     * Objetivo: Ejecutar la operacion recolectarLecturas definida por OptimizadorIR.
+     *
+     * Entrada: List<Instruccion> codigo.
+     *
+     * Salida: Valor de tipo Set<String>.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private Set<String> recolectarLecturas(List<Instruccion> codigo) {
         Set<String> temporales = new HashSet<>();
         for (Instruccion i : codigo) {
@@ -142,6 +191,17 @@ public final class OptimizadorIR {
     }
 
     /** Agrega cada temporal {@code _tN} que aparezca como token dentro del operando (incluye índices de arreglo). */
+    /**
+     * Nombre: agregarTemporales
+     *
+     * Objetivo: Ejecutar la operacion agregarTemporales definida por OptimizadorIR.
+     *
+     * Entrada: String operando; Set<String> destino.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private void agregarTemporales(String operando, Set<String> destino) {
         if (operando == null) {
             return;
@@ -152,11 +212,33 @@ public final class OptimizadorIR {
         }
     }
 
+    /**
+     * Nombre: esDefinicionPura
+     *
+     * Objetivo: Indicar si se cumple la condicion DefinicionPura.
+     *
+     * Entrada: Operacion op.
+     *
+     * Salida: Valor de tipo boolean.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private boolean esDefinicionPura(Operacion op) {
         return op == Operacion.ASIG || op == Operacion.LOAD || op == Operacion.NEG
                 || op == Operacion.NOT || esBinaria(op);
     }
 
+    /**
+     * Nombre: esBinaria
+     *
+     * Objetivo: Indicar si se cumple la condicion Binaria.
+     *
+     * Entrada: Operacion op.
+     *
+     * Salida: Valor de tipo boolean.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private boolean esBinaria(Operacion op) {
         switch (op) {
             case SUMA: case RESTA: case MULT: case DIV: case MOD: case POW:
@@ -168,10 +250,32 @@ public final class OptimizadorIR {
         }
     }
 
+    /**
+     * Nombre: esTemporal
+     *
+     * Objetivo: Indicar si se cumple la condicion Temporal.
+     *
+     * Entrada: String nombre.
+     *
+     * Salida: Valor de tipo boolean.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private boolean esTemporal(String nombre) {
         return nombre != null && nombre.startsWith("_t") && ENTERO.matcher(nombre.substring(2)).matches();
     }
 
+    /**
+     * Nombre: esEntero
+     *
+     * Objetivo: Indicar si se cumple la condicion Entero.
+     *
+     * Entrada: String valor.
+     *
+     * Salida: Valor de tipo boolean.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private boolean esEntero(String valor) {
         return valor != null && ENTERO.matcher(valor).matches();
     }

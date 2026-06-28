@@ -1,23 +1,27 @@
 package ast;
 
 /**
- * <strong>Objetivo:</strong> Sentencia de interrupcion de flujo dentro de estructuras como switch.
+ * Nombre: BreakNodo
  *
- * <p><strong>Entradas:</strong> Datos sintacticos reconocidos por el parser, posiciones de fuente y subnodos relacionados.</p>
+ * Objetivo: Representar BreakNodo dentro del arbol sintactico abstracto del lenguaje.
  *
- * <p><strong>Salidas:</strong> Nodos, valores o metadatos consultables por las fases semantica e intermedia.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Restricciones:</strong> No debe ejecutar validaciones globales ni escribir archivos; solo conserva estructura y metadatos.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public class BreakNodo extends SentenciaNodo {
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * Nombre: BreakNodo
      *
-     * <p><strong>Entradas:</strong> int linea, int columna</p>
+     * Objetivo: Inicializar una instancia de BreakNodo con los datos requeridos.
      *
-     * <p><strong>Salidas:</strong> Instancia inicializada de BreakNodo.</p>
+     * Entrada: int linea; int columna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Nueva instancia de BreakNodo.
+     *
+     * Restricciones: Ninguna.
      */
     public BreakNodo(int linea, int columna) {
         super(linea, columna, TipoDato.EMPTY);

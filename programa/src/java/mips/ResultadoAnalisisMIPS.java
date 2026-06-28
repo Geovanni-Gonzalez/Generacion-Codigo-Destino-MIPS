@@ -4,7 +4,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Resultado del primer recorrido del codigo intermedio antes de emitir MIPS.
+ * Nombre: ResultadoAnalisisMIPS
+ *
+ * Objetivo: Analizar, traducir, emitir u optimizar codigo destino MIPS.
+ *
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
+ *
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 final class ResultadoAnalisisMIPS {
     final Map<String, String> tipos = new LinkedHashMap<>();

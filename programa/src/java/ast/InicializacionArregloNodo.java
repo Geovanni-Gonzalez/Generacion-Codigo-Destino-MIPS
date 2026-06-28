@@ -5,24 +5,28 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * <strong>Objetivo:</strong> Literal compuesto que contiene los valores iniciales de un arreglo 2D.
+ * Nombre: InicializacionArregloNodo
  *
- * <p><strong>Entradas:</strong> Datos sintacticos reconocidos por el parser, posiciones de fuente y subnodos relacionados.</p>
+ * Objetivo: Representar InicializacionArregloNodo dentro del arbol sintactico abstracto del lenguaje.
  *
- * <p><strong>Salidas:</strong> Nodos, valores o metadatos consultables por las fases semantica e intermedia.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Restricciones:</strong> No debe ejecutar validaciones globales ni escribir archivos; solo conserva estructura y metadatos.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public class InicializacionArregloNodo extends Nodo {
     private final List<List<ExpresionNodo>> filas;
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * Nombre: InicializacionArregloNodo
      *
-     * <p><strong>Entradas:</strong> int linea, int columna, List<List<ExpresionNodo>> filas</p>
+     * Objetivo: Inicializar una instancia de InicializacionArregloNodo con los datos requeridos.
      *
-     * <p><strong>Salidas:</strong> Instancia inicializada de InicializacionArregloNodo.</p>
+     * Entrada: int linea; int columna; List<List<ExpresionNodo>> filas.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Nueva instancia de InicializacionArregloNodo.
+     *
+     * Restricciones: Ninguna.
      */
     public InicializacionArregloNodo(int linea, int columna, List<List<ExpresionNodo>> filas) {
         super(linea, columna);

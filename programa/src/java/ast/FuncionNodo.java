@@ -5,13 +5,15 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * <strong>Objetivo:</strong> Declaracion completa de una funcion o del procedimiento principal.
+ * Nombre: FuncionNodo
  *
- * <p><strong>Entradas:</strong> Datos sintacticos reconocidos por el parser, posiciones de fuente y subnodos relacionados.</p>
+ * Objetivo: Representar FuncionNodo dentro del arbol sintactico abstracto del lenguaje.
  *
- * <p><strong>Salidas:</strong> Nodos, valores o metadatos consultables por las fases semantica e intermedia.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Restricciones:</strong> No debe ejecutar validaciones globales ni escribir archivos; solo conserva estructura y metadatos.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public class FuncionNodo extends Nodo {
     private final String nombre;
@@ -38,65 +40,75 @@ public class FuncionNodo extends Nodo {
         this.principal = principal;
     }
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * Nombre: getNombre
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Obtener el valor de Nombre almacenado en la instancia.
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo String.
+     *
+     * Restricciones: Ninguna.
      */
     public String getNombre() {
         return nombre;
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * Nombre: getTipoRetorno
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Obtener el valor de TipoRetorno almacenado en la instancia.
      *
-     * <p><strong>Salidas:</strong> Retorna TipoDato.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo TipoDato.
+     *
+     * Restricciones: Ninguna.
      */
     public TipoDato getTipoRetorno() {
         return tipoRetorno;
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * Nombre: getParametros
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Obtener el valor de Parametros almacenado en la instancia.
      *
-     * <p><strong>Salidas:</strong> Retorna List<ParametroNodo>.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo List<ParametroNodo>.
+     *
+     * Restricciones: Ninguna.
      */
     public List<ParametroNodo> getParametros() {
         return Collections.unmodifiableList(parametros);
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * Nombre: getCuerpo
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Obtener el valor de Cuerpo almacenado en la instancia.
      *
-     * <p><strong>Salidas:</strong> Retorna BloqueNodo.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo BloqueNodo.
+     *
+     * Restricciones: Ninguna.
      */
     public BloqueNodo getCuerpo() {
         return cuerpo;
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta una condicion booleana del objeto.
+     * Nombre: isPrincipal
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Indicar si se cumple la condicion Principal.
      *
-     * <p><strong>Salidas:</strong> Retorna boolean.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo boolean.
+     *
+     * Restricciones: Ninguna.
      */
     public boolean isPrincipal() {
         return principal;

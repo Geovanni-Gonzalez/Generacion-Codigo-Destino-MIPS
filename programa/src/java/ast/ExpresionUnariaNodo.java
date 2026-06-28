@@ -1,25 +1,29 @@
 package ast;
 
 /**
- * <strong>Objetivo:</strong> Expresion formada por un operador unario y un unico operando.
+ * Nombre: ExpresionUnariaNodo
  *
- * <p><strong>Entradas:</strong> Datos sintacticos reconocidos por el parser, posiciones de fuente y subnodos relacionados.</p>
+ * Objetivo: Representar ExpresionUnariaNodo dentro del arbol sintactico abstracto del lenguaje.
  *
- * <p><strong>Salidas:</strong> Nodos, valores o metadatos consultables por las fases semantica e intermedia.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Restricciones:</strong> No debe ejecutar validaciones globales ni escribir archivos; solo conserva estructura y metadatos.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public class ExpresionUnariaNodo extends ExpresionNodo {
     private final String operador;
     private final ExpresionNodo expresion;
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * Nombre: ExpresionUnariaNodo
      *
-     * <p><strong>Entradas:</strong> int linea, int columna, String operador, ExpresionNodo expresion</p>
+     * Objetivo: Inicializar una instancia de ExpresionUnariaNodo con los datos requeridos.
      *
-     * <p><strong>Salidas:</strong> Instancia inicializada de ExpresionUnariaNodo.</p>
+     * Entrada: int linea; int columna; String operador; ExpresionNodo expresion.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Nueva instancia de ExpresionUnariaNodo.
+     *
+     * Restricciones: Ninguna.
      */
     public ExpresionUnariaNodo(int linea, int columna, String operador, ExpresionNodo expresion) {
         super(linea, columna);
@@ -27,26 +31,30 @@ public class ExpresionUnariaNodo extends ExpresionNodo {
         this.expresion = expresion;
     }
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * Nombre: getOperador
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Obtener el valor de Operador almacenado en la instancia.
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo String.
+     *
+     * Restricciones: Ninguna.
      */
     public String getOperador() {
         return operador;
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * Nombre: getExpresion
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Obtener el valor de Expresion almacenado en la instancia.
      *
-     * <p><strong>Salidas:</strong> Retorna ExpresionNodo.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo ExpresionNodo.
+     *
+     * Restricciones: Ninguna.
      */
     public ExpresionNodo getExpresion() {
         return expresion;

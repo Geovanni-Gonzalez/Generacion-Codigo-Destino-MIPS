@@ -3,7 +3,15 @@ package mips;
 import java.util.Map;
 
 /**
- * Resuelve operandos, cargas, guardados y direcciones de memoria para la traduccion MIPS.
+ * Nombre: TraductorMemoriaMIPS
+ *
+ * Objetivo: Analizar, traducir, emitir u optimizar codigo destino MIPS.
+ *
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
+ *
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 final class TraductorMemoriaMIPS {
     private final EmisorMIPS salida;
@@ -27,6 +35,17 @@ final class TraductorMemoriaMIPS {
         this.flotantes = flotantes;
     }
 
+    /**
+     * Nombre: tipoOperando
+     *
+     * Objetivo: Ejecutar la operacion tipoOperando definida por TraductorMemoriaMIPS.
+     *
+     * Entrada: String operando; String funcion.
+     *
+     * Salida: Valor de tipo String.
+     *
+     * Restricciones: Ninguna.
+     */
     String tipoOperando(String operando, String funcion) {
         if (operando == null) {
             return "int";
@@ -51,12 +70,34 @@ final class TraductorMemoriaMIPS {
         return tipos.getOrDefault(EtiquetasMIPS.clave(funcion, base), "int");
     }
 
+    /**
+     * Nombre: cargarValor
+     *
+     * Objetivo: Cargar un operando o valor en el registro requerido.
+     *
+     * Entrada: String operando; String funcion.
+     *
+     * Salida: Valor de tipo String.
+     *
+     * Restricciones: Ninguna.
+     */
     String cargarValor(String operando, String funcion) {
         String registro = registros.obtenerRegistro();
         cargarEntero(operando, registro, funcion);
         return registro;
     }
 
+    /**
+     * Nombre: cargarEntero
+     *
+     * Objetivo: Cargar un operando o valor en el registro requerido.
+     *
+     * Entrada: String operando; String registro; String funcion.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Ninguna.
+     */
     void cargarEntero(String operando, String registro, String funcion) {
         if (operando == null) {
             salida.instruccion("move " + registro + ", $zero");
@@ -76,6 +117,17 @@ final class TraductorMemoriaMIPS {
         }
     }
 
+    /**
+     * Nombre: cargarFloat
+     *
+     * Objetivo: Cargar un operando o valor en el registro requerido.
+     *
+     * Entrada: String operando; String registro; String funcion.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Ninguna.
+     */
     void cargarFloat(String operando, String registro, String funcion) {
         if (OperandosMIPS.esFloatLiteral(operando)) {
             salida.instruccion("l.s " + registro + ", " + flotantes.get(operando));
@@ -91,6 +143,17 @@ final class TraductorMemoriaMIPS {
         }
     }
 
+    /**
+     * Nombre: guardar
+     *
+     * Objetivo: Guardar un valor en la variable, temporal o posicion destino.
+     *
+     * Entrada: String destino; String registroEntero; String registroFloat; String funcion.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Ninguna.
+     */
     void guardar(String destino, String registroEntero, String registroFloat, String funcion) {
         if (OperandosMIPS.esAccesoArreglo(destino)) {
             direccionArreglo(destino, RegistrosMIPS.SCRATCH_DIRECCION, funcion);
@@ -104,12 +167,34 @@ final class TraductorMemoriaMIPS {
         }
     }
 
+    /**
+     * Nombre: etiqueta
+     *
+     * Objetivo: Construir o devolver una etiqueta valida para codigo MIPS.
+     *
+     * Entrada: String operando; String funcion.
+     *
+     * Salida: Valor de tipo String.
+     *
+     * Restricciones: Ninguna.
+     */
     String etiqueta(String operando, String funcion) {
         String base = OperandosMIPS.esAccesoArreglo(operando)
                 ? operando.substring(0, operando.indexOf('[')) : operando;
         return direccionDato(EtiquetasMIPS.clave(funcion, base));
     }
 
+    /**
+     * Nombre: direccionArreglo
+     *
+     * Objetivo: Ejecutar la operacion direccionArreglo definida por TraductorMemoriaMIPS.
+     *
+     * Entrada: String acceso; String registroDireccion; String funcion.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Ninguna.
+     */
     void direccionArreglo(String acceso, String registroDireccion, String funcion) {
         int primero = acceso.indexOf('[');
         String nombre = acceso.substring(0, primero);
@@ -133,6 +218,17 @@ final class TraductorMemoriaMIPS {
         salida.instruccion("add " + registroDireccion + ", " + registroDireccion + ", " + fil);
     }
 
+    /**
+     * Nombre: direccionDato
+     *
+     * Objetivo: Ejecutar la operacion direccionDato definida por TraductorMemoriaMIPS.
+     *
+     * Entrada: String clave.
+     *
+     * Salida: Valor de tipo String.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private String direccionDato(String clave) {
         String direccion = direcciones.get(clave);
         if (direccion == null) {

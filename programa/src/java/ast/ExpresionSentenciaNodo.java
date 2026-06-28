@@ -1,24 +1,28 @@
 package ast;
 
 /**
- * <strong>Objetivo:</strong> Sentencia compuesta por una expresion usada por su efecto lateral.
+ * Nombre: ExpresionSentenciaNodo
  *
- * <p><strong>Entradas:</strong> Datos sintacticos reconocidos por el parser, posiciones de fuente y subnodos relacionados.</p>
+ * Objetivo: Representar ExpresionSentenciaNodo dentro del arbol sintactico abstracto del lenguaje.
  *
- * <p><strong>Salidas:</strong> Nodos, valores o metadatos consultables por las fases semantica e intermedia.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Restricciones:</strong> No debe ejecutar validaciones globales ni escribir archivos; solo conserva estructura y metadatos.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public class ExpresionSentenciaNodo extends SentenciaNodo {
     private final ExpresionNodo expresion;
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * Nombre: ExpresionSentenciaNodo
      *
-     * <p><strong>Entradas:</strong> int linea, int columna, ExpresionNodo expresion</p>
+     * Objetivo: Inicializar una instancia de ExpresionSentenciaNodo con los datos requeridos.
      *
-     * <p><strong>Salidas:</strong> Instancia inicializada de ExpresionSentenciaNodo.</p>
+     * Entrada: int linea; int columna; ExpresionNodo expresion.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Nueva instancia de ExpresionSentenciaNodo.
+     *
+     * Restricciones: Ninguna.
      */
     public ExpresionSentenciaNodo(int linea, int columna, ExpresionNodo expresion) {
         super(linea, columna);
@@ -26,13 +30,15 @@ public class ExpresionSentenciaNodo extends SentenciaNodo {
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * Nombre: getExpresion
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Obtener el valor de Expresion almacenado en la instancia.
      *
-     * <p><strong>Salidas:</strong> Retorna ExpresionNodo.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo ExpresionNodo.
+     *
+     * Restricciones: Ninguna.
      */
     public ExpresionNodo getExpresion() {
         return expresion;

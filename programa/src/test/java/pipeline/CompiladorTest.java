@@ -78,7 +78,7 @@ class CompiladorTest {
         assertTrue(mips.contains(".text"), mips);
         assertTrue(mips.contains(".globl main"), mips);
         assertTrue(mips.contains("main:"), mips);
-        assertTrue(mips.contains("d___main___x: .word 0"), mips);
+        assertTrue(mips.contains("d_main_x: .word 0"), mips);
         // Epilogo de salida del programa (syscall 10).
         assertTrue(mips.contains("li $v0, 10"), mips);
         assertTrue(mips.contains("syscall"), mips);
@@ -87,7 +87,7 @@ class CompiladorTest {
         assertTrue(mips.contains("move $t0, $t2"), mips);
         assertTrue(mips.contains("mov.s $f0, $f4"), mips);
         // El store/load redundante al mismo registro debe haberse eliminado.
-        assertFalse(mips.contains("sw $t0, d___main____t9\n\tlw $t0, d___main____t9"), mips);
+        assertFalse(mips.contains("sw $t0, d_main_t9\n\tlw $t0, d_main_t9"), mips);
     }
 
     private static String irComoTexto(List<Instruccion> codigo) {

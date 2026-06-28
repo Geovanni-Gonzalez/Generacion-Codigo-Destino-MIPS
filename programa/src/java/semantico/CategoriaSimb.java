@@ -1,16 +1,15 @@
 package semantico;
 
 /**
- * <strong>Nombre:</strong> CategoriaSimb
+ * Nombre: CategoriaSimb
  *
- * <p><strong>Objetivo:</strong> Clasificar el rol de un símbolo dentro de la tabla de símbolos:
- * distingue variables, arreglos, parámetros y funciones.</p>
+ * Objetivo: Validar reglas semanticas y administrar informacion de simbolos.
  *
- * <p><strong>Entrada:</strong> Ninguna; son constantes fijas del enum.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Salida:</strong> Valores de categoría usados por la tabla de símbolos.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
  *
- * <p><strong>Restricciones:</strong> Ninguna.</p>
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public enum CategoriaSimb {
     /** Variable escalar declarada en un alcance. */

@@ -7,13 +7,32 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Recolecta tipos, constantes, arreglos y metadatos de funciones necesarios para emitir MIPS.
+ * Nombre: AnalizadorIRMIPS
+ *
+ * Objetivo: Analizar, traducir, emitir u optimizar codigo destino MIPS.
+ *
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
+ *
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 final class AnalizadorIRMIPS {
     private final ResultadoAnalisisMIPS resultado = new ResultadoAnalisisMIPS();
     private int contadorCadena;
     private int contadorFlotante;
 
+    /**
+     * Nombre: analizar
+     *
+     * Objetivo: Ejecutar la operacion analizar definida por AnalizadorIRMIPS.
+     *
+     * Entrada: List<Instruccion> codigo.
+     *
+     * Salida: Valor de tipo ResultadoAnalisisMIPS.
+     *
+     * Restricciones: Ninguna.
+     */
     ResultadoAnalisisMIPS analizar(List<Instruccion> codigo) {
         recolectarDeclaracionesYConstantes(codigo);
         propagarTipos(codigo);
@@ -21,6 +40,17 @@ final class AnalizadorIRMIPS {
         return resultado;
     }
 
+    /**
+     * Nombre: recolectarDeclaracionesYConstantes
+     *
+     * Objetivo: Ejecutar la operacion recolectarDeclaracionesYConstantes definida por AnalizadorIRMIPS.
+     *
+     * Entrada: List<Instruccion> codigo.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private void recolectarDeclaracionesYConstantes(List<Instruccion> codigo) {
         String funcion = null;
         for (Instruccion instruccion : codigo) {
@@ -58,6 +88,17 @@ final class AnalizadorIRMIPS {
         }
     }
 
+    /**
+     * Nombre: propagarTipos
+     *
+     * Objetivo: Ejecutar la operacion propagarTipos definida por AnalizadorIRMIPS.
+     *
+     * Entrada: List<Instruccion> codigo.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private void propagarTipos(List<Instruccion> codigo) {
         for (int vuelta = 0; vuelta < 4; vuelta++) {
             String funcion = null;
@@ -85,6 +126,17 @@ final class AnalizadorIRMIPS {
         }
     }
 
+    /**
+     * Nombre: construirTablaDirecciones
+     *
+     * Objetivo: Ejecutar la operacion construirTablaDirecciones definida por AnalizadorIRMIPS.
+     *
+     * Entrada: Ninguna.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private void construirTablaDirecciones() {
         Map<String, Integer> repeticiones = new LinkedHashMap<>();
         for (String clave : resultado.tipos.keySet()) {
@@ -95,6 +147,17 @@ final class AnalizadorIRMIPS {
         }
     }
 
+    /**
+     * Nombre: tipoResultado
+     *
+     * Objetivo: Ejecutar la operacion tipoResultado definida por AnalizadorIRMIPS.
+     *
+     * Entrada: Instruccion i; String funcion.
+     *
+     * Salida: Valor de tipo String.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private String tipoResultado(Instruccion i, String funcion) {
         switch (i.op) {
             case LOAD:
@@ -125,6 +188,17 @@ final class AnalizadorIRMIPS {
         }
     }
 
+    /**
+     * Nombre: tipoOperando
+     *
+     * Objetivo: Ejecutar la operacion tipoOperando definida por AnalizadorIRMIPS.
+     *
+     * Entrada: String operando; String funcion.
+     *
+     * Salida: Valor de tipo String.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private String tipoOperando(String operando, String funcion) {
         if (operando == null) {
             return "int";
@@ -149,6 +223,17 @@ final class AnalizadorIRMIPS {
         return resultado.tipos.getOrDefault(EtiquetasMIPS.clave(funcion, base), "int");
     }
 
+    /**
+     * Nombre: registrarConstante
+     *
+     * Objetivo: Registrar informacion en las estructuras internas de la fase actual.
+     *
+     * Entrada: String valor.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private void registrarConstante(String valor) {
         if (OperandosMIPS.esCadena(valor)) {
             resultado.cadenas.computeIfAbsent(valor, k -> "_str_" + contadorCadena++);
@@ -157,6 +242,17 @@ final class AnalizadorIRMIPS {
         }
     }
 
+    /**
+     * Nombre: dimensiones
+     *
+     * Objetivo: Ejecutar la operacion dimensiones definida por AnalizadorIRMIPS.
+     *
+     * Entrada: String texto.
+     *
+     * Salida: Valor de tipo int[].
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private static int[] dimensiones(String texto) {
         if (texto != null && texto.matches("\\[[0-9]+\\]\\[[0-9]+\\]")) {
             int medio = texto.indexOf("][");

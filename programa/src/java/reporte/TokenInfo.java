@@ -1,16 +1,15 @@
 package reporte;
 
 /**
- * <strong>Nombre:</strong> TokenInfo
+ * Nombre: TokenInfo
  *
- * <p><strong>Objetivo:</strong> Guardar, en una fila inmutable, la información de un token que el
- * lexer envía a los reportes de tokens y de tabla de símbolos.</p>
+ * Objetivo: Formatear o escribir reportes y artefactos generados por el compilador.
  *
- * <p><strong>Entrada:</strong> Id, nombre, lexema, línea, columna, tabla e información del token.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Salida:</strong> Registro consultable por los escritores de reportes.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
  *
- * <p><strong>Restricciones:</strong> Sus campos son finales (no cambian tras crearse).</p>
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public class TokenInfo {
     /** Identificador numérico del token según la tabla generada por CUP. */

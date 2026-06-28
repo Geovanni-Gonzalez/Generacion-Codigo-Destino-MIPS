@@ -8,31 +8,41 @@ import java.nio.file.Path;
 import java.util.List;
 
 /**
- * <strong>Nombre:</strong> EscritorReportes
+ * Nombre: EscritorReportes
  *
- * <p><strong>Objetivo:</strong> Generar los archivos de reporte de la línea de comandos: tokens,
- * tabla de símbolos, errores, resultado sintáctico y código intermedio.</p>
+ * Objetivo: Formatear o escribir reportes y artefactos generados por el compilador.
  *
- * <p><strong>Entrada:</strong> Rutas de salida y los datos ya calculados por las fases de análisis.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Salida:</strong> Archivos de texto escritos en UTF-8.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
  *
- * <p><strong>Restricciones:</strong> Clase utilitaria; solo formatea y persiste, no analiza.</p>
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public final class EscritorReportes {
+    /**
+     * Nombre: EscritorReportes
+     *
+     * Objetivo: Inicializar una instancia de EscritorReportes con los datos requeridos.
+     *
+     * Entrada: Ninguna.
+     *
+     * Salida: Nueva instancia de EscritorReportes.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private EscritorReportes() {
     }
 
     /**
-     * <strong>Nombre:</strong> escribirTokens
+     * Nombre: escribirTokens
      *
-     * <p><strong>Objetivo:</strong> Escribir la lista completa de tokens reconocidos por el lexer, en formato de tabla.</p>
+     * Objetivo: Indicar si se cumple la condicion cribirTokens.
      *
-     * <p><strong>Entrada:</strong> Path archivo, List&lt;TokenInfo&gt; tokens.</p>
+     * Entrada: Path archivo; List<TokenInfo> tokens.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Puede propagar Exception.
      */
     public static void escribirTokens(Path archivo, List<TokenInfo> tokens) throws Exception {
         try (BufferedWriter writer = Files.newBufferedWriter(archivo, StandardCharsets.UTF_8)) {
@@ -48,15 +58,15 @@ public final class EscritorReportes {
     }
 
     /**
-     * <strong>Nombre:</strong> escribirTablaSimbolos
+     * Nombre: escribirTablaSimbolos
      *
-     * <p><strong>Objetivo:</strong> Escribir una vista tabular de los símbolos léxicos recolectados.</p>
+     * Objetivo: Indicar si se cumple la condicion cribirTablaSimbolos.
      *
-     * <p><strong>Entrada:</strong> Path archivo, List&lt;TokenInfo&gt; tokens.</p>
+     * Entrada: Path archivo; List<TokenInfo> tokens.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Puede propagar Exception.
      */
     public static void escribirTablaSimbolos(Path archivo, List<TokenInfo> tokens) throws Exception {
         try (BufferedWriter writer = Files.newBufferedWriter(archivo, StandardCharsets.UTF_8)) {
@@ -103,15 +113,15 @@ public final class EscritorReportes {
     }
 
     /**
-     * <strong>Nombre:</strong> escribirResultado
+     * Nombre: escribirResultado
      *
-     * <p><strong>Objetivo:</strong> Escribir el veredicto global de aceptación del programa fuente.</p>
+     * Objetivo: Indicar si se cumple la condicion cribirResultado.
      *
-     * <p><strong>Entrada:</strong> Path archivo, Path fuente, boolean aceptado.</p>
+     * Entrada: Path archivo; Path fuente; boolean aceptado.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Puede propagar Exception.
      */
     public static void escribirResultado(Path archivo, Path fuente, boolean aceptado) throws Exception {
         try (BufferedWriter writer = Files.newBufferedWriter(archivo, StandardCharsets.UTF_8)) {
@@ -125,15 +135,15 @@ public final class EscritorReportes {
     }
 
     /**
-     * <strong>Nombre:</strong> escribirCodigoIntermedio
+     * Nombre: escribirCodigoIntermedio
      *
-     * <p><strong>Objetivo:</strong> Escribir instrucciones intermedias sin encabezado, una por línea.</p>
+     * Objetivo: Indicar si se cumple la condicion cribirCodigoIntermedio.
      *
-     * <p><strong>Entrada:</strong> Path archivo, List&lt;Instruccion&gt; instrucciones.</p>
+     * Entrada: Path archivo; List<Instruccion> instrucciones.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Puede propagar Exception.
      */
     public static void escribirCodigoIntermedio(Path archivo, List<Instruccion> instrucciones) throws Exception {
         try (BufferedWriter writer = Files.newBufferedWriter(archivo, StandardCharsets.UTF_8)) {

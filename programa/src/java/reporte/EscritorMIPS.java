@@ -7,18 +7,28 @@ import java.nio.file.Path;
 import pipeline.ResultadoCompilacion;
 
 /**
- * <strong>Nombre:</strong> EscritorMIPS
+ * Nombre: EscritorMIPS
  *
- * <p><strong>Objetivo:</strong> Guardar en disco el ensamblador MIPS generado para un archivo
- * fuente aceptado, en un archivo con extensión {@code .asm}.</p>
+ * Objetivo: Formatear o escribir reportes y artefactos generados por el compilador.
  *
- * <p><strong>Entrada:</strong> El directorio de salida y el resultado de la compilación.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Salida:</strong> Un archivo {@code .asm} y la ruta de dicho archivo.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
  *
- * <p><strong>Restricciones:</strong> Clase utilitaria; no se instancia.</p>
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public final class EscritorMIPS {
+    /**
+     * Nombre: EscritorMIPS
+     *
+     * Objetivo: Inicializar una instancia de EscritorMIPS con los datos requeridos.
+     *
+     * Entrada: Ninguna.
+     *
+     * Salida: Nueva instancia de EscritorMIPS.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private EscritorMIPS() {
     }
 
@@ -52,16 +62,15 @@ public final class EscritorMIPS {
     }
 
     /**
-     * <strong>Nombre:</strong> resolverArchivoSalida
+     * Nombre: resolverArchivoSalida
      *
-     * <p><strong>Objetivo:</strong> Calcular la ruta destino: el mismo nombre base que el fuente pero
-     * con extensión {@code .asm}.</p>
+     * Objetivo: Resolver una ruta, etiqueta o referencia a partir de la entrada.
      *
-     * <p><strong>Entrada:</strong> Path directorioSalida, Path fuente.</p>
+     * Entrada: Path directorioSalida; Path fuente.
      *
-     * <p><strong>Salida:</strong> Path del archivo {@code .asm} destino.</p>
+     * Salida: Valor de tipo Path.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public static Path resolverArchivoSalida(Path directorioSalida, Path fuente) {
         String nombre = fuente.getFileName().toString();

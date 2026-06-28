@@ -9,16 +9,15 @@ import lexico.MiLexer;
 import sintactico.Parser;
 
 /**
- * <strong>Nombre:</strong> ResultadoCompilacion
+ * Nombre: ResultadoCompilacion
  *
- * <p><strong>Objetivo:</strong> Empaquetar de forma inmutable todo lo que produce una corrida del
- * compilador: la ruta fuente, el lexer y el parser usados, si fue aceptado y el código intermedio y MIPS.</p>
+ * Objetivo: Coordinar fases del compilador o transportar resultados entre ellas.
  *
- * <p><strong>Entrada:</strong> Los artefactos generados por el {@link Compilador}.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Salida:</strong> Objeto consultado por los escritores de reportes y de código.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
  *
- * <p><strong>Restricciones:</strong> Es inmutable; expone las listas como solo lectura.</p>
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public class ResultadoCompilacion {
     private final Path fuente;
@@ -53,105 +52,105 @@ public class ResultadoCompilacion {
     }
 
     /**
-     * <strong>Nombre:</strong> getFuente
+     * Nombre: getFuente
      *
-     * <p><strong>Objetivo:</strong> Devolver la ruta del archivo fuente procesado.</p>
+     * Objetivo: Obtener el valor de Fuente almacenado en la instancia.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> Path del archivo fuente.</p>
+     * Salida: Valor de tipo Path.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public Path getFuente() {
         return fuente;
     }
 
     /**
-     * <strong>Nombre:</strong> getLexerTokens
+     * Nombre: getLexerTokens
      *
-     * <p><strong>Objetivo:</strong> Devolver el lexer que conserva el reporte de tokens y los errores léxicos.</p>
+     * Objetivo: Obtener el valor de LexerTokens almacenado en la instancia.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> MiLexer de la pasada de tokens.</p>
+     * Salida: Valor de tipo MiLexer.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public MiLexer getLexerTokens() {
         return lexerTokens;
     }
 
     /**
-     * <strong>Nombre:</strong> getParser
+     * Nombre: getParser
      *
-     * <p><strong>Objetivo:</strong> Devolver el parser con el AST, la tabla de símbolos y los errores sintácticos.</p>
+     * Objetivo: Obtener el valor de Parser almacenado en la instancia.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> Parser usado en la compilación.</p>
+     * Salida: Valor de tipo Parser.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public Parser getParser() {
         return parser;
     }
 
     /**
-     * <strong>Nombre:</strong> isSintaxisCompleta
+     * Nombre: isSintaxisCompleta
      *
-     * <p><strong>Objetivo:</strong> Indicar si el parser terminó sin una excepción irrecuperable.</p>
+     * Objetivo: Indicar si se cumple la condicion SintaxisCompleta.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> boolean; true si el parseo concluyó.</p>
+     * Salida: Valor de tipo boolean.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public boolean isSintaxisCompleta() {
         return sintaxisCompleta;
     }
 
     /**
-     * <strong>Nombre:</strong> isAceptado
+     * Nombre: isAceptado
      *
-     * <p><strong>Objetivo:</strong> Indicar si el fuente superó los análisis léxico, sintáctico y semántico.</p>
+     * Objetivo: Indicar si se cumple la condicion Aceptado.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> boolean; true si no hubo errores.</p>
+     * Salida: Valor de tipo boolean.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public boolean isAceptado() {
         return aceptado;
     }
 
     /**
-     * <strong>Nombre:</strong> getCodigoIntermedio
+     * Nombre: getCodigoIntermedio
      *
-     * <p><strong>Objetivo:</strong> Devolver el código intermedio generado.</p>
+     * Objetivo: Obtener el valor de CodigoIntermedio almacenado en la instancia.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> List&lt;Instruccion&gt; no modificable (vacía si no fue aceptado).</p>
+     * Salida: Valor de tipo List<Instruccion>.
      *
-     * <p><strong>Restricciones:</strong> La lista no se puede modificar.</p>
+     * Restricciones: Ninguna.
      */
     public List<Instruccion> getCodigoIntermedio() {
         return Collections.unmodifiableList(codigoIntermedio);
     }
 
     /**
-     * <strong>Nombre:</strong> getCodigoMIPS
+     * Nombre: getCodigoMIPS
      *
-     * <p><strong>Objetivo:</strong> Devolver el programa MIPS generado.</p>
+     * Objetivo: Obtener el valor de CodigoMIPS almacenado en la instancia.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> List&lt;String&gt; no modificable (vacía si no fue aceptado).</p>
+     * Salida: Valor de tipo List<String>.
      *
-     * <p><strong>Restricciones:</strong> La lista no se puede modificar.</p>
+     * Restricciones: Ninguna.
      */
     public List<String> getCodigoMIPS() {
         return Collections.unmodifiableList(codigoMIPS);

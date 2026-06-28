@@ -1,24 +1,28 @@
 package ast;
 
 /**
- * <strong>Objetivo:</strong> Expresion hoja que representa un literal del codigo fuente.
+ * Nombre: LiteralNodo
  *
- * <p><strong>Entradas:</strong> Datos sintacticos reconocidos por el parser, posiciones de fuente y subnodos relacionados.</p>
+ * Objetivo: Representar LiteralNodo dentro del arbol sintactico abstracto del lenguaje.
  *
- * <p><strong>Salidas:</strong> Nodos, valores o metadatos consultables por las fases semantica e intermedia.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Restricciones:</strong> No debe ejecutar validaciones globales ni escribir archivos; solo conserva estructura y metadatos.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public class LiteralNodo extends ExpresionNodo {
     private final Object valor;
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * Nombre: LiteralNodo
      *
-     * <p><strong>Entradas:</strong> int linea, int columna, Object valor, TipoDato tipo</p>
+     * Objetivo: Inicializar una instancia de LiteralNodo con los datos requeridos.
      *
-     * <p><strong>Salidas:</strong> Instancia inicializada de LiteralNodo.</p>
+     * Entrada: int linea; int columna; Object valor; TipoDato tipo.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Nueva instancia de LiteralNodo.
+     *
+     * Restricciones: Ninguna.
      */
     public LiteralNodo(int linea, int columna, Object valor, TipoDato tipo) {
         super(linea, columna, tipo);
@@ -26,13 +30,15 @@ public class LiteralNodo extends ExpresionNodo {
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * Nombre: getValor
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Obtener el valor de Valor almacenado en la instancia.
      *
-     * <p><strong>Salidas:</strong> Retorna Object.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo Object.
+     *
+     * Restricciones: Ninguna.
      */
     public Object getValor() {
         return valor;

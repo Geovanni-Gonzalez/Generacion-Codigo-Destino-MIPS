@@ -8,16 +8,15 @@ import java.util.Set;
 import pipeline.CompiladorInternoException;
 
 /**
- * <strong>Nombre:</strong> AdministradorRegistros
+ * Nombre: AdministradorRegistros
  *
- * <p><strong>Objetivo:</strong> Administrar el banco de registros temporales ({@code $t0}–{@code $t5})
- * que usa el generador MIPS: entregar registros libres, marcarlos como ocupados y liberarlos.</p>
+ * Objetivo: Analizar, traducir, emitir u optimizar codigo destino MIPS.
  *
- * <p><strong>Entrada:</strong> Peticiones de obtener y liberar registros durante la generación.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Salida:</strong> Nombres de registros temporales disponibles.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
  *
- * <p><strong>Restricciones:</strong> Si se piden más registros de los disponibles, lanza un error.</p>
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public final class AdministradorRegistros {
     private static final String[] REGISTROS = RegistrosMIPS.POOL_TEMPORALES;
@@ -25,31 +24,30 @@ public final class AdministradorRegistros {
     private final Set<String> ocupados = new LinkedHashSet<>();
 
     /**
-     * <strong>Nombre:</strong> AdministradorRegistros
+     * Nombre: AdministradorRegistros
      *
-     * <p><strong>Objetivo:</strong> Crear el administrador con todos los registros libres.</p>
+     * Objetivo: Inicializar una instancia de AdministradorRegistros con los datos requeridos.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> Nueva instancia de AdministradorRegistros.</p>
+     * Salida: Nueva instancia de AdministradorRegistros.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public AdministradorRegistros() {
         reiniciar();
     }
 
     /**
-     * <strong>Nombre:</strong> obtenerRegistro
+     * Nombre: obtenerRegistro
      *
-     * <p><strong>Objetivo:</strong> Obtener un registro temporal libre y marcarlo como ocupado.</p>
+     * Objetivo: Ejecutar la operacion obtenerRegistro definida por AdministradorRegistros.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> String con el nombre del registro.</p>
+     * Salida: Valor de tipo String.
      *
-     * <p><strong>Restricciones:</strong> Lanza {@link CompiladorInternoException} si no hay registros
-     * disponibles, de modo que el pipeline lo reporte como error de generación en vez de abortar.</p>
+     * Restricciones: Ninguna.
      */
     public String obtenerRegistro() {
         String registro = disponibles.pollFirst();
@@ -63,15 +61,15 @@ public final class AdministradorRegistros {
     }
 
     /**
-     * <strong>Nombre:</strong> liberarRegistro
+     * Nombre: liberarRegistro
      *
-     * <p><strong>Objetivo:</strong> Liberar un registro para que pueda reutilizarse en la siguiente operación.</p>
+     * Objetivo: Ejecutar la operacion liberarRegistro definida por AdministradorRegistros.
      *
-     * <p><strong>Entrada:</strong> String registro.</p>
+     * Entrada: String registro.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ignora valores {@code null} o registros que no estaban ocupados.</p>
+     * Restricciones: Ninguna.
      */
     public void liberarRegistro(String registro) {
         if (registro != null && ocupados.remove(registro)) {
@@ -80,15 +78,15 @@ public final class AdministradorRegistros {
     }
 
     /**
-     * <strong>Nombre:</strong> reiniciar
+     * Nombre: reiniciar
      *
-     * <p><strong>Objetivo:</strong> Restablecer el banco al iniciar una nueva generación.</p>
+     * Objetivo: Restablecer el estado interno a sus valores iniciales.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Deja todos los registros como disponibles.</p>
+     * Restricciones: Ninguna.
      */
     public void reiniciar() {
         disponibles.clear();
@@ -97,15 +95,15 @@ public final class AdministradorRegistros {
     }
 
     /**
-     * <strong>Nombre:</strong> cantidadDisponibles
+     * Nombre: cantidadDisponibles
      *
-     * <p><strong>Objetivo:</strong> Indicar cuántos registros temporales están libres.</p>
+     * Objetivo: Ejecutar la operacion cantidadDisponibles definida por AdministradorRegistros.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> int con la cantidad de registros disponibles.</p>
+     * Salida: Valor de tipo int.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public int cantidadDisponibles() {
         return disponibles.size();

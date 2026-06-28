@@ -1,26 +1,30 @@
 package ast;
 
 /**
- * <strong>Objetivo:</strong> Sentencia de ciclo while o do-while.
+ * Nombre: WhileNodo
  *
- * <p><strong>Entradas:</strong> Datos sintacticos reconocidos por el parser, posiciones de fuente y subnodos relacionados.</p>
+ * Objetivo: Representar WhileNodo dentro del arbol sintactico abstracto del lenguaje.
  *
- * <p><strong>Salidas:</strong> Nodos, valores o metadatos consultables por las fases semantica e intermedia.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Restricciones:</strong> No debe ejecutar validaciones globales ni escribir archivos; solo conserva estructura y metadatos.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public class WhileNodo extends SentenciaNodo {
     private final ExpresionNodo condicion;
     private final BloqueNodo cuerpo;
     private final boolean doWhile;
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * Nombre: WhileNodo
      *
-     * <p><strong>Entradas:</strong> int linea, int columna, ExpresionNodo condicion, BloqueNodo cuerpo, boolean doWhile</p>
+     * Objetivo: Inicializar una instancia de WhileNodo con los datos requeridos.
      *
-     * <p><strong>Salidas:</strong> Instancia inicializada de WhileNodo.</p>
+     * Entrada: int linea; int columna; ExpresionNodo condicion; BloqueNodo cuerpo; boolean doWhile.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Nueva instancia de WhileNodo.
+     *
+     * Restricciones: Ninguna.
      */
     public WhileNodo(int linea, int columna, ExpresionNodo condicion, BloqueNodo cuerpo, boolean doWhile) {
         super(linea, columna);
@@ -29,39 +33,45 @@ public class WhileNodo extends SentenciaNodo {
         this.doWhile = doWhile;
     }
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * Nombre: getCondicion
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Obtener el valor de Condicion almacenado en la instancia.
      *
-     * <p><strong>Salidas:</strong> Retorna ExpresionNodo.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo ExpresionNodo.
+     *
+     * Restricciones: Ninguna.
      */
     public ExpresionNodo getCondicion() {
         return condicion;
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * Nombre: getCuerpo
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Obtener el valor de Cuerpo almacenado en la instancia.
      *
-     * <p><strong>Salidas:</strong> Retorna BloqueNodo.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo BloqueNodo.
+     *
+     * Restricciones: Ninguna.
      */
     public BloqueNodo getCuerpo() {
         return cuerpo;
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta una condicion booleana del objeto.
+     * Nombre: isDoWhile
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Indicar si se cumple la condicion DoWhile.
      *
-     * <p><strong>Salidas:</strong> Retorna boolean.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo boolean.
+     *
+     * Restricciones: Ninguna.
      */
     public boolean isDoWhile() {
         return doWhile;

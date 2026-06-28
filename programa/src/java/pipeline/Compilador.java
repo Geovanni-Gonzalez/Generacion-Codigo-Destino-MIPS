@@ -18,31 +18,27 @@ import sintactico.Parser;
 import sintactico.sym;
 
 /**
- * <strong>Nombre:</strong> Compilador
+ * Nombre: Compilador
  *
- * <p><strong>Objetivo:</strong> Coordinar todas las fases del compilador en orden, desde el archivo
- * fuente hasta el código MIPS: validar el archivo, recorrer el lexer, ejecutar el parser (que hace
- * el análisis sintáctico y, dirigido por sintaxis, el semántico) y, solo si no hubo errores, generar
- * el código intermedio y el MIPS.</p>
+ * Objetivo: Coordinar fases del compilador o transportar resultados entre ellas.
  *
- * <p><strong>Entrada:</strong> La ruta del archivo fuente a compilar.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Salida:</strong> Un {@link ResultadoCompilacion} con todos los artefactos en memoria.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
  *
- * <p><strong>Restricciones:</strong> No escribe archivos; de eso se encarga la capa de reportes.</p>
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public class Compilador {
     /**
-     * <strong>Nombre:</strong> compilar
+     * Nombre: compilar
      *
-     * <p><strong>Objetivo:</strong> Compilar un archivo fuente y devolver todos sus artefactos en memoria.
-     * El código intermedio y el MIPS solo se generan si no hay errores léxicos, sintácticos ni semánticos.</p>
+     * Objetivo: Ejecutar la operacion compilar definida por Compilador.
      *
-     * <p><strong>Entrada:</strong> Path fuente.</p>
+     * Entrada: Path fuente.
      *
-     * <p><strong>Salida:</strong> ResultadoCompilacion con tokens, AST, errores y código generado.</p>
+     * Salida: Valor de tipo ResultadoCompilacion.
      *
-     * <p><strong>Restricciones:</strong> Lanza excepción si el archivo no es válido o legible.</p>
+     * Restricciones: Puede propagar Exception.
      */
     public ResultadoCompilacion compilar(Path fuente) throws Exception {
         validarFuente(fuente);
@@ -93,15 +89,15 @@ public class Compilador {
     }
 
     /**
-     * <strong>Nombre:</strong> validarFuente
+     * Nombre: validarFuente
      *
-     * <p><strong>Objetivo:</strong> Comprobar que el archivo exista, sea regular y se pueda leer.</p>
+     * Objetivo: Ejecutar la operacion validarFuente definida por Compilador.
      *
-     * <p><strong>Entrada:</strong> Path fuente.</p>
+     * Entrada: Path fuente.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Lanza IOException si alguna comprobación falla.</p>
+     * Restricciones: Puede propagar IOException; Uso interno de la clase.
      */
     private void validarFuente(Path fuente) throws IOException {
         if (fuente == null) {
@@ -119,33 +115,30 @@ public class Compilador {
     }
 
     /**
-     * <strong>Nombre:</strong> abrirFuente
+     * Nombre: abrirFuente
      *
-     * <p><strong>Objetivo:</strong> Abrir el archivo como UTF-8 para una pasada del lexer.</p>
+     * Objetivo: Abrir un contexto, alcance o fase de procesamiento.
      *
-     * <p><strong>Entrada:</strong> Path fuente.</p>
+     * Entrada: Path fuente.
      *
-     * <p><strong>Salida:</strong> Reader listo para recorrer el archivo.</p>
+     * Salida: Valor de tipo Reader.
      *
-     * <p><strong>Restricciones:</strong> El llamador debe cerrarlo.</p>
+     * Restricciones: Puede propagar IOException; Uso interno de la clase.
      */
     private Reader abrirFuente(Path fuente) throws IOException {
         return Files.newBufferedReader(fuente, StandardCharsets.UTF_8);
     }
 
     /**
-     * <strong>Nombre:</strong> consumirTokens
+     * Nombre: consumirTokens
      *
-     * <p><strong>Objetivo:</strong> Drenar el resto del flujo léxico hasta el fin de archivo. Como el
-     * lexer registra cada token y error léxico al ser leído, el parser ya recolecta los tokens conforme
-     * avanza; esta pasada solo completa el reporte cuando el parser se detiene antes del EOF por un
-     * error fatal.</p>
+     * Objetivo: Ejecutar la operacion consumirTokens definida por Compilador.
      *
-     * <p><strong>Entrada:</strong> MiLexer lexer (el mismo que usó el parser).</p>
+     * Entrada: MiLexer lexer.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Puede propagar Exception; Uso interno de la clase.
      */
     private void consumirTokens(MiLexer lexer) throws Exception {
         Symbol token;

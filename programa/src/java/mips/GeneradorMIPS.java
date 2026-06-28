@@ -7,10 +7,15 @@ import java.util.Map;
 import pipeline.CompiladorInternoException;
 
 /**
- * Coordina la traduccion de codigo intermedio a MIPS.
+ * Nombre: GeneradorMIPS
  *
- * <p>El analisis, emision de datos y traduccion por familia de operaciones viven
- * en clases especializadas para mantener este generador como despachador.</p>
+ * Objetivo: Analizar, traducir, emitir u optimizar codigo destino MIPS.
+ *
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
+ *
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public final class GeneradorMIPS {
     private final EmisorMIPS salida = new EmisorMIPS();
@@ -38,6 +43,17 @@ public final class GeneradorMIPS {
     private String funcionActual;
     private int indiceParametroFormal;
 
+    /**
+     * Nombre: generarCodigo
+     *
+     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
+     *
+     * Entrada: List<Instruccion> codigoIntermedio.
+     *
+     * Salida: Valor de tipo List<String>.
+     *
+     * Restricciones: Ninguna.
+     */
     public List<String> generarCodigo(List<Instruccion> codigoIntermedio) {
         reiniciar();
         aplicarAnalisis(new AnalizadorIRMIPS().analizar(codigoIntermedio));
@@ -48,6 +64,17 @@ public final class GeneradorMIPS {
         return new OptimizadorMIPS().optimizar(salida.lineas());
     }
 
+    /**
+     * Nombre: reiniciar
+     *
+     * Objetivo: Restablecer el estado interno a sus valores iniciales.
+     *
+     * Entrada: Ninguna.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private void reiniciar() {
         salida.limpiar();
         registros.reiniciar();
@@ -64,6 +91,17 @@ public final class GeneradorMIPS {
         indiceParametroFormal = 0;
     }
 
+    /**
+     * Nombre: aplicarAnalisis
+     *
+     * Objetivo: Ejecutar la operacion aplicarAnalisis definida por GeneradorMIPS.
+     *
+     * Entrada: ResultadoAnalisisMIPS analisis.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private void aplicarAnalisis(ResultadoAnalisisMIPS analisis) {
         tipos.putAll(analisis.tipos);
         direcciones.putAll(analisis.direcciones);
@@ -75,11 +113,33 @@ public final class GeneradorMIPS {
         retornosFuncion.putAll(analisis.retornosFuncion);
     }
 
+    /**
+     * Nombre: emitirDatos
+     *
+     * Objetivo: Agregar lineas o instrucciones al artefacto de salida correspondiente.
+     *
+     * Entrada: Ninguna.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private void emitirDatos() {
         new EmisorDatosMIPS().emitir(salida, tipos, direcciones, columnasArreglo,
                 dimensionesDeclaradas, cadenas, flotantes);
     }
 
+    /**
+     * Nombre: traducir
+     *
+     * Objetivo: Convertir una instruccion o construccion intermedia a codigo MIPS.
+     *
+     * Entrada: List<Instruccion> codigo.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private void traducir(List<Instruccion> codigo) {
         funcionActual = null;
         for (int indice = 0; indice < codigo.size(); indice++) {
@@ -93,10 +153,32 @@ public final class GeneradorMIPS {
         }
     }
 
+    /**
+     * Nombre: puedeFusionarSalto
+     *
+     * Objetivo: Ejecutar la operacion puedeFusionarSalto definida por GeneradorMIPS.
+     *
+     * Entrada: Instruccion comparacion; Instruccion salto.
+     *
+     * Salida: Valor de tipo boolean.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private boolean puedeFusionarSalto(Instruccion comparacion, Instruccion salto) {
         return control.puedeFusionarSalto(comparacion, salto, funcionActual);
     }
 
+    /**
+     * Nombre: traducirInstruccion
+     *
+     * Objetivo: Convertir una instruccion o construccion intermedia a codigo MIPS.
+     *
+     * Entrada: Instruccion i.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private void traducirInstruccion(Instruccion i) {
         switch (i.op) {
             case INICIO_FUNC:
@@ -168,6 +250,17 @@ public final class GeneradorMIPS {
         }
     }
 
+    /**
+     * Nombre: nuevaEtiquetaInterna
+     *
+     * Objetivo: Ejecutar la operacion nuevaEtiquetaInterna definida por GeneradorMIPS.
+     *
+     * Entrada: String prefijo.
+     *
+     * Salida: Valor de tipo String.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private String nuevaEtiquetaInterna(String prefijo) {
         return EtiquetasMIPS.etiquetaInterna(prefijo, contadorEtiquetaInterna++);
     }

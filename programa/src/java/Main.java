@@ -10,17 +10,15 @@ import reporte.EscritorMIPS;
 import reporte.EscritorReportes;
 
 /**
- * <strong>Nombre:</strong> Main
+ * Nombre: Main
  *
- * <p><strong>Objetivo:</strong> Ser el punto de entrada del compilador desde la línea de comandos:
- * ejecuta el {@link Compilador} sobre el archivo recibido y escribe en disco los reportes, el código
- * intermedio ({@code .ic}) y el código MIPS ({@code .asm}).</p>
+ * Objetivo: Ejecutar el compilador desde la linea de comandos.
  *
- * <p><strong>Entrada:</strong> Argumentos de consola: archivo fuente y, opcionalmente, directorio de salida.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Salida:</strong> Archivos de reporte y de código en el directorio de salida; mensajes en consola.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
  *
- * <p><strong>Restricciones:</strong> Valida el archivo antes de compilar y maneja rutas inválidas.</p>
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public class Main {
     private static final String DIR_SALIDA_POR_DEFECTO = "salida";
@@ -30,15 +28,15 @@ public class Main {
     private static final String REPORTE_SINTACTICO = "resultado_sintactico.txt";
 
     /**
-     * <strong>Nombre:</strong> main
+     * Nombre: main
      *
-     * <p><strong>Objetivo:</strong> Ejecutar el compilador sobre el archivo recibido y persistir sus resultados.</p>
+     * Objetivo: Inicializar una instancia de Main con los datos requeridos.
      *
-     * <p><strong>Entrada:</strong> String[] args; {@code args[0]} = archivo fuente, {@code args[1]} (opcional) = directorio de salida.</p>
+     * Entrada: String[] args.
      *
-     * <p><strong>Salida:</strong> No retorna valor; produce archivos y mensajes de consola.</p>
+     * Salida: Nueva instancia de Main.
      *
-     * <p><strong>Restricciones:</strong> Si falta el argumento o la ruta es inválida, muestra un mensaje y termina.</p>
+     * Restricciones: Ninguna.
      */
     public static void main(String[] args) {
         if (args.length == 0) {

@@ -6,13 +6,15 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * <strong>Objetivo:</strong> Generador historico/simple de temporales, etiquetas e instrucciones AST.
+ * Nombre: GeneradorCodigo
  *
- * <p><strong>Entradas:</strong> Datos sintacticos reconocidos por el parser, posiciones de fuente y subnodos relacionados.</p>
+ * Objetivo: Representar GeneradorCodigo dentro del arbol sintactico abstracto del lenguaje.
  *
- * <p><strong>Salidas:</strong> Nodos, valores o metadatos consultables por las fases semantica e intermedia.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Restricciones:</strong> No debe ejecutar validaciones globales ni escribir archivos; solo conserva estructura y metadatos.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public final class GeneradorCodigo {
     /**
@@ -33,90 +35,104 @@ public final class GeneradorCodigo {
     private int contadorEtiquetas;
     private final List<Instruccion> instrucciones;
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * Nombre: GeneradorCodigo
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Inicializar una instancia de GeneradorCodigo con los datos requeridos.
      *
-     * <p><strong>Salidas:</strong> Instancia inicializada de GeneradorCodigo.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Nueva instancia de GeneradorCodigo.
+     *
+     * Restricciones: Uso interno de la clase.
      */
     private GeneradorCodigo() {
         instrucciones = new ArrayList<>();
     }
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * Nombre: getInstancia
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Obtener el valor de Instancia almacenado en la instancia.
      *
-     * <p><strong>Salidas:</strong> Retorna GeneradorCodigo.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo GeneradorCodigo.
+     *
+     * Restricciones: Ninguna.
      */
     public static GeneradorCodigo getInstancia() {
         return INSTANCIA;
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * Nombre: nuevoTemp
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Ejecutar la operacion nuevoTemp definida por GeneradorCodigo.
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo String.
+     *
+     * Restricciones: Ninguna.
      */
     public String nuevoTemp() {
         return "_t" + contadorTemporales++;
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * Nombre: nuevaEtiqueta
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Ejecutar la operacion nuevaEtiqueta definida por GeneradorCodigo.
      *
-     * <p><strong>Salidas:</strong> Retorna String.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo String.
+     *
+     * Restricciones: Ninguna.
      */
     public String nuevaEtiqueta() {
         return "_L" + contadorEtiquetas++;
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * Nombre: emitir
      *
-     * <p><strong>Entradas:</strong> Instruccion instruccion</p>
+     * Objetivo: Agregar lineas o instrucciones al artefacto de salida correspondiente.
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * Entrada: Instruccion instruccion.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Ninguna.
      */
     public void emitir(Instruccion instruccion) {
         instrucciones.add(Objects.requireNonNull(instruccion, "instruccion"));
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta el valor asociado a esta propiedad.
+     * Nombre: getInstrucciones
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Obtener el valor de Instrucciones almacenado en la instancia.
      *
-     * <p><strong>Salidas:</strong> Retorna List<Instruccion>.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo List<Instruccion>.
+     *
+     * Restricciones: Ninguna.
      */
     public List<Instruccion> getInstrucciones() {
         return Collections.unmodifiableList(instrucciones);
     }
 
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * Nombre: reiniciar
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Restablecer el estado interno a sus valores iniciales.
      *
-     * <p><strong>Salidas:</strong> No retorna valor.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Ninguna.
      */
     public void reiniciar() {
         contadorTemporales = 0;

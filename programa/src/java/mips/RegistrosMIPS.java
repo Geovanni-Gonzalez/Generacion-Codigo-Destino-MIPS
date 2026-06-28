@@ -1,25 +1,15 @@
 package mips;
 
 /**
- * <strong>Nombre:</strong> RegistrosMIPS
+ * Nombre: RegistrosMIPS
  *
- * <p><strong>Objetivo:</strong> Ser la única fuente de verdad del convenio de uso de registros del
- * generador MIPS. Documenta y nombra los registros que hasta ahora estaban dispersos como literales
- * (por ejemplo {@code "$t7"}) en los traductores, para evitar colisiones difíciles de rastrear.</p>
+ * Objetivo: Analizar, traducir, emitir u optimizar codigo destino MIPS.
  *
- * <p><strong>Convenio:</strong></p>
- * <ul>
- *   <li><b>Banco temporal administrado</b> ({@link #POOL_TEMPORALES}, {@code $t0}–{@code $t5}):
- *       lo reparte y libera {@link AdministradorRegistros}. Mantienen valores vivos entre operaciones.</li>
- *   <li><b>Scratch entero</b> ({@code $t6}–{@code $t9}): registros de apoyo de muy corta vida usados
- *       dentro de una sola instrucción traducida (cálculo de direcciones de arreglos, conversiones).
- *       Nunca deben solaparse con el banco administrado.</li>
- *   <li><b>Scratch de punto flotante</b> ({@code $f0}–{@code $f6}): registros de apoyo para aritmética
- *       y comparación flotante dentro de una sola instrucción.</li>
- *   <li><b>Argumento flotante</b> ({@code $f12}): convenio de SPIM/MARS para imprimir flotantes.</li>
- * </ul>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Restricciones:</strong> Clase de constantes; no se instancia.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 final class RegistrosMIPS {
 
@@ -41,6 +31,17 @@ final class RegistrosMIPS {
     /** Registro de argumento flotante para syscalls de impresión (convenio SPIM/MARS). */
     static final String ARG_FLOAT = "$f12";
 
+    /**
+     * Nombre: RegistrosMIPS
+     *
+     * Objetivo: Inicializar una instancia de RegistrosMIPS con los datos requeridos.
+     *
+     * Entrada: Ninguna.
+     *
+     * Salida: Nueva instancia de RegistrosMIPS.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private RegistrosMIPS() {
     }
 }

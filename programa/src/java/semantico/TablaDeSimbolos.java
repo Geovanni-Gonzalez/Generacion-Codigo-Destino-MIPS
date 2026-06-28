@@ -11,16 +11,15 @@ import java.util.Stack;
 import reporte.ReportadorErrores;
 
 /**
- * <strong>Nombre:</strong> TablaDeSimbolos
+ * Nombre: TablaDeSimbolos
  *
- * <p><strong>Objetivo:</strong> Administrar los símbolos del programa por alcances (una pila de
- * ámbitos), permitir su inserción y búsqueda, y acumular los errores semánticos detectados.</p>
+ * Objetivo: Validar reglas semanticas y administrar informacion de simbolos.
  *
- * <p><strong>Entrada:</strong> Símbolos a insertar y nombres a buscar durante el análisis semántico.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Salida:</strong> Símbolos resueltos y la lista de errores semánticos.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
  *
- * <p><strong>Restricciones:</strong> No genera código intermedio ni escribe archivos de reporte.</p>
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public class TablaDeSimbolos {
     private final Stack<HashMap<String, Simbolo>> alcances;
@@ -29,15 +28,15 @@ public class TablaDeSimbolos {
     private final Set<String> funcionesNoDeclaradasReportadas;
 
     /**
-     * <strong>Nombre:</strong> TablaDeSimbolos
+     * Nombre: TablaDeSimbolos
      *
-     * <p><strong>Objetivo:</strong> Inicializar la pila de alcances y las estructuras de errores.</p>
+     * Objetivo: Inicializar una instancia de TablaDeSimbolos con los datos requeridos.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> Nueva instancia de TablaDeSimbolos.</p>
+     * Salida: Nueva instancia de TablaDeSimbolos.
      *
-     * <p><strong>Restricciones:</strong> Comienza sin alcances abiertos.</p>
+     * Restricciones: Ninguna.
      */
     public TablaDeSimbolos() {
         this.alcances = new Stack<>();
@@ -47,30 +46,30 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> abrirAlcance
+     * Nombre: abrirAlcance
      *
-     * <p><strong>Objetivo:</strong> Abrir un nuevo alcance (ámbito) apilándolo sobre los actuales.</p>
+     * Objetivo: Abrir un contexto, alcance o fase de procesamiento.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void abrirAlcance() {
         alcances.push(new HashMap<>());
     }
 
     /**
-     * <strong>Nombre:</strong> cerrarAlcance
+     * Nombre: cerrarAlcance
      *
-     * <p><strong>Objetivo:</strong> Cerrar el alcance actual, descartando sus símbolos.</p>
+     * Objetivo: Cerrar el contexto, alcance o fase de procesamiento actual.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Lanza excepción si no hay alcances abiertos.</p>
+     * Restricciones: Ninguna.
      */
     public void cerrarAlcance() {
         if (alcances.isEmpty()) {
@@ -80,16 +79,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> insertar
+     * Nombre: insertar
      *
-     * <p><strong>Objetivo:</strong> Insertar un símbolo en el alcance actual, reportando redeclaración si
-     * el nombre ya existe en ese alcance o choca con un parámetro visible.</p>
+     * Objetivo: Insertar informacion en la estructura interna correspondiente.
      *
-     * <p><strong>Entrada:</strong> Simbolo simbolo.</p>
+     * Entrada: Simbolo simbolo.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Lanza excepción si no hay un alcance abierto.</p>
+     * Restricciones: Ninguna.
      */
     public void insertar(Simbolo simbolo) {
         if (alcances.isEmpty()) {
@@ -112,30 +110,30 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarTipoDeclaracionInvalido
+     * Nombre: reportarTipoDeclaracionInvalido
      *
-     * <p><strong>Objetivo:</strong> Reportar que se declaró una variable con un tipo no permitido.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> TipoDato tipo, int linea.</p>
+     * Entrada: TipoDato tipo; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarTipoDeclaracionInvalido(TipoDato tipo, int linea) {
         reportar("tipo declarado invalido '" + tipo + "'", linea);
     }
 
     /**
-     * <strong>Nombre:</strong> reportarAsignacionIncompatible
+     * Nombre: reportarAsignacionIncompatible
      *
-     * <p><strong>Objetivo:</strong> Reportar una asignación entre tipos incompatibles (variante por tipos).</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> TipoDato tipoOrigen, TipoDato tipoDestino, int linea.</p>
+     * Entrada: TipoDato tipoOrigen; TipoDato tipoDestino; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarAsignacionIncompatible(TipoDato tipoOrigen, TipoDato tipoDestino, int linea) {
         reportar("no se puede asignar tipo " + tipoOrigen
@@ -143,30 +141,30 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> buscar
+     * Nombre: buscar
      *
-     * <p><strong>Objetivo:</strong> Buscar un símbolo por nombre sin información de línea.</p>
+     * Objetivo: Localizar un simbolo o dato en las estructuras internas.
      *
-     * <p><strong>Entrada:</strong> String nombre.</p>
+     * Entrada: String nombre.
      *
-     * <p><strong>Salida:</strong> El Simbolo encontrado, o uno de tipo ERROR si no existe.</p>
+     * Salida: Valor de tipo Simbolo.
      *
-     * <p><strong>Restricciones:</strong> Si no existe, reporta variable no declarada.</p>
+     * Restricciones: Ninguna.
      */
     public Simbolo buscar(String nombre) {
         return buscar(nombre, -1);
     }
 
     /**
-     * <strong>Nombre:</strong> buscar
+     * Nombre: buscar
      *
-     * <p><strong>Objetivo:</strong> Buscar un símbolo recorriendo los alcances del más interno al más externo.</p>
+     * Objetivo: Localizar un simbolo o dato en las estructuras internas.
      *
-     * <p><strong>Entrada:</strong> String nombre, int linea.</p>
+     * Entrada: String nombre; int linea.
      *
-     * <p><strong>Salida:</strong> El Simbolo encontrado, o uno de tipo ERROR si no existe.</p>
+     * Salida: Valor de tipo Simbolo.
      *
-     * <p><strong>Restricciones:</strong> Reporta "no declarada" una sola vez por nombre.</p>
+     * Restricciones: Ninguna.
      */
     public Simbolo buscar(String nombre, int linea) {
         for (int i = alcances.size() - 1; i >= 0; i--) {
@@ -183,15 +181,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> buscarFuncion
+     * Nombre: buscarFuncion
      *
-     * <p><strong>Objetivo:</strong> Buscar una función por nombre entre todos los alcances.</p>
+     * Objetivo: Localizar un simbolo o dato en las estructuras internas.
      *
-     * <p><strong>Entrada:</strong> String nombre, int linea.</p>
+     * Entrada: String nombre; int linea.
      *
-     * <p><strong>Salida:</strong> El Simbolo de la función, o uno de tipo ERROR si no existe.</p>
+     * Salida: Valor de tipo Simbolo.
      *
-     * <p><strong>Restricciones:</strong> Reporta "función no declarada" una sola vez por nombre.</p>
+     * Restricciones: Ninguna.
      */
     public Simbolo buscarFuncion(String nombre, int linea) {
         for (int i = alcances.size() - 1; i >= 0; i--) {
@@ -232,15 +230,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> existeEnAlcanceActual
+     * Nombre: existeEnAlcanceActual
      *
-     * <p><strong>Objetivo:</strong> Indicar si un nombre ya está declarado en el alcance más interno.</p>
+     * Objetivo: Ejecutar la operacion existeEnAlcanceActual definida por TablaDeSimbolos.
      *
-     * <p><strong>Entrada:</strong> String nombre.</p>
+     * Entrada: String nombre.
      *
-     * <p><strong>Salida:</strong> boolean; true si existe en el alcance actual.</p>
+     * Salida: Valor de tipo boolean.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public boolean existeEnAlcanceActual(String nombre) {
         if (alcances.isEmpty()) {
@@ -250,15 +248,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> agregarParametroAFuncion
+     * Nombre: agregarParametroAFuncion
      *
-     * <p><strong>Objetivo:</strong> Agregar el tipo de un parámetro a la firma de una función ya declarada.</p>
+     * Objetivo: Ejecutar la operacion agregarParametroAFuncion definida por TablaDeSimbolos.
      *
-     * <p><strong>Entrada:</strong> String nombreFuncion, TipoDato tipoParametro, int lineaFuncion.</p>
+     * Entrada: String nombreFuncion; TipoDato tipoParametro; int lineaFuncion.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> No hace nada si no encuentra la función en esa línea.</p>
+     * Restricciones: Ninguna.
      */
     public void agregarParametroAFuncion(String nombreFuncion, TipoDato tipoParametro, int lineaFuncion) {
         Simbolo funcion = buscarFuncionPorFirma(nombreFuncion, lineaFuncion);
@@ -268,15 +266,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> marcarInicializado
+     * Nombre: marcarInicializado
      *
-     * <p><strong>Objetivo:</strong> Marcar un símbolo como inicializado cuando se le asigna un valor.</p>
+     * Objetivo: Actualizar marcas de estado asociadas a simbolos o destinos.
      *
-     * <p><strong>Entrada:</strong> String nombre.</p>
+     * Entrada: String nombre.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> No hace nada si el símbolo no existe.</p>
+     * Restricciones: Ninguna.
      */
     public void marcarInicializado(String nombre) {
         Simbolo simbolo = buscarSinReportar(nombre);
@@ -286,45 +284,45 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> getErroresSemanticos
+     * Nombre: getErroresSemanticos
      *
-     * <p><strong>Objetivo:</strong> Devolver la lista de errores semánticos acumulados.</p>
+     * Objetivo: Obtener el valor de ErroresSemanticos almacenado en la instancia.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> List&lt;String&gt; no modificable con los errores.</p>
+     * Salida: Valor de tipo List<String>.
      *
-     * <p><strong>Restricciones:</strong> La lista no se puede modificar.</p>
+     * Restricciones: Ninguna.
      */
     public List<String> getErroresSemanticos() {
         return Collections.unmodifiableList(erroresSemanticos);
     }
 
     /**
-     * <strong>Nombre:</strong> reportarMainObligatorio
+     * Nombre: reportarMainObligatorio
      *
-     * <p><strong>Objetivo:</strong> Reportar que el programa debe contener exactamente un método main.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarMainObligatorio() {
         reportar("el programa debe contener exactamente un metodo main", 0);
     }
 
     /**
-     * <strong>Nombre:</strong> reportarAsignacionIncompatible
+     * Nombre: reportarAsignacionIncompatible
      *
-     * <p><strong>Objetivo:</strong> Reportar una asignación incompatible indicando la variable, el tipo esperado y el recibido.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> String nombre, TipoDato esperado, TipoDato recibido, int linea.</p>
+     * Entrada: String nombre; TipoDato esperado; TipoDato recibido; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarAsignacionIncompatible(String nombre, TipoDato esperado, TipoDato recibido, int linea) {
         reportar("asignacion incompatible para '" + nombre + "': se esperaba tipo "
@@ -332,15 +330,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarOperacionIncompatible
+     * Nombre: reportarOperacionIncompatible
      *
-     * <p><strong>Objetivo:</strong> Reportar tipos incompatibles en una operación binaria, con su requisito.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> String operador, TipoDato izquierda, TipoDato derecha, int linea.</p>
+     * Entrada: String operador; TipoDato izquierda; TipoDato derecha; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarOperacionIncompatible(String operador, TipoDato izquierda, TipoDato derecha, int linea) {
         reportar("tipos incompatibles para operador '" + operador
@@ -350,15 +348,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarOperacionIncompatible
+     * Nombre: reportarOperacionIncompatible
      *
-     * <p><strong>Objetivo:</strong> Reportar un tipo incompatible en una operación unaria, con su requisito.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> String operador, TipoDato operando, int linea.</p>
+     * Entrada: String operador; TipoDato operando; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarOperacionIncompatible(String operador, TipoDato operando, int linea) {
         reportar("tipo incompatible para operador '" + operador
@@ -366,15 +364,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarOperandoNoModificable
+     * Nombre: reportarOperandoNoModificable
      *
-     * <p><strong>Objetivo:</strong> Reportar que un operador requiere un operando modificable (variable o celda), no un literal.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> String operador, TipoDato tipo, int linea.</p>
+     * Entrada: String operador; TipoDato tipo; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarOperandoNoModificable(String operador, TipoDato tipo, int linea) {
         reportar("el operador '" + operador + "' no puede aplicarse a un literal o expresion "
@@ -383,15 +381,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarNegativoSobreExpresionNoLiteral
+     * Nombre: reportarNegativoSobreExpresionNoLiteral
      *
-     * <p><strong>Objetivo:</strong> Reportar que el operador {@code -} unario solo aplica a literales numéricos.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> TipoDato tipo, int linea.</p>
+     * Entrada: TipoDato tipo; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarNegativoSobreExpresionNoLiteral(TipoDato tipo, int linea) {
         reportar("el operador '-' solo puede aplicarse a literales numericos; se intento aplicar "
@@ -399,15 +397,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarVariableNoInicializada
+     * Nombre: reportarVariableNoInicializada
      *
-     * <p><strong>Objetivo:</strong> Reportar el uso de una variable antes de asignarle un valor.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> String nombre, int linea.</p>
+     * Entrada: String nombre; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarVariableNoInicializada(String nombre, int linea) {
         reportar("variable '" + nombre + "' usada antes de inicializarse. Asigne un valor antes "
@@ -415,15 +413,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarUsoArregloComoEscalar
+     * Nombre: reportarUsoArregloComoEscalar
      *
-     * <p><strong>Objetivo:</strong> Reportar el uso de un arreglo sin índices, como si fuera escalar.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> String nombre, int linea.</p>
+     * Entrada: String nombre; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarUsoArregloComoEscalar(String nombre, int linea) {
         reportar("'" + nombre + "' es un arreglo y debe accederse con indices. Use '" + nombre
@@ -431,15 +429,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarUsoEscalarComoArreglo
+     * Nombre: reportarUsoEscalarComoArreglo
      *
-     * <p><strong>Objetivo:</strong> Reportar el uso de una variable escalar con índices, como si fuera arreglo.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> String nombre, int linea.</p>
+     * Entrada: String nombre; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarUsoEscalarComoArreglo(String nombre, int linea) {
         reportar("'" + nombre + "' no es un arreglo; fue declarado como variable escalar y no "
@@ -447,15 +445,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarAsignacionArregloCompleto
+     * Nombre: reportarAsignacionArregloCompleto
      *
-     * <p><strong>Objetivo:</strong> Reportar el intento de asignar al arreglo completo en vez de a una celda.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> String nombre, int linea.</p>
+     * Entrada: String nombre; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarAsignacionArregloCompleto(String nombre, int linea) {
         reportar("no se puede asignar directamente al arreglo completo '" + nombre
@@ -480,15 +478,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarDimensionArregloInvalida
+     * Nombre: reportarDimensionArregloInvalida
      *
-     * <p><strong>Objetivo:</strong> Reportar que una dimensión de un arreglo no es de tipo int.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> String nombre, String dimension, int linea.</p>
+     * Entrada: String nombre; String dimension; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarDimensionArregloInvalida(String nombre, String dimension, int linea) {
         reportar("la dimension " + dimension + " del arreglo '" + nombre
@@ -532,15 +530,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarInicializacionArregloIrregular
+     * Nombre: reportarInicializacionArregloIrregular
      *
-     * <p><strong>Objetivo:</strong> Reportar una inicialización de arreglo con filas de distinta cantidad de columnas.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> String nombre, int linea.</p>
+     * Entrada: String nombre; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarInicializacionArregloIrregular(String nombre, int linea) {
         reportar("la inicializacion del arreglo '" + nombre
@@ -548,30 +546,30 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarSwitchTipoInvalido
+     * Nombre: reportarSwitchTipoInvalido
      *
-     * <p><strong>Objetivo:</strong> Reportar que la expresión de un switch tiene un tipo no permitido.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> TipoDato tipo, int linea.</p>
+     * Entrada: TipoDato tipo; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarSwitchTipoInvalido(TipoDato tipo, int linea) {
         reportar("la expresion de switch no puede ser de tipo " + tipo, linea);
     }
 
     /**
-     * <strong>Nombre:</strong> reportarCaseTipoIncompatible
+     * Nombre: reportarCaseTipoIncompatible
      *
-     * <p><strong>Objetivo:</strong> Reportar que el valor de un case no coincide con el tipo del switch.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> TipoDato esperado, TipoDato encontrado, int linea.</p>
+     * Entrada: TipoDato esperado; TipoDato encontrado; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarCaseTipoIncompatible(TipoDato esperado, TipoDato encontrado, int linea) {
         reportar("tipo incompatible en case: se esperaba tipo " + esperado
@@ -579,15 +577,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarEntradaTipoInvalido
+     * Nombre: reportarEntradaTipoInvalido
      *
-     * <p><strong>Objetivo:</strong> Reportar que {@code cin} se usa sobre una variable de tipo no admitido.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> String nombre, TipoDato tipo, int linea.</p>
+     * Entrada: String nombre; TipoDato tipo; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarEntradaTipoInvalido(String nombre, TipoDato tipo, int linea) {
         reportar("cin solo puede leer variables escalares de tipo int o float; '" + nombre
@@ -595,30 +593,30 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarSalidaTipoInvalido
+     * Nombre: reportarSalidaTipoInvalido
      *
-     * <p><strong>Objetivo:</strong> Reportar que {@code cout} intenta imprimir una expresión de tipo no admitido.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> TipoDato tipo, int linea.</p>
+     * Entrada: TipoDato tipo; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarSalidaTipoInvalido(TipoDato tipo, int linea) {
         reportar("cout no puede imprimir una expresion de tipo " + tipo, linea);
     }
 
     /**
-     * <strong>Nombre:</strong> reportarReturnFaltante
+     * Nombre: reportarReturnFaltante
      *
-     * <p><strong>Objetivo:</strong> Reportar que una función con retorno no devuelve valor en todas las rutas.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> TipoDato esperado, int linea.</p>
+     * Entrada: TipoDato esperado; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarReturnFaltante(TipoDato esperado, int linea) {
         reportar("la funcion de tipo " + esperado
@@ -626,15 +624,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarIndiceNoEntero
+     * Nombre: reportarIndiceNoEntero
      *
-     * <p><strong>Objetivo:</strong> Reportar que el índice de un arreglo no es de tipo int.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> TipoDato tipoIndice, int linea.</p>
+     * Entrada: TipoDato tipoIndice; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarIndiceNoEntero(TipoDato tipoIndice, int linea) {
         reportar("el indice del arreglo debe ser de tipo int, se encontro " + tipoIndice, linea);
@@ -658,45 +656,45 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarCondicionNoBooleana
+     * Nombre: reportarCondicionNoBooleana
      *
-     * <p><strong>Objetivo:</strong> Reportar que una condición no es de tipo bool.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> TipoDato recibido, int linea.</p>
+     * Entrada: TipoDato recibido; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarCondicionNoBooleana(TipoDato recibido, int linea) {
         reportar("la condicion debe ser de tipo bool, pero se encontro tipo " + recibido, linea);
     }
 
     /**
-     * <strong>Nombre:</strong> reportarReturnSinValor
+     * Nombre: reportarReturnSinValor
      *
-     * <p><strong>Objetivo:</strong> Reportar que una función con retorno usó un return sin valor.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> TipoDato esperado, int linea.</p>
+     * Entrada: TipoDato esperado; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarReturnSinValor(TipoDato esperado, int linea) {
         reportar("la funcion de tipo " + esperado + " debe retornar un valor", linea);
     }
 
     /**
-     * <strong>Nombre:</strong> reportarReturnConValorEnVoid
+     * Nombre: reportarReturnConValorEnVoid
      *
-     * <p><strong>Objetivo:</strong> Reportar que una función void intenta retornar un valor.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> int linea.</p>
+     * Entrada: int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarReturnConValorEnVoid(int linea) {
         reportar("la funcion void no puede retornar un valor. Use 'return!' o elimine la "
@@ -704,15 +702,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarReturnTipoIncompatible
+     * Nombre: reportarReturnTipoIncompatible
      *
-     * <p><strong>Objetivo:</strong> Reportar que el valor retornado no coincide con el tipo de la función.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> TipoDato esperado, TipoDato encontrado, int linea.</p>
+     * Entrada: TipoDato esperado; TipoDato encontrado; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarReturnTipoIncompatible(TipoDato esperado, TipoDato encontrado, int linea) {
         reportar("tipo incompatible en return: se esperaba tipo " + esperado
@@ -720,30 +718,30 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarBreakFueraDeCicloOSwitch
+     * Nombre: reportarBreakFueraDeCicloOSwitch
      *
-     * <p><strong>Objetivo:</strong> Reportar un {@code break} fuera de un ciclo o switch.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> int linea.</p>
+     * Entrada: int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarBreakFueraDeCicloOSwitch(int linea) {
         reportar("la sentencia break solo puede utilizarse dentro de un ciclo o switch", linea);
     }
 
     /**
-     * <strong>Nombre:</strong> reportarCantidadArgumentosIncorrecta
+     * Nombre: reportarCantidadArgumentosIncorrecta
      *
-     * <p><strong>Objetivo:</strong> Reportar una llamada con un número de argumentos distinto al esperado.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> int esperados, int encontrados, int linea.</p>
+     * Entrada: int esperados; int encontrados; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarCantidadArgumentosIncorrecta(int esperados, int encontrados, int linea) {
         reportar("cantidad de argumentos incorrecta: se esperaban " + esperados
@@ -751,15 +749,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarTipoArgumentoIncorrecto
+     * Nombre: reportarTipoArgumentoIncorrecto
      *
-     * <p><strong>Objetivo:</strong> Reportar que un argumento de una llamada tiene un tipo incompatible.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> int argumento, TipoDato esperado, TipoDato encontrado, int linea.</p>
+     * Entrada: int argumento; TipoDato esperado; TipoDato encontrado; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public void reportarTipoArgumentoIncorrecto(int argumento, TipoDato esperado, TipoDato encontrado, int linea) {
         reportar("argumento " + argumento + " incompatible: se esperaba tipo "
@@ -767,15 +765,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarVariableNoDeclarada
+     * Nombre: reportarVariableNoDeclarada
      *
-     * <p><strong>Objetivo:</strong> Reportar el uso de una variable que no fue declarada.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> String nombre, int linea.</p>
+     * Entrada: String nombre; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Método interno usado por {@link #buscar}.</p>
+     * Restricciones: Uso interno de la clase.
      */
     private void reportarVariableNoDeclarada(String nombre, int linea) {
         reportar("variable '" + nombre + "' no declarada. Declare la variable antes de usarla y "
@@ -783,15 +781,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarFuncionNoDeclarada
+     * Nombre: reportarFuncionNoDeclarada
      *
-     * <p><strong>Objetivo:</strong> Reportar la invocación de una función que no fue declarada.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> String nombre, int linea.</p>
+     * Entrada: String nombre; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Método interno usado por {@link #buscarFuncion}.</p>
+     * Restricciones: Uso interno de la clase.
      */
     private void reportarFuncionNoDeclarada(String nombre, int linea) {
         reportar("funcion '" + nombre + "' no declarada. Declare la funcion antes de invocarla y "
@@ -799,30 +797,30 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportarRedeclaracion
+     * Nombre: reportarRedeclaracion
      *
-     * <p><strong>Objetivo:</strong> Reportar que un nombre ya está declarado en el alcance actual.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> String nombre, int linea.</p>
+     * Entrada: String nombre; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Método interno usado por {@link #insertar}.</p>
+     * Restricciones: Uso interno de la clase.
      */
     private void reportarRedeclaracion(String nombre, int linea) {
         reportar("'" + nombre + "' ya esta declarado en este alcance", linea);
     }
 
     /**
-     * <strong>Nombre:</strong> existeParametroVisible
+     * Nombre: existeParametroVisible
      *
-     * <p><strong>Objetivo:</strong> Indicar si el primer símbolo visible con ese nombre es un parámetro.</p>
+     * Objetivo: Ejecutar la operacion existeParametroVisible definida por TablaDeSimbolos.
      *
-     * <p><strong>Entrada:</strong> String nombre.</p>
+     * Entrada: String nombre.
      *
-     * <p><strong>Salida:</strong> boolean; true si el símbolo visible es un parámetro.</p>
+     * Salida: Valor de tipo boolean.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Uso interno de la clase.
      */
     private boolean existeParametroVisible(String nombre) {
         for (int i = alcances.size() - 1; i >= 0; i--) {
@@ -835,15 +833,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> buscarSinReportar
+     * Nombre: buscarSinReportar
      *
-     * <p><strong>Objetivo:</strong> Buscar un símbolo sin generar ningún error si no existe.</p>
+     * Objetivo: Localizar un simbolo o dato en las estructuras internas.
      *
-     * <p><strong>Entrada:</strong> String nombre.</p>
+     * Entrada: String nombre.
      *
-     * <p><strong>Salida:</strong> El Simbolo encontrado, o {@code null} si no existe.</p>
+     * Salida: Valor de tipo Simbolo.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Uso interno de la clase.
      */
     private Simbolo buscarSinReportar(String nombre) {
         for (int i = alcances.size() - 1; i >= 0; i--) {
@@ -856,15 +854,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> buscarFuncionPorFirma
+     * Nombre: buscarFuncionPorFirma
      *
-     * <p><strong>Objetivo:</strong> Buscar una función por nombre y línea de declaración exactos.</p>
+     * Objetivo: Localizar un simbolo o dato en las estructuras internas.
      *
-     * <p><strong>Entrada:</strong> String nombre, int linea.</p>
+     * Entrada: String nombre; int linea.
      *
-     * <p><strong>Salida:</strong> El Simbolo de la función, o {@code null} si no existe.</p>
+     * Salida: Valor de tipo Simbolo.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Uso interno de la clase.
      */
     private Simbolo buscarFuncionPorFirma(String nombre, int linea) {
         for (int i = alcances.size() - 1; i >= 0; i--) {
@@ -878,30 +876,30 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> reportar
+     * Nombre: reportar
      *
-     * <p><strong>Objetivo:</strong> Formatear un error semántico con su línea y agregarlo a la lista.</p>
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
      *
-     * <p><strong>Entrada:</strong> String descripcion, int linea.</p>
+     * Entrada: String descripcion; int linea.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Método interno usado por todos los {@code reportar*}.</p>
+     * Restricciones: Uso interno de la clase.
      */
     private void reportar(String descripcion, int linea) {
         erroresSemanticos.add(ReportadorErrores.reportarSemantico(linea, 0, descripcion));
     }
 
     /**
-     * <strong>Nombre:</strong> requisitoOperador
+     * Nombre: requisitoOperador
      *
-     * <p><strong>Objetivo:</strong> Devolver el texto que describe los operandos que requiere un operador, para enriquecer el error.</p>
+     * Objetivo: Ejecutar la operacion requisitoOperador definida por TablaDeSimbolos.
      *
-     * <p><strong>Entrada:</strong> String operador.</p>
+     * Entrada: String operador.
      *
-     * <p><strong>Salida:</strong> String con el requisito del operador.</p>
+     * Salida: Valor de tipo String.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Uso interno de la clase.
      */
     private String requisitoOperador(String operador) {
         if ("%".equals(operador)) {
@@ -927,15 +925,15 @@ public class TablaDeSimbolos {
     }
 
     /**
-     * <strong>Nombre:</strong> insertarSimboloError
+     * Nombre: insertarSimboloError
      *
-     * <p><strong>Objetivo:</strong> Insertar un símbolo de recuperación de error, abriendo un alcance si hace falta.</p>
+     * Objetivo: Insertar informacion en la estructura interna correspondiente.
      *
-     * <p><strong>Entrada:</strong> Simbolo simbolo.</p>
+     * Entrada: Simbolo simbolo.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> No sobreescribe un símbolo ya existente.</p>
+     * Restricciones: Uso interno de la clase.
      */
     private void insertarSimboloError(Simbolo simbolo) {
         if (alcances.isEmpty()) {

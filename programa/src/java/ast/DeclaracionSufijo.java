@@ -1,13 +1,15 @@
 package ast;
 
 /**
- * <strong>Objetivo:</strong> Estructura auxiliar usada por la gramatica para conservar el sufijo de una.
+ * Nombre: DeclaracionSufijo
  *
- * <p><strong>Entradas:</strong> Datos sintacticos reconocidos por el parser, posiciones de fuente y subnodos relacionados.</p>
+ * Objetivo: Representar DeclaracionSufijo dentro del arbol sintactico abstracto del lenguaje.
  *
- * <p><strong>Salidas:</strong> Nodos, valores o metadatos consultables por las fases semantica e intermedia.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Restricciones:</strong> No debe ejecutar validaciones globales ni escribir archivos; solo conserva estructura y metadatos.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public class DeclaracionSufijo {
     public final ExpresionNodo inicializador;
@@ -15,13 +17,15 @@ public class DeclaracionSufijo {
     public final ExpresionNodo columnas;
     public final InicializacionArregloNodo inicializacionArreglo;
     /**
-     * <strong>Objetivo:</strong> Ejecuta la responsabilidad principal indicada por el nombre de la funcion.
+     * Nombre: DeclaracionSufijo
      *
-     * <p><strong>Entradas:</strong> ExpresionNodo inicializador</p>
+     * Objetivo: Inicializar una instancia de DeclaracionSufijo con los datos requeridos.
      *
-     * <p><strong>Salidas:</strong> Instancia inicializada de DeclaracionSufijo.</p>
+     * Entrada: ExpresionNodo inicializador.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Nueva instancia de DeclaracionSufijo.
+     *
+     * Restricciones: Ninguna.
      */
     public DeclaracionSufijo(ExpresionNodo inicializador) {
         this.inicializador = inicializador;
@@ -48,13 +52,15 @@ public class DeclaracionSufijo {
     }
 
     /**
-     * <strong>Objetivo:</strong> Consulta una condicion booleana del objeto.
+     * Nombre: esArreglo
      *
-     * <p><strong>Entradas:</strong> Sin parametros.</p>
+     * Objetivo: Indicar si se cumple la condicion Arreglo.
      *
-     * <p><strong>Salidas:</strong> Retorna boolean.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Restricciones:</strong> Debe construir una instancia consistente sin ejecutar fases externas del compilador.</p>
+     * Salida: Valor de tipo boolean.
+     *
+     * Restricciones: Ninguna.
      */
     public boolean esArreglo() {
         return filas != null || columnas != null;

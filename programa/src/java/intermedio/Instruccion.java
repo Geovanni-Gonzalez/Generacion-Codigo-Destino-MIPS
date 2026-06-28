@@ -1,16 +1,15 @@
 package intermedio;
 
 /**
- * <strong>Nombre:</strong> Instruccion (intermedio)
+ * Nombre: Instruccion
  *
- * <p><strong>Objetivo:</strong> Representar una instrucción del código de tres direcciones, con una
- * {@link Operacion} y hasta tres operandos de texto ({@code resultado}, {@code op1}, {@code op2}).</p>
+ * Objetivo: Representar, generar u optimizar instrucciones de codigo intermedio.
  *
- * <p><strong>Entrada:</strong> La operación y los operandos que correspondan.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Salida:</strong> Objeto inmutable que {@link #toString()} imprime como una línea legible.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
  *
- * <p><strong>Restricciones:</strong> No todos los operandos se usan en cada operación.</p>
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public class Instruccion {
     public final Operacion op;
@@ -19,15 +18,15 @@ public class Instruccion {
     public final String op2;
 
     /**
-     * <strong>Nombre:</strong> Instruccion
+     * Nombre: Instruccion
      *
-     * <p><strong>Objetivo:</strong> Crear una instrucción con sus tres operandos.</p>
+     * Objetivo: Inicializar una instancia de Instruccion con los datos requeridos.
      *
-     * <p><strong>Entrada:</strong> Operacion op, String resultado, String op1, String op2.</p>
+     * Entrada: Operacion op; String resultado; String op1; String op2.
      *
-     * <p><strong>Salida:</strong> Nueva instancia de Instruccion.</p>
+     * Salida: Nueva instancia de Instruccion.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public Instruccion(Operacion op, String resultado, String op1, String op2) {
         this.op = op;
@@ -37,105 +36,105 @@ public class Instruccion {
     }
 
     /**
-     * <strong>Nombre:</strong> Instruccion
+     * Nombre: Instruccion
      *
-     * <p><strong>Objetivo:</strong> Crear una instrucción con resultado y un operando ({@code op2 = null}).</p>
+     * Objetivo: Inicializar una instancia de Instruccion con los datos requeridos.
      *
-     * <p><strong>Entrada:</strong> Operacion op, String resultado, String op1.</p>
+     * Entrada: Operacion op; String resultado; String op1.
      *
-     * <p><strong>Salida:</strong> Nueva instancia de Instruccion.</p>
+     * Salida: Nueva instancia de Instruccion.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public Instruccion(Operacion op, String resultado, String op1) {
         this(op, resultado, op1, null);
     }
 
     /**
-     * <strong>Nombre:</strong> Instruccion
+     * Nombre: Instruccion
      *
-     * <p><strong>Objetivo:</strong> Crear una instrucción con un único operando en {@code resultado}.</p>
+     * Objetivo: Inicializar una instancia de Instruccion con los datos requeridos.
      *
-     * <p><strong>Entrada:</strong> Operacion op, String resultado.</p>
+     * Entrada: Operacion op; String resultado.
      *
-     * <p><strong>Salida:</strong> Nueva instancia de Instruccion.</p>
+     * Salida: Nueva instancia de Instruccion.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public Instruccion(Operacion op, String resultado) {
         this(op, resultado, null, null);
     }
 
     /**
-     * <strong>Nombre:</strong> getOp
+     * Nombre: getOp
      *
-     * <p><strong>Objetivo:</strong> Devolver la operación que realiza la instrucción.</p>
+     * Objetivo: Obtener el valor de Op almacenado en la instancia.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> Operacion de la instrucción.</p>
+     * Salida: Valor de tipo Operacion.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public Operacion getOp() {
         return op;
     }
 
     /**
-     * <strong>Nombre:</strong> getResultado
+     * Nombre: getResultado
      *
-     * <p><strong>Objetivo:</strong> Devolver el operando de resultado (destino, etiqueta u operando único).</p>
+     * Objetivo: Obtener el valor de Resultado almacenado en la instancia.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> String con el resultado, o {@code null}.</p>
+     * Salida: Valor de tipo String.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public String getResultado() {
         return resultado;
     }
 
     /**
-     * <strong>Nombre:</strong> getOp1
+     * Nombre: getOp1
      *
-     * <p><strong>Objetivo:</strong> Devolver el primer operando.</p>
+     * Objetivo: Obtener el valor de Op1 almacenado en la instancia.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> String con op1, o {@code null} si no aplica.</p>
+     * Salida: Valor de tipo String.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public String getOp1() {
         return op1;
     }
 
     /**
-     * <strong>Nombre:</strong> getOp2
+     * Nombre: getOp2
      *
-     * <p><strong>Objetivo:</strong> Devolver el segundo operando.</p>
+     * Objetivo: Obtener el valor de Op2 almacenado en la instancia.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> String con op2, o {@code null} si no aplica.</p>
+     * Salida: Valor de tipo String.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public String getOp2() {
         return op2;
     }
 
     /**
-     * <strong>Nombre:</strong> toString
+     * Nombre: toString
      *
-     * <p><strong>Objetivo:</strong> Dar formato a la instrucción como una línea de código intermedio.</p>
+     * Objetivo: Ejecutar la operacion toString definida por Instruccion.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> String con la instrucción legible.</p>
+     * Salida: Valor de tipo String.
      *
-     * <p><strong>Restricciones:</strong> Lanza excepción si la operación no está soportada.</p>
+     * Restricciones: Ninguna.
      */
     @Override
     public String toString() {
@@ -196,31 +195,30 @@ public class Instruccion {
     }
 
     /**
-     * <strong>Nombre:</strong> operandoUnico
+     * Nombre: operandoUnico
      *
-     * <p><strong>Objetivo:</strong> Devolver el operando de las operaciones de un solo argumento
-     * (en {@code op1} o, si falta, en {@code resultado}).</p>
+     * Objetivo: Ejecutar la operacion operandoUnico definida por Instruccion.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> String con el operando único.</p>
+     * Salida: Valor de tipo String.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Uso interno de la clase.
      */
     private String operandoUnico() {
         return op1 != null ? op1 : resultado;
     }
 
     /**
-     * <strong>Nombre:</strong> formatearCall
+     * Nombre: formatearCall
      *
-     * <p><strong>Objetivo:</strong> Dar formato a una llamada, con o sin variable que recibe el valor retornado.</p>
+     * Objetivo: Convertir un valor interno a su representacion textual.
      *
-     * <p><strong>Entrada:</strong> Ninguna.</p>
+     * Entrada: Ninguna.
      *
-     * <p><strong>Salida:</strong> String con la llamada formateada.</p>
+     * Salida: Valor de tipo String.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Uso interno de la clase.
      */
     private String formatearCall() {
         String llamada = op2 == null ? "call " + op1 : "call " + op1 + ", " + op2;
@@ -228,15 +226,15 @@ public class Instruccion {
     }
 
     /**
-     * <strong>Nombre:</strong> simboloBinario
+     * Nombre: simboloBinario
      *
-     * <p><strong>Objetivo:</strong> Traducir una operación binaria a su símbolo ({@code +}, {@code <}, {@code ==}, ...).</p>
+     * Objetivo: Ejecutar la operacion simboloBinario definida por Instruccion.
      *
-     * <p><strong>Entrada:</strong> Operacion op.</p>
+     * Entrada: Operacion op.
      *
-     * <p><strong>Salida:</strong> String con el símbolo.</p>
+     * Salida: Valor de tipo String.
      *
-     * <p><strong>Restricciones:</strong> Lanza excepción si la operación no es binaria.</p>
+     * Restricciones: Uso interno de la clase.
      */
     private static String simboloBinario(Operacion op) {
         switch (op) {
@@ -274,15 +272,15 @@ public class Instruccion {
     }
 
     /**
-     * <strong>Nombre:</strong> simboloUnario
+     * Nombre: simboloUnario
      *
-     * <p><strong>Objetivo:</strong> Traducir una operación unaria a su símbolo ({@code -} para NEG, {@code !} para NOT).</p>
+     * Objetivo: Ejecutar la operacion simboloUnario definida por Instruccion.
      *
-     * <p><strong>Entrada:</strong> Operacion op.</p>
+     * Entrada: Operacion op.
      *
-     * <p><strong>Salida:</strong> String con el símbolo.</p>
+     * Salida: Valor de tipo String.
      *
-     * <p><strong>Restricciones:</strong> Lanza excepción si la operación no es unaria.</p>
+     * Restricciones: Uso interno de la clase.
      */
     private static String simboloUnario(Operacion op) {
         switch (op) {

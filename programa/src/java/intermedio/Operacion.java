@@ -1,16 +1,15 @@
 package intermedio;
 
 /**
- * <strong>Nombre:</strong> Operacion
+ * Nombre: Operacion
  *
- * <p><strong>Objetivo:</strong> Enumerar las operaciones que puede representar una instrucción
- * del código de tres direcciones (declarar, operar, saltar, llamar, imprimir, etc.).</p>
+ * Objetivo: Representar, generar u optimizar instrucciones de codigo intermedio.
  *
- * <p><strong>Entrada:</strong> Ninguna; son constantes fijas del enum.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Salida:</strong> Valores que identifican qué hace cada instrucción intermedia.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
  *
- * <p><strong>Restricciones:</strong> Ninguna.</p>
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public enum Operacion {
     /** Declaración de variable escalar. */

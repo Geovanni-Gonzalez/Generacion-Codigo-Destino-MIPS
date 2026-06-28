@@ -5,7 +5,15 @@ import intermedio.Operacion;
 import java.util.function.Function;
 
 /**
- * Traduce operaciones aritmeticas, logicas, relacionales y unarias a MIPS.
+ * Nombre: TraductorOperacionesMIPS
+ *
+ * Objetivo: Analizar, traducir, emitir u optimizar codigo destino MIPS.
+ *
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
+ *
+ * Salida: Estado, datos o artefactos producidos por la clase.
+ *
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 final class TraductorOperacionesMIPS {
     private final EmisorMIPS salida;
@@ -21,6 +29,17 @@ final class TraductorOperacionesMIPS {
         this.nuevaEtiqueta = nuevaEtiqueta;
     }
 
+    /**
+     * Nombre: traducirBinaria
+     *
+     * Objetivo: Convertir una instruccion o construccion intermedia a codigo MIPS.
+     *
+     * Entrada: Instruccion i; String funcion.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Ninguna.
+     */
     void traducirBinaria(Instruccion i, String funcion) {
         boolean flotante = OperandosMIPS.esFloat(memoria.tipoOperando(i.op1, funcion))
                 || OperandosMIPS.esFloat(memoria.tipoOperando(i.op2, funcion));
@@ -67,6 +86,17 @@ final class TraductorOperacionesMIPS {
         registros.liberarRegistro(izquierdo);
     }
 
+    /**
+     * Nombre: traducirUnaria
+     *
+     * Objetivo: Convertir una instruccion o construccion intermedia a codigo MIPS.
+     *
+     * Entrada: Instruccion i; String funcion.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Ninguna.
+     */
     void traducirUnaria(Instruccion i, String funcion) {
         if (i.op == Operacion.NEG && OperandosMIPS.esFloat(memoria.tipoOperando(i.op1, funcion))) {
             String a = RegistrosMIPS.SCRATCH_FLOAT_A;
@@ -88,6 +118,17 @@ final class TraductorOperacionesMIPS {
         registros.liberarRegistro(operando);
     }
 
+    /**
+     * Nombre: traducirBinariaFloat
+     *
+     * Objetivo: Convertir una instruccion o construccion intermedia a codigo MIPS.
+     *
+     * Entrada: Instruccion i; String funcion.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private void traducirBinariaFloat(Instruccion i, String funcion) {
         String a = RegistrosMIPS.SCRATCH_FLOAT_A;
         String b = RegistrosMIPS.SCRATCH_FLOAT_B;
@@ -118,6 +159,17 @@ final class TraductorOperacionesMIPS {
         salida.instruccion("s.s " + r + ", " + memoria.etiqueta(i.resultado, funcion));
     }
 
+    /**
+     * Nombre: traducirComparacionFloat
+     *
+     * Objetivo: Convertir una instruccion o construccion intermedia a codigo MIPS.
+     *
+     * Entrada: Instruccion i; String funcion.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private void traducirComparacionFloat(Instruccion i, String funcion) {
         String a = RegistrosMIPS.SCRATCH_FLOAT_A;
         String b = RegistrosMIPS.SCRATCH_FLOAT_B;
@@ -162,6 +214,17 @@ final class TraductorOperacionesMIPS {
         registros.liberarRegistro(resultado);
     }
 
+    /**
+     * Nombre: traducirPotenciaEntera
+     *
+     * Objetivo: Convertir una instruccion o construccion intermedia a codigo MIPS.
+     *
+     * Entrada: String base; String exponente; String resultado.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private void traducirPotenciaEntera(String base, String exponente, String resultado) {
         String ciclo = nuevaEtiqueta.apply("pow");
         String fin = nuevaEtiqueta.apply("pow_fin");
@@ -174,6 +237,17 @@ final class TraductorOperacionesMIPS {
         salida.add(fin + ":");
     }
 
+    /**
+     * Nombre: traducirPotenciaFloat
+     *
+     * Objetivo: Convertir una instruccion o construccion intermedia a codigo MIPS.
+     *
+     * Entrada: String resultado; String funcion.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private void traducirPotenciaFloat(String resultado, String funcion) {
         String base = RegistrosMIPS.SCRATCH_FLOAT_A;
         String exponente = RegistrosMIPS.SCRATCH_FLOAT_B;

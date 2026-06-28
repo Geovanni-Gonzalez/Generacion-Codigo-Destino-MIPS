@@ -11,34 +11,43 @@ import java.util.List;
 import pipeline.ResultadoCompilacion;
 
 /**
- * <strong>Nombre:</strong> EscritorCodigo
+ * Nombre: EscritorCodigo
  *
- * <p><strong>Objetivo:</strong> Escribir en disco el archivo de código intermedio ({@code .ic}) del
- * compilador, con un encabezado de metadatos y una instrucción por línea.</p>
+ * Objetivo: Formatear o escribir reportes y artefactos generados por el compilador.
  *
- * <p><strong>Entrada:</strong> El directorio de salida, el resultado de la compilación o una lista de instrucciones.</p>
+ * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
  *
- * <p><strong>Salida:</strong> Un archivo {@code .ic} escrito en UTF-8.</p>
+ * Salida: Estado, datos o artefactos producidos por la clase.
  *
- * <p><strong>Restricciones:</strong> Solo formatea y persiste información ya calculada; no analiza.</p>
+ * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
  */
 public final class EscritorCodigo {
     private static final String INTEGRANTES = "Geovanni Gonzalez";
 
+    /**
+     * Nombre: EscritorCodigo
+     *
+     * Objetivo: Inicializar una instancia de EscritorCodigo con los datos requeridos.
+     *
+     * Entrada: Ninguna.
+     *
+     * Salida: Nueva instancia de EscritorCodigo.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
     private EscritorCodigo() {
     }
 
     /**
-     * <strong>Nombre:</strong> escribir
+     * Nombre: escribir
      *
-     * <p><strong>Objetivo:</strong> Generar el archivo {@code .ic} correspondiente a un resultado de
-     * compilación. Si el fuente no fue aceptado, borra cualquier {@code .ic} previo y no genera salida.</p>
+     * Objetivo: Indicar si se cumple la condicion cribir.
      *
-     * <p><strong>Entrada:</strong> Path directorioSalida, ResultadoCompilacion resultado.</p>
+     * Entrada: Path directorioSalida; ResultadoCompilacion resultado.
      *
-     * <p><strong>Salida:</strong> Path del archivo destino (exista o no).</p>
+     * Salida: Valor de tipo Path.
      *
-     * <p><strong>Restricciones:</strong> Crea el directorio de salida si no existe.</p>
+     * Restricciones: Puede propagar Exception.
      */
     public static Path escribir(Path directorioSalida, ResultadoCompilacion resultado) throws Exception {
         Files.createDirectories(directorioSalida);
@@ -80,16 +89,15 @@ public final class EscritorCodigo {
     }
 
     /**
-     * <strong>Nombre:</strong> resolverArchivoSalida
+     * Nombre: resolverArchivoSalida
      *
-     * <p><strong>Objetivo:</strong> Calcular la ruta destino: el mismo nombre base que el fuente pero
-     * con extensión {@code .ic}.</p>
+     * Objetivo: Resolver una ruta, etiqueta o referencia a partir de la entrada.
      *
-     * <p><strong>Entrada:</strong> Path directorioSalida, Path fuente.</p>
+     * Entrada: Path directorioSalida; Path fuente.
      *
-     * <p><strong>Salida:</strong> Path del archivo {@code .ic} destino.</p>
+     * Salida: Valor de tipo Path.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Ninguna.
      */
     public static Path resolverArchivoSalida(Path directorioSalida, Path fuente) {
         String nombreFuente = fuente.getFileName().toString();
@@ -99,15 +107,15 @@ public final class EscritorCodigo {
     }
 
     /**
-     * <strong>Nombre:</strong> escribirEncabezado
+     * Nombre: escribirEncabezado
      *
-     * <p><strong>Objetivo:</strong> Escribir el encabezado con fecha, archivo fuente e integrantes.</p>
+     * Objetivo: Indicar si se cumple la condicion cribirEncabezado.
      *
-     * <p><strong>Entrada:</strong> BufferedWriter writer, Path fuente.</p>
+     * Entrada: BufferedWriter writer; Path fuente.
      *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
+     * Salida: No retorna valor.
      *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     * Restricciones: Puede propagar Exception; Uso interno de la clase.
      */
     private static void escribirEncabezado(BufferedWriter writer, Path fuente) throws Exception {
         writer.write("// Codigo intermedio");
