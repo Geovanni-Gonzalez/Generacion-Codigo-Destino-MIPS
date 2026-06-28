@@ -1,0 +1,187 @@
+package mips;
+
+import intermedio.Instruccion;
+import intermedio.Operacion;
+import java.util.function.Function;
+
+/**
+ * Traduce operaciones aritmeticas, logicas, relacionales y unarias a MIPS.
+ */
+final class TraductorOperacionesMIPS {
+    private final EmisorMIPS salida;
+    private final AdministradorRegistros registros;
+    private final TraductorMemoriaMIPS memoria;
+    private final Function<String, String> nuevaEtiqueta;
+
+    TraductorOperacionesMIPS(EmisorMIPS salida, AdministradorRegistros registros,
+                             TraductorMemoriaMIPS memoria, Function<String, String> nuevaEtiqueta) {
+        this.salida = salida;
+        this.registros = registros;
+        this.memoria = memoria;
+        this.nuevaEtiqueta = nuevaEtiqueta;
+    }
+
+    void traducirBinaria(Instruccion i, String funcion) {
+        boolean flotante = OperandosMIPS.esFloat(memoria.tipoOperando(i.op1, funcion))
+                || OperandosMIPS.esFloat(memoria.tipoOperando(i.op2, funcion));
+        if (flotante && OperandosMIPS.esComparacion(i.op)) {
+            traducirComparacionFloat(i, funcion);
+            return;
+        }
+        if (flotante && OperandosMIPS.esAritmetica(i.op)) {
+            traducirBinariaFloat(i, funcion);
+            return;
+        }
+
+        String izquierdo = memoria.cargarValor(i.op1, funcion);
+        String derecho = memoria.cargarValor(i.op2, funcion);
+        String resultado = registros.obtenerRegistro();
+        switch (i.op) {
+            case SUMA: salida.instruccion("add " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case RESTA: salida.instruccion("sub " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case MULT: salida.instruccion("mul " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case DIV:
+                salida.instruccion("div " + izquierdo + ", " + derecho);
+                salida.instruccion("mflo " + resultado);
+                break;
+            case MOD:
+                salida.instruccion("div " + izquierdo + ", " + derecho);
+                salida.instruccion("mfhi " + resultado);
+                break;
+            case POW:
+                traducirPotenciaEntera(izquierdo, derecho, resultado);
+                break;
+            case AND: salida.instruccion("and " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case OR: salida.instruccion("or " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case IGUAL: salida.instruccion("seq " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case DISTINTO: salida.instruccion("sne " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case MENOR: salida.instruccion("slt " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case MAYOR: salida.instruccion("sgt " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case MENOR_IGUAL: salida.instruccion("sle " + resultado + ", " + izquierdo + ", " + derecho); break;
+            case MAYOR_IGUAL: salida.instruccion("sge " + resultado + ", " + izquierdo + ", " + derecho); break;
+            default: throw new IllegalStateException("Operacion binaria no soportada: " + i.op);
+        }
+        salida.instruccion("sw " + resultado + ", " + memoria.etiqueta(i.resultado, funcion));
+        registros.liberarRegistro(resultado);
+        registros.liberarRegistro(derecho);
+        registros.liberarRegistro(izquierdo);
+    }
+
+    void traducirUnaria(Instruccion i, String funcion) {
+        if (i.op == Operacion.NEG && OperandosMIPS.esFloat(memoria.tipoOperando(i.op1, funcion))) {
+            memoria.cargarFloat(i.op1, "$f0", funcion);
+            salida.instruccion("neg.s $f2, $f0");
+            salida.instruccion("s.s $f2, " + memoria.etiqueta(i.resultado, funcion));
+            return;
+        }
+        String operando = memoria.cargarValor(i.op1, funcion);
+        String resultado = registros.obtenerRegistro();
+        if (i.op == Operacion.NEG) {
+            salida.instruccion("sub " + resultado + ", $zero, " + operando);
+        } else {
+            salida.instruccion("seq " + resultado + ", " + operando + ", $zero");
+        }
+        salida.instruccion("sw " + resultado + ", " + memoria.etiqueta(i.resultado, funcion));
+        registros.liberarRegistro(resultado);
+        registros.liberarRegistro(operando);
+    }
+
+    private void traducirBinariaFloat(Instruccion i, String funcion) {
+        memoria.cargarFloat(i.op1, "$f0", funcion);
+        memoria.cargarFloat(i.op2, "$f2", funcion);
+        String operacion;
+        switch (i.op) {
+            case SUMA: operacion = "add.s"; break;
+            case RESTA: operacion = "sub.s"; break;
+            case MULT: operacion = "mul.s"; break;
+            case DIV: operacion = "div.s"; break;
+            case MOD:
+                salida.instruccion("div.s $f4, $f0, $f2");
+                salida.instruccion("trunc.w.s $f6, $f4");
+                salida.instruccion("cvt.s.w $f6, $f6");
+                salida.instruccion("mul.s $f6, $f6, $f2");
+                salida.instruccion("sub.s $f4, $f0, $f6");
+                salida.instruccion("s.s $f4, " + memoria.etiqueta(i.resultado, funcion));
+                return;
+            case POW:
+                traducirPotenciaFloat(i.resultado, funcion);
+                return;
+            default: throw new IllegalStateException("Operacion flotante no soportada: " + i.op);
+        }
+        salida.instruccion(operacion + " $f4, $f0, $f2");
+        salida.instruccion("s.s $f4, " + memoria.etiqueta(i.resultado, funcion));
+    }
+
+    private void traducirComparacionFloat(Instruccion i, String funcion) {
+        memoria.cargarFloat(i.op1, "$f0", funcion);
+        memoria.cargarFloat(i.op2, "$f2", funcion);
+        String verdadero = nuevaEtiqueta.apply("cmp_true");
+        String fin = nuevaEtiqueta.apply("cmp_fin");
+        String resultado = registros.obtenerRegistro();
+        salida.instruccion("li " + resultado + ", 0");
+        switch (i.op) {
+            case IGUAL:
+                salida.instruccion("c.eq.s $f0, $f2");
+                salida.instruccion("bc1t " + verdadero);
+                break;
+            case DISTINTO:
+                salida.instruccion("c.eq.s $f0, $f2");
+                salida.instruccion("bc1f " + verdadero);
+                break;
+            case MENOR:
+                salida.instruccion("c.lt.s $f0, $f2");
+                salida.instruccion("bc1t " + verdadero);
+                break;
+            case MENOR_IGUAL:
+                salida.instruccion("c.le.s $f0, $f2");
+                salida.instruccion("bc1t " + verdadero);
+                break;
+            case MAYOR:
+                salida.instruccion("c.lt.s $f2, $f0");
+                salida.instruccion("bc1t " + verdadero);
+                break;
+            case MAYOR_IGUAL:
+                salida.instruccion("c.le.s $f2, $f0");
+                salida.instruccion("bc1t " + verdadero);
+                break;
+            default: throw new IllegalStateException("Comparacion flotante no soportada: " + i.op);
+        }
+        salida.instruccion("j " + fin);
+        salida.add(verdadero + ":");
+        salida.instruccion("li " + resultado + ", 1");
+        salida.add(fin + ":");
+        salida.instruccion("sw " + resultado + ", " + memoria.etiqueta(i.resultado, funcion));
+        registros.liberarRegistro(resultado);
+    }
+
+    private void traducirPotenciaEntera(String base, String exponente, String resultado) {
+        String ciclo = nuevaEtiqueta.apply("pow");
+        String fin = nuevaEtiqueta.apply("pow_fin");
+        salida.instruccion("li " + resultado + ", 1");
+        salida.add(ciclo + ":");
+        salida.instruccion("blez " + exponente + ", " + fin);
+        salida.instruccion("mul " + resultado + ", " + resultado + ", " + base);
+        salida.instruccion("addiu " + exponente + ", " + exponente + ", -1");
+        salida.instruccion("j " + ciclo);
+        salida.add(fin + ":");
+    }
+
+    private void traducirPotenciaFloat(String resultado, String funcion) {
+        String ciclo = nuevaEtiqueta.apply("powf");
+        String fin = nuevaEtiqueta.apply("powf_fin");
+        String contador = registros.obtenerRegistro();
+        salida.instruccion("li " + contador + ", 1");
+        salida.instruccion("mtc1 " + contador + ", $f4");
+        salida.instruccion("cvt.s.w $f4, $f4");
+        salida.instruccion("trunc.w.s $f6, $f2");
+        salida.instruccion("mfc1 " + contador + ", $f6");
+        salida.add(ciclo + ":");
+        salida.instruccion("blez " + contador + ", " + fin);
+        salida.instruccion("mul.s $f4, $f4, $f0");
+        salida.instruccion("addiu " + contador + ", " + contador + ", -1");
+        salida.instruccion("j " + ciclo);
+        salida.add(fin + ":");
+        salida.instruccion("s.s $f4, " + memoria.etiqueta(resultado, funcion));
+        registros.liberarRegistro(contador);
+    }
+}
