@@ -1,0 +1,12 @@
+empty ~ __main__<| |>
+|:
+    int ~ x <- 10 !
+    if <|greather_t<|x,5|>|>
+    |:
+        cout <|x|> !
+    :|
+    else
+    |:
+        cout <|"menor"|> !
+    :|
+:|

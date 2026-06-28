@@ -1,0 +1,9 @@
+empty ~ __main__<| |>
+|:
+    int ~ x <- 0 !
+    do
+    |:
+        x <- x + 1 !
+    :|
+    while <|less_t<|x,10|>|> !
+:|

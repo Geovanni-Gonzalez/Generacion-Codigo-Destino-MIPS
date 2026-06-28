@@ -1,0 +1,24 @@
+int ~ retornaEnteroOk<| |>
+|:
+    return 5 !
+:|
+
+int ~ retornaFloatEnInt<| |>
+|:
+    return 5.0 !
+:|
+
+void ~ voidConValor<| |>
+|:
+    return 5 !
+:|
+
+int ~ intSinValor<| |>
+|:
+    return !
+:|
+
+empty ~ __main__<| |>
+|:
+    cout <|retornaEnteroOk<| |>|> !
+:|

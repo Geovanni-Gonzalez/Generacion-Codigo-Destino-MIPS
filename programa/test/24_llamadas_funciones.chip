@@ -1,0 +1,12 @@
+int ~ sumar<|int ~ a, int ~ b|>
+|:
+    return ~ a + b !
+:|
+
+empty ~ __main__<| |>
+|:
+    int ~ correcto <- sumar<|1, 2|> !
+    int ~ noDeclarada <- desconocida<|1|> !
+    int ~ malCantidad <- sumar<|1|> !
+    int ~ malTipo <- sumar<|1, true|> !
+:|

@@ -1,0 +1,7 @@
+empty ~ __main__<| |>
+|:
+    int ~ matriz <<2,2>> !
+    matriz <<0,0>> <- 10 !
+    matriz <<0,1>> <- matriz <<0,0>> + 5 !
+    cout <|matriz <<0,1>>|> !
+:|

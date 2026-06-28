@@ -1,0 +1,10 @@
+empty ~ __main__<| |>
+|:
+    ¡¡ Este es un comentario de una linea
+    int ~ x <- 10 !
+    {-
+        Este es un comentario
+        de multiples lineas
+    -}
+    cout <|x|> !
+:|

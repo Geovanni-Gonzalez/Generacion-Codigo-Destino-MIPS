@@ -1,0 +1,19 @@
+empty ~ __main__<| |>
+|:
+    int ~ a <- x + 1 !
+    int ~ b <- x - 1 !
+    int ~ c <- x * 2 !
+    int ~ d <- x / 2 !
+    int ~ e <- x % 2 !
+    if <|x|>
+    |:
+        int ~ f <- x + 3 !
+        int ~ g <- x - 3 !
+    :|
+    do
+    |:
+        int ~ h <- x * 4 !
+    :|
+    while <|x|> !
+    int ~ i <- x + 5 !
+:|

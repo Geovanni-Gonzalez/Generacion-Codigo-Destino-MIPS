@@ -1,0 +1,15 @@
+empty ~ __main__<| |>
+|:
+    int ~ x <- 2 !
+    switch <|x|>
+    |:
+        case ~ 2:
+        |:
+            break !
+        :|
+        default ~:
+        |:
+            break !
+        :|
+    :|
+:|

@@ -1,0 +1,8 @@
+empty ~ __main__<| |>
+|:
+    int ~ x <- 10 !
+    float ~ y <- 2.5 !
+    bool ~ activo <- true !
+    char ~ letra <- 'a' !
+    string ~ mensaje <- "hola" !
+:|

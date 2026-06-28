@@ -1,0 +1,5 @@
+empty ~ __main__<| |>
+|:
+    int ~ x <- 10
+    cout <|x|>!
+:|

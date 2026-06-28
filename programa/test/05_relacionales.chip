@@ -1,0 +1,9 @@
+empty ~ __main__<| |>
+|:
+    bool ~ a <- equal<|10,10|> !
+    bool ~ b <- n_equal<|10,5|> !
+    bool ~ c <- less_t<|5,10|> !
+    bool ~ d <- less_te<|5,5|> !
+    bool ~ e <- greather_t<|10,5|> !
+    bool ~ f <- greather_te<|10,10|> !
+:|

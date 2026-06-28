@@ -1,0 +1,7 @@
+empty ~ __main__<| |>
+|:
+    char ~ vacio <- '' !
+    char ~ doble <- 'ab' !
+    string ~ texto <- "sin cerrar
+    int ~ x <- 10 !
+:|

@@ -1,0 +1,10 @@
+int ~ sumar<|int ~ a, int ~ b|>
+|:
+    return ~ a + b !
+:|
+
+empty ~ __main__<| |>
+|:
+    int ~ resultado <- sumar<|2,3|> !
+    cout <|resultado|> !
+:|

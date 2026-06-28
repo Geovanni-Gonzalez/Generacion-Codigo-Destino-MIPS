@@ -1,0 +1,8 @@
+empty ~ __main__<| |>
+|:
+    entero ~ x !
+    flotante ~ y !
+    booleano ~ activo !
+    char ~ letra !
+    string ~ mensaje !
+:|
