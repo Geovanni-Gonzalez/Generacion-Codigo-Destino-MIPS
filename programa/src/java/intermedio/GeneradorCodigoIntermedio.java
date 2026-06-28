@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
+import pipeline.CompiladorInternoException;
 
 /**
  * <strong>Nombre:</strong> GeneradorCodigoIntermedio
@@ -455,7 +456,7 @@ public class GeneradorCodigoIntermedio {
         if (expresion instanceof LlamadaFuncionNodo) {
             return generarLlamada((LlamadaFuncionNodo) expresion);
         }
-        throw new UnsupportedOperationException("Expresion no soportada en codigo intermedio: "
+        throw new CompiladorInternoException("Expresion no soportada en codigo intermedio: "
                 + expresion.getClass().getSimpleName() + " (linea " + expresion.getLinea() + ")");
     }
 

@@ -133,7 +133,7 @@
 
                     <execution>
                         <id>add-generated-sources</id>
-                        <phase>generate-sources</phase>
+                        <phase>initialize</phase>
 
                         <goals>
                             <goal>add-source</goal>
@@ -168,6 +168,7 @@
                     <source>11</source>
                     <target>11</target>
                     <encoding>UTF-8</encoding>
+                    <fork>true</fork>
                     <useIncrementalCompilation>false</useIncrementalCompilation>
                 </configuration>
             </plugin>

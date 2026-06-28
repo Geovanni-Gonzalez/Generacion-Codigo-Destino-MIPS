@@ -4,6 +4,7 @@ import intermedio.Instruccion;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import pipeline.CompiladorInternoException;
 
 /**
  * Coordina la traduccion de codigo intermedio a MIPS.
@@ -163,7 +164,7 @@ public final class GeneradorMIPS {
                 io.traducirRead(i.op1 != null ? i.op1 : i.resultado, funcionActual);
                 break;
             default:
-                salida.instruccion("# Operacion no implementada: " + i.op);
+                throw new CompiladorInternoException("Operacion MIPS no implementada: " + i.op);
         }
     }
 

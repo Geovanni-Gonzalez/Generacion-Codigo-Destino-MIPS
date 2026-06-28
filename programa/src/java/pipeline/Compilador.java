@@ -72,12 +72,20 @@ public class Compilador {
                 && parser.getNumErrores() == 0
                 && parser.tablaSimbolos.getErroresSemanticos().isEmpty();
 
-        List<Instruccion> codigoIntermedio = aceptado && parser.ast != null
-                ? new GeneradorCodigoIntermedio().generar(parser.ast)
-                : Collections.emptyList();
-        List<String> codigoMIPS = aceptado
-                ? new GeneradorMIPS().generarCodigo(codigoIntermedio)
-                : Collections.emptyList();
+        List<Instruccion> codigoIntermedio = Collections.emptyList();
+        List<String> codigoMIPS = Collections.emptyList();
+        if (aceptado && parser.ast != null) {
+            try {
+                codigoIntermedio = new GeneradorCodigoIntermedio().generar(parser.ast);
+                codigoMIPS = new GeneradorMIPS().generarCodigo(codigoIntermedio);
+            } catch (CompiladorInternoException ex) {
+                aceptado = false;
+                parser.tablaSimbolos.getErroresSemanticos().add(ReportadorErrores.semantico(1, 1,
+                        "error interno de generacion: " + ex.getMessage()));
+                codigoIntermedio = Collections.emptyList();
+                codigoMIPS = Collections.emptyList();
+            }
+        }
 
         return new ResultadoCompilacion(fuente, lexerTokens, parser, sintaxisCompleta,
                 aceptado, codigoIntermedio, codigoMIPS);
