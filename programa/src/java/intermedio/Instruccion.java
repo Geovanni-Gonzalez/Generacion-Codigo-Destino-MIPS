@@ -189,6 +189,12 @@ public class Instruccion {
                 return "begin_function " + resultado;
             case FIN_FUNC:
                 return resultado == null ? "end_function" : "end_function " + resultado;
+            case NEW:
+                return resultado + " = new " + op1 + ", " + op2; // t = new Clase, <bytes>
+            case LOAD_FIELD:
+                return resultado + " = field " + op1 + " @" + op2; // t = field obj @offset:tipo
+            case STORE_FIELD:
+                return "field " + resultado + " @" + op2 + " = " + op1; // field obj @offset:tipo = valor
             default:
                 throw new IllegalStateException("Operacion no soportada: " + op);
         }

@@ -2,9 +2,12 @@ package intermedio;
 
 import ast.AsignacionNodo;
 import ast.AccesoArregloNodo;
+import ast.AccesoMiembroNodo;
 import ast.BloqueNodo;
 import ast.BreakNodo;
 import ast.CasoSwitchNodo;
+import ast.ClaseNodo;
+import ast.DeclaracionObjetoNodo;
 import ast.DeclaracionVariableNodo;
 import ast.EntradaNodo;
 import ast.ExpresionBinariaNodo;
@@ -18,6 +21,7 @@ import ast.InicializacionArregloNodo;
 import ast.LiteralNodo;
 import ast.LlamadaFuncionNodo;
 import ast.Nodo;
+import ast.NuevoObjetoNodo;
 import ast.ProgramaNodo;
 import ast.ParametroNodo;
 import ast.ReturnNodo;
@@ -28,7 +32,9 @@ import ast.WhileNodo;
 import java.util.ArrayList;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import pipeline.CompiladorInternoException;
 
 /**
@@ -49,6 +55,23 @@ public class GeneradorCodigoIntermedio {
     private int contadorEtiquetas;
     /** Pila con la etiqueta de fin del switch actual, destino de los {@code break}. */
     private final Deque<String> destinosBreak = new ArrayDeque<>();
+    /** Layout (offset y tipo de cada campo, tamaño total) por clase. */
+    private final Map<String, ClaseLayout> clasesLayout = new LinkedHashMap<>();
+    /** Variable de objeto -> nombre de su clase, dentro de la función actual. */
+    private final Map<String, String> objetoClase = new LinkedHashMap<>();
+
+    /** Disposición en memoria de una clase: offset y tipo por campo, y tamaño total en bytes. */
+    private static final class ClaseLayout {
+        private final Map<String, Integer> offsets;
+        private final Map<String, String> tipos;
+        private final int tamanoBytes;
+
+        ClaseLayout(Map<String, Integer> offsets, Map<String, String> tipos, int tamanoBytes) {
+            this.offsets = offsets;
+            this.tipos = tipos;
+            this.tamanoBytes = tamanoBytes;
+        }
+    }
 
     /**
      * Nombre: generar
@@ -66,10 +89,37 @@ public class GeneradorCodigoIntermedio {
         contadorTemporales = 0;
         contadorEtiquetas = 0;
         destinosBreak.clear();
+        construirLayoutClases(programa);
         for (FuncionNodo funcion : programa.getFunciones()) {
             generarFuncion(funcion);
         }
         return new ArrayList<>(instrucciones);
+    }
+
+    /**
+     * Nombre: construirLayoutClases
+     *
+     * Objetivo: Calcular el offset y tipo de cada campo y el tamaño total de cada clase declarada.
+     *
+     * Entrada: ProgramaNodo programa.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Reserva la palabra 0 (offset 0) para el puntero de vtable; los campos inician en 4.
+     */
+    private void construirLayoutClases(ProgramaNodo programa) {
+        clasesLayout.clear();
+        for (ClaseNodo clase : programa.getClases()) {
+            Map<String, Integer> offsets = new LinkedHashMap<>();
+            Map<String, String> tipos = new LinkedHashMap<>();
+            int offset = 4;
+            for (DeclaracionVariableNodo campo : clase.getCampos()) {
+                offsets.put(campo.getNombre(), offset);
+                tipos.put(campo.getNombre(), campo.getTipo().toString());
+                offset += 4;
+            }
+            clasesLayout.put(clase.getNombre(), new ClaseLayout(offsets, tipos, offset));
+        }
     }
 
     /**
@@ -84,6 +134,7 @@ public class GeneradorCodigoIntermedio {
      * Restricciones: Uso interno de la clase.
      */
     private void generarFuncion(FuncionNodo funcion) {
+        objetoClase.clear();
         instrucciones.add(new Instruccion(Operacion.INICIO_FUNC, funcion.getNombre()));
         for (ParametroNodo parametro : funcion.getParametros()) {
             instrucciones.add(new Instruccion(Operacion.FORMAL_PARAM, parametro.getNombre(),

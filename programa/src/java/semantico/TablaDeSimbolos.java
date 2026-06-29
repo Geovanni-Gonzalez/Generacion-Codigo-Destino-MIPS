@@ -314,6 +314,83 @@ public class TablaDeSimbolos {
     }
 
     /**
+     * Nombre: reportarClaseRedeclarada
+     *
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
+     *
+     * Entrada: String nombre; int linea.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Ninguna.
+     */
+    public void reportarClaseRedeclarada(String nombre, int linea) {
+        reportar("la clase '" + nombre + "' ya esta declarada", linea);
+    }
+
+    /**
+     * Nombre: reportarClaseNoDeclarada
+     *
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
+     *
+     * Entrada: String nombre; int linea.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Ninguna.
+     */
+    public void reportarClaseNoDeclarada(String nombre, int linea) {
+        reportar("la clase '" + nombre + "' no esta declarada. Declare la clase antes de usarla "
+                + "y verifique la escritura de su nombre", linea);
+    }
+
+    /**
+     * Nombre: reportarCampoNoDeclarado
+     *
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
+     *
+     * Entrada: String clase; String campo; int linea.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Ninguna.
+     */
+    public void reportarCampoNoDeclarado(String clase, String campo, int linea) {
+        reportar("la clase '" + clase + "' no tiene un campo llamado '" + campo + "'", linea);
+    }
+
+    /**
+     * Nombre: reportarAccesoCampoSobreNoObjeto
+     *
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
+     *
+     * Entrada: TipoDato tipo; int linea.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Ninguna.
+     */
+    public void reportarAccesoCampoSobreNoObjeto(TipoDato tipo, int linea) {
+        reportar("el acceso '.campo' requiere un objeto; se encontro tipo " + tipo, linea);
+    }
+
+    /**
+     * Nombre: reportarTipoObjetoIncompatible
+     *
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
+     *
+     * Entrada: String esperado; String recibido; int linea.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Ninguna.
+     */
+    public void reportarTipoObjetoIncompatible(String esperado, String recibido, int linea) {
+        reportar("asignacion de objeto incompatible: se esperaba una instancia de '" + esperado
+                + "' y se obtuvo '" + recibido + "'", linea);
+    }
+
+    /**
      * Nombre: reportarAsignacionIncompatible
      *
      * Objetivo: Registrar un diagnostico de error con el formato del compilador.

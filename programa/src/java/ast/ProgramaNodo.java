@@ -17,6 +17,7 @@ import java.util.List;
  */
 public class ProgramaNodo extends Nodo {
     private final List<FuncionNodo> funciones;
+    private final List<ClaseNodo> clases;
     /**
      * Nombre: ProgramaNodo
      *
@@ -29,8 +30,24 @@ public class ProgramaNodo extends Nodo {
      * Restricciones: Ninguna.
      */
     public ProgramaNodo(int linea, int columna, List<FuncionNodo> funciones) {
+        this(linea, columna, funciones, new ArrayList<ClaseNodo>());
+    }
+
+    /**
+     * Nombre: ProgramaNodo
+     *
+     * Objetivo: Inicializar un ProgramaNodo con sus funciones y clases de nivel superior.
+     *
+     * Entrada: int linea; int columna; List<FuncionNodo> funciones; List<ClaseNodo> clases.
+     *
+     * Salida: Nueva instancia de ProgramaNodo.
+     *
+     * Restricciones: Ninguna.
+     */
+    public ProgramaNodo(int linea, int columna, List<FuncionNodo> funciones, List<ClaseNodo> clases) {
         super(linea, columna, TipoDato.EMPTY);
         this.funciones = new ArrayList<>(funciones);
+        this.clases = new ArrayList<>(clases);
     }
 
     /**
@@ -46,5 +63,20 @@ public class ProgramaNodo extends Nodo {
      */
     public List<FuncionNodo> getFunciones() {
         return Collections.unmodifiableList(funciones);
+    }
+
+    /**
+     * Nombre: getClases
+     *
+     * Objetivo: Obtener el valor de Clases almacenado en la instancia.
+     *
+     * Entrada: Ninguna.
+     *
+     * Salida: Valor de tipo List<ClaseNodo>.
+     *
+     * Restricciones: Ninguna.
+     */
+    public List<ClaseNodo> getClases() {
+        return Collections.unmodifiableList(clases);
     }
 }

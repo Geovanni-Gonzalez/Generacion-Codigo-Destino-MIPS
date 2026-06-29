@@ -1,10 +1,12 @@
 package semantico;
 
 import ast.AccesoArregloNodo;
+import ast.AccesoMiembroNodo;
 import ast.AsignacionNodo;
 import ast.BloqueNodo;
 import ast.BreakNodo;
 import ast.CasoSwitchNodo;
+import ast.DeclaracionVariableNodo;
 import ast.EntradaNodo;
 import ast.ExpresionBinariaNodo;
 import ast.ExpresionNodo;
@@ -15,6 +17,7 @@ import ast.InicializacionArregloNodo;
 import ast.LlamadaFuncionNodo;
 import ast.LiteralNodo;
 import ast.Nodo;
+import ast.NuevoObjetoNodo;
 import ast.ParametroNodo;
 import ast.ProgramaNodo;
 import ast.ReturnNodo;
@@ -24,7 +27,9 @@ import ast.TipoDato;
 import ast.WhileNodo;
 import ast.IfNodo;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -41,6 +46,8 @@ import java.util.function.Consumer;
 public class AnalizadorSemantico {
     private final TablaDeSimbolos tablaSimbolos;
     private final Consumer<String> reportadorSintactico;
+    /** Registro de clases declaradas: nombre -> informacion estructural. */
+    private final Map<String, ClaseInfo> clases = new LinkedHashMap<>();
     private int cantidadMain;
     private TipoDato tipoRetornoActual = TipoDato.DESCONOCIDO;
     private String funcionActual;
@@ -307,6 +314,66 @@ public class AnalizadorSemantico {
     }
 
     /**
+     * <strong>Nombre:</strong> registrarClase
+     *
+     * <p><strong>Objetivo:</strong> Registrar la estructura de una clase (campos) validando tipos y duplicados.</p>
+     *
+     * <p><strong>Entrada:</strong> String nombre, String padre, List&lt;DeclaracionVariableNodo&gt; campos, int linea.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> 'padre' puede ser null. La herencia se valida en una fase posterior.</p>
+     */
+    public void registrarClase(String nombre, String padre, List<DeclaracionVariableNodo> campos,
+                               int linea) {
+        if (clases.containsKey(nombre)) {
+            tablaSimbolos.reportarClaseRedeclarada(nombre, linea);
+            return;
+        }
+        ClaseInfo info = new ClaseInfo(nombre, padre, linea);
+        for (DeclaracionVariableNodo campo : campos) {
+            TipoDato tipo = campo.getTipo();
+            if (!tipo.esDeclarableVariable()) {
+                tablaSimbolos.reportarTipoDeclaracionInvalido(tipo, campo.getLinea());
+                continue;
+            }
+            if (!info.agregarCampo(campo.getNombre(), tipo)) {
+                tablaSimbolos.reportarCampoNoDeclarado(nombre, campo.getNombre(), campo.getLinea());
+            }
+        }
+        clases.put(nombre, info);
+        insertarSimbolo(new Simbolo(nombre, TipoDato.OBJETO, CategoriaSimb.CLASE, linea, true));
+    }
+
+    /**
+     * <strong>Nombre:</strong> registrarDeclaracionObjeto
+     *
+     * <p><strong>Objetivo:</strong> Declarar una variable de tipo objeto validando la clase y la instanciacion.</p>
+     *
+     * <p><strong>Entrada:</strong> String nombre, String nombreClase, ExpresionNodo inicializador, int linea.</p>
+     *
+     * <p><strong>Salida:</strong> No retorna valor.</p>
+     *
+     * <p><strong>Restricciones:</strong> No inserta el simbolo si la clase no existe.</p>
+     */
+    public void registrarDeclaracionObjeto(String nombre, String nombreClase,
+                                           ExpresionNodo inicializador, int linea) {
+        if (!clases.containsKey(nombreClase)) {
+            tablaSimbolos.reportarClaseNoDeclarada(nombreClase, linea);
+            return;
+        }
+        if (inicializador instanceof NuevoObjetoNodo) {
+            NuevoObjetoNodo nuevo = (NuevoObjetoNodo) inicializador;
+            evaluarTipo(nuevo);
+            if (clases.containsKey(nuevo.getNombreClase())
+                    && !esCompatibleObjeto(nombreClase, nuevo.getNombreClase())) {
+                tablaSimbolos.reportarTipoObjetoIncompatible(nombreClase, nuevo.getNombreClase(), linea);
+            }
+        }
+        insertarSimbolo(Simbolo.objeto(nombre, nombreClase, linea, inicializador != null));
+    }
+
+    /**
      * Nombre: usarIdentificador
      *
      * Objetivo: Ejecutar la operacion usarIdentificador definida por AnalizadorSemantico.
@@ -485,6 +552,10 @@ public class AnalizadorSemantico {
             tipo = evaluarTipoBinaria((ExpresionBinariaNodo) expresion);
         } else if (expresion instanceof ExpresionUnariaNodo) {
             tipo = evaluarTipoUnaria((ExpresionUnariaNodo) expresion);
+        } else if (expresion instanceof NuevoObjetoNodo) {
+            tipo = evaluarTipoNuevo((NuevoObjetoNodo) expresion);
+        } else if (expresion instanceof AccesoMiembroNodo) {
+            tipo = evaluarTipoAccesoMiembro((AccesoMiembroNodo) expresion);
         }
 
         expresion.setTipo(tipo);
@@ -899,6 +970,107 @@ public class AnalizadorSemantico {
     }
 
     /**
+     * Nombre: evaluarTipoNuevo
+     *
+     * Objetivo: Calcular el tipo de una instanciacion 'new Clase<|...|>' y validar la clase.
+     *
+     * Entrada: NuevoObjetoNodo nuevo.
+     *
+     * Salida: Valor de tipo TipoDato.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
+    private TipoDato evaluarTipoNuevo(NuevoObjetoNodo nuevo) {
+        if (!clases.containsKey(nuevo.getNombreClase())) {
+            tablaSimbolos.reportarClaseNoDeclarada(nuevo.getNombreClase(), nuevo.getLinea());
+            return TipoDato.ERROR;
+        }
+        return TipoDato.OBJETO;
+    }
+
+    /**
+     * Nombre: evaluarTipoAccesoMiembro
+     *
+     * Objetivo: Calcular el tipo de un acceso a campo 'objeto.campo' validando objeto y campo.
+     *
+     * Entrada: AccesoMiembroNodo acceso.
+     *
+     * Salida: Valor de tipo TipoDato.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
+    private TipoDato evaluarTipoAccesoMiembro(AccesoMiembroNodo acceso) {
+        TipoDato tipoObjeto = evaluarTipo(acceso.getObjeto());
+        String clase = claseDe(acceso.getObjeto());
+        if (clase == null || !clases.containsKey(clase)) {
+            if (tipoObjeto != TipoDato.ERROR && tipoObjeto != TipoDato.DESCONOCIDO) {
+                tablaSimbolos.reportarAccesoCampoSobreNoObjeto(tipoObjeto, acceso.getLinea());
+            }
+            return TipoDato.ERROR;
+        }
+        TipoDato tipoCampo = tipoCampoEnJerarquia(clase, acceso.getNombreCampo());
+        if (tipoCampo == null) {
+            tablaSimbolos.reportarCampoNoDeclarado(clase, acceso.getNombreCampo(), acceso.getLinea());
+            return TipoDato.ERROR;
+        }
+        return tipoCampo;
+    }
+
+    /**
+     * Nombre: claseDe
+     *
+     * Objetivo: Determinar el nombre de la clase a la que pertenece la expresion objeto.
+     *
+     * Entrada: ExpresionNodo expresion.
+     *
+     * Salida: Valor de tipo String (null si la expresion no es un objeto conocido).
+     *
+     * Restricciones: Uso interno de la clase.
+     */
+    private String claseDe(ExpresionNodo expresion) {
+        if (expresion instanceof IdentificadorNodo) {
+            Simbolo simbolo = tablaSimbolos.buscar(((IdentificadorNodo) expresion).getNombre(),
+                    expresion.getLinea());
+            return simbolo.getNombreClase();
+        }
+        if (expresion instanceof NuevoObjetoNodo) {
+            return ((NuevoObjetoNodo) expresion).getNombreClase();
+        }
+        return null;
+    }
+
+    /**
+     * Nombre: tipoCampoEnJerarquia
+     *
+     * Objetivo: Obtener el tipo de un campo buscando en la clase (la herencia se incorpora en otra fase).
+     *
+     * Entrada: String nombreClase; String campo.
+     *
+     * Salida: Valor de tipo TipoDato (null si no existe el campo).
+     *
+     * Restricciones: Uso interno de la clase.
+     */
+    private TipoDato tipoCampoEnJerarquia(String nombreClase, String campo) {
+        ClaseInfo info = clases.get(nombreClase);
+        return info == null ? null : info.tipoCampo(campo);
+    }
+
+    /**
+     * Nombre: esCompatibleObjeto
+     *
+     * Objetivo: Indicar si un objeto de la clase 'origen' es asignable a una variable de la clase 'destino'.
+     *
+     * Entrada: String destino; String origen.
+     *
+     * Salida: Valor de tipo boolean.
+     *
+     * Restricciones: Uso interno de la clase. La compatibilidad por herencia se amplia en otra fase.
+     */
+    private boolean esCompatibleObjeto(String destino, String origen) {
+        return destino != null && destino.equals(origen);
+    }
+
+    /**
      * Nombre: nombreDestino
      *
      * Objetivo: Ejecutar la operacion nombreDestino definida por AnalizadorSemantico.
@@ -915,6 +1087,9 @@ public class AnalizadorSemantico {
         }
         if (destino instanceof AccesoArregloNodo) {
             return ((AccesoArregloNodo) destino).getNombre();
+        }
+        if (destino instanceof AccesoMiembroNodo) {
+            return ((AccesoMiembroNodo) destino).getNombreCampo();
         }
         return "<desconocido>";
     }
@@ -945,6 +1120,9 @@ public class AnalizadorSemantico {
         }
         if (destino instanceof AccesoArregloNodo) {
             return evaluarTipoAccesoArreglo((AccesoArregloNodo) destino, false);
+        }
+        if (destino instanceof AccesoMiembroNodo) {
+            return evaluarTipoAccesoMiembro((AccesoMiembroNodo) destino);
         }
         return TipoDato.ERROR;
     }

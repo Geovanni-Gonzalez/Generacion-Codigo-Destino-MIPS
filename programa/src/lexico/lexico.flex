@@ -162,6 +162,9 @@ STRING = [^\r\n\"]*
 "void"          { return symbol(sym.VOID); }
 "empty"         { return symbol(sym.EMPTY); }
 "__main__"      { return symbol(sym.MAIN); }
+"class"         { return symbol(sym.CLASS); }
+"new"           { return symbol(sym.NEW); }
+"this"          { return symbol(sym.THIS); }
 "return"        { return symbol(sym.RETURN); }
 "break"         { return symbol(sym.BREAK); }
 "if"            { return symbol(sym.IF); }
@@ -212,6 +215,7 @@ STRING = [^\r\n\"]*
 "~"             { return symbol(sym.SEPARATOR); }
 ","             { return symbol(sym.COMMA); }
 ":"             { return symbol(sym.COLON); }
+"."             { return symbol(sym.DOT); }
 "!"             { return symbol(sym.END_EXPR); }
 
 {EXPONENTE_CERO} { errorLexico("literal exponencial con exponente no positivo"); }

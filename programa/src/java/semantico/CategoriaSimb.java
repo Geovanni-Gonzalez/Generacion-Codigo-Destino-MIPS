@@ -19,5 +19,9 @@ public enum CategoriaSimb {
     /** Parámetro formal de una función. */
     PARAMETRO,
     /** Función de nivel superior. */
-    FUNCION
+    FUNCION,
+    /** Definición de una clase de nivel superior. */
+    CLASE,
+    /** Variable cuyo tipo es una instancia de clase (objeto). */
+    OBJETO
 }

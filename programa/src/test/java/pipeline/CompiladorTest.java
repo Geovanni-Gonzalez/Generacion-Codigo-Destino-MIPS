@@ -60,11 +60,17 @@ class CompiladorTest {
         assertTrue(ir.contains("declare float f"), ir);
         assertTrue(ir.contains("end_function __main__"), ir);
 
-        // El optimizador debe plegar las constantes enteras y eliminar los temporales muertos.
-        assertTrue(ir.contains("x = 20"), ir);   // 10 + 5 * 2
-        assertTrue(ir.contains("y = 30"), ir);   // <|10 + 5|> * 2
-        assertTrue(ir.contains("z = 2"), ir);    // 2 ^ 3 % 3
-        assertFalse(ir.contains("_t0 ="), ir);   // temporal plegado y eliminado
+        // El codigo intermedio debe exhibir los temporales y todas las operaciones, sin plegar.
+        // 10 + 5 * 2 respeta la precedencia: primero 5 * 2 en un temporal, luego la suma.
+        assertTrue(ir.contains("_t0 = 5 * 2"), ir);
+        assertTrue(ir.contains("_t1 = 10 + _t0"), ir);
+        assertTrue(ir.contains("x = _t1"), ir);
+        // <|10 + 5|> * 2 y 2 ^ 3 % 3 tambien deben mostrar sus operaciones intermedias.
+        assertTrue(ir.contains("10 + 5"), ir);
+        assertTrue(ir.contains("2 ^ 3"), ir);
+        // Ya no se pliegan las constantes: no debe aparecer el resultado precalculado.
+        assertFalse(ir.contains("x = 20"), ir);
+        assertFalse(ir.contains("y = 30"), ir);
     }
 
     @Test

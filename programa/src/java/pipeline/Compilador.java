@@ -2,7 +2,6 @@ package pipeline;
 
 import intermedio.GeneradorCodigoIntermedio;
 import intermedio.Instruccion;
-import intermedio.OptimizadorIR;
 import mips.GeneradorMIPS;
 import java.io.Reader;
 import java.io.IOException;
@@ -71,7 +70,6 @@ public class Compilador {
         if (aceptado && parser.ast != null) {
             try {
                 codigoIntermedio = new GeneradorCodigoIntermedio().generar(parser.ast);
-                codigoIntermedio = new OptimizadorIR().optimizar(codigoIntermedio);
                 codigoMIPS = new GeneradorMIPS().generarCodigo(codigoIntermedio);
             } catch (CompiladorInternoException ex) {
                 aceptado = false;

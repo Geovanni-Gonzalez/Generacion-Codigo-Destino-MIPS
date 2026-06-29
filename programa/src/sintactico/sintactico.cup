@@ -75,6 +75,16 @@ parser code {:
         analizadorSemantico.registrarDeclaracionArreglo(nombre, tipo, filas, columnas, inicializacion, linea);
     }
 
+    public void registrarClase(String nombre, String padre,
+                               java.util.List<DeclaracionVariableNodo> campos, int linea) {
+        analizadorSemantico.registrarClase(nombre, padre, campos, linea);
+    }
+
+    public void registrarDeclaracionObjeto(String nombre, String nombreClase,
+                                           ExpresionNodo inicializador, int linea) {
+        analizadorSemantico.registrarDeclaracionObjeto(nombre, nombreClase, inicializador, linea);
+    }
+
     public void usarIdentificador(String nombre, int linea) {
         analizadorSemantico.usarIdentificador(nombre, linea);
     }
@@ -241,6 +251,7 @@ terminal INT, FLOAT, BOOL, CHAR_TYPE, STRING_TYPE;
 terminal EMPTY, VOID, MAIN, RETURN, BREAK;
 terminal IF, ELSE, DO, WHILE, SWITCH, CASE, DEFAULT;
 terminal CIN, COUT;
+terminal CLASS, NEW, THIS, DOT;
 terminal Boolean TRUE, FALSE;
 terminal EQUAL, N_EQUAL, LESS_T, LESS_TE, GREATHER_T, GREATHER_TE;
 terminal PLUS, MINUS, TIMES, DIV, MOD, POW;
@@ -259,13 +270,17 @@ terminal String ID;
 
 non terminal ProgramaNodo programa;
 non terminal java.util.List miembros, parametrosOpt, parametros, contenido, itemsCaso;
-non terminal FuncionNodo miembro, funcion, main;
+non terminal java.util.List camposClase;
+non terminal Nodo miembro;
+non terminal FuncionNodo funcion, main;
+non terminal ClaseNodo clase;
+non terminal DeclaracionVariableNodo campoClase;
 non terminal Object inicioPrograma, firmaFuncion, firmaMain, aperturaBloque;
 non terminal TipoDato tipo;
 non terminal ParametroNodo parametro;
 non terminal BloqueNodo bloque, cuerpoCaso;
 non terminal Nodo item, sentencia, control;
-non terminal DeclaracionVariableNodo creacion;
+non terminal SentenciaNodo creacion;
 non terminal Object restoNumerico;
 non terminal ExpresionNodo restoVariable;
 non terminal InicializacionArregloNodo asigArr;
@@ -295,7 +310,16 @@ programa
     ::= inicioPrograma miembros:ms
         {:
             parser.verificarMain();
-            ProgramaNodo programaNodo = new ProgramaNodo(msleft, msright, ms);
+            java.util.List funciones = new java.util.ArrayList();
+            java.util.List clases = new java.util.ArrayList();
+            for (Object miembro : ms) {
+                if (miembro instanceof ClaseNodo) {
+                    clases.add(miembro);
+                } else if (miembro != null) {
+                    funciones.add(miembro);
+                }
+            }
+            ProgramaNodo programaNodo = new ProgramaNodo(msleft, msright, funciones, clases);
             parser.verificarContextoBreak(programaNodo);
             parser.verificarRutasRetorno(programaNodo);
             RESULT = programaNodo;
@@ -327,12 +351,53 @@ miembros
         :}
     ;
 
-/* Miembro de nivel superior: declaracion de funcion regular o procedimiento principal. */
+/* Miembro de nivel superior: declaracion de funcion regular, clase o procedimiento principal. */
 miembro
     ::= funcion:f
         {: RESULT = f; :}
     | main:m
         {: RESULT = m; :}
+    | clase:c
+        {: RESULT = c; :}
+    ;
+
+/* Definicion de clase: nombre y cuerpo con declaraciones de campo (Corte A: sin herencia ni metodos). */
+clase
+    ::= CLASS SEPARATOR ID:nombre L_BLOCK camposClase:cs R_BLOCK
+        {:
+            parser.registrarClase(nombre, null, cs, nombreleft);
+            RESULT = new ClaseNodo(nombreleft, nombreright, nombre, null, cs,
+                    new java.util.ArrayList());
+        :}
+    | CLASS error ID:nombre L_BLOCK camposClase:cs R_BLOCK
+        {:
+            parser.report_error("Se esperaba '~' entre 'class' y el nombre de la clase", null);
+            parser.registrarClase(nombre, null, cs, nombreleft);
+            RESULT = new ClaseNodo(nombreleft, nombreright, nombre, null, cs,
+                    new java.util.ArrayList());
+        :}
+    ;
+
+/* Cuerpo de clase: cero o mas declaraciones de campo. */
+camposClase
+    ::=
+        {: RESULT = new java.util.ArrayList(); :}
+    | camposClase:cs campoClase:c
+        {:
+            cs.add(c);
+            RESULT = cs;
+        :}
+    ;
+
+/* Declaracion de campo escalar dentro de una clase. */
+campoClase
+    ::= tipo:t SEPARATOR ID:id END_EXPR
+        {: RESULT = new DeclaracionVariableNodo(tleft, tright, id, t, (ExpresionNodo) null); :}
+    | tipo:t error ID:id END_EXPR
+        {:
+            parser.report_error("Se esperaba '~' entre el tipo y el nombre del campo", null);
+            RESULT = new DeclaracionVariableNodo(tleft, tright, id, t, (ExpresionNodo) null);
+        :}
     ;
 
 /* Procedimiento principal: firma empty ~ __main__<| |> seguida de un bloque. */
@@ -653,6 +718,11 @@ creacion
                             s.filas, s.columnas, s.inicializacionArreglo)
                     : new DeclaracionVariableNodo(tleft, tright, id, TipoDato.FLOAT, s.inicializador);
         :}
+    | ID:c SEPARATOR ID:id restoVariable:r
+        {:
+            parser.registrarDeclaracionObjeto(id, c, r, idleft);
+            RESULT = new DeclaracionObjetoNodo(cleft, cright, id, c, r);
+        :}
     | BOOL:t error ID:id restoVariable:r
         {:
             parser.report_error("Se esperaba '~' entre 'bool' y el identificador", null);
@@ -850,6 +920,14 @@ asignacion
     | accesoArreglo:a ASSIGN expresion:e
         {:
             AsignacionNodo asignacion = new AsignacionNodo(aleft, aright, a, e);
+            parser.verificarAsignacion(asignacion);
+            RESULT = asignacion;
+        :}
+    | ID:obj DOT ID:campo ASSIGN expresion:e
+        {:
+            AccesoMiembroNodo acceso = new AccesoMiembroNodo(objleft, objright,
+                    new IdentificadorNodo(objleft, objright, obj), campo);
+            AsignacionNodo asignacion = new AsignacionNodo(objleft, objright, acceso, e);
             parser.verificarAsignacion(asignacion);
             RESULT = asignacion;
         :}
@@ -1466,6 +1544,20 @@ base
         {: RESULT = a; :}
     | idFuncion:f
         {: RESULT = f; :}
+    | ID:obj DOT ID:campo
+        {:
+            RESULT = new AccesoMiembroNodo(objleft, objright,
+                    new IdentificadorNodo(objleft, objright, obj), campo);
+        :}
+    | NEW ID:c L_PAREN args:a R_PAREN
+        {:
+            RESULT = new NuevoObjetoNodo(cleft, cright, c, a);
+        :}
+    | NEW ID:c L_PAREN args:a error
+        {:
+            parser.report_error("Se esperaba '|>' para cerrar la instanciacion 'new'", null);
+            RESULT = new NuevoObjetoNodo(cleft, cright, c, a);
+        :}
     | L_PAREN expresion:e R_PAREN
         {: RESULT = e; :}
     | L_PAREN expresion:e error

@@ -75,5 +75,11 @@ public enum Operacion {
     /** Marcador de inicio de función. */
     INICIO_FUNC,
     /** Marcador de fin de función. */
-    FIN_FUNC
+    FIN_FUNC,
+    /** Instanciación de objeto: reserva un bloque en heap. resultado = puntero, op1 = clase, op2 = tamaño. */
+    NEW,
+    /** Lectura de un campo de objeto: resultado = temporal, op1 = objeto, op2 = "offset:tipo". */
+    LOAD_FIELD,
+    /** Escritura de un campo de objeto: resultado = objeto, op1 = valor, op2 = "offset:tipo". */
+    STORE_FIELD
 }

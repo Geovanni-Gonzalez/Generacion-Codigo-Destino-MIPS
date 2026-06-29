@@ -26,6 +26,8 @@ public class Simbolo {
     private final Integer filasArreglo;
     private final Integer columnasArreglo;
     private boolean inicializado;
+    /** Nombre de la clase cuando el simbolo es un objeto; null en otro caso. */
+    private String nombreClase;
 
     /**
      * Nombre: Simbolo
@@ -131,6 +133,23 @@ public class Simbolo {
     }
 
     /**
+     * <strong>Nombre:</strong> objeto
+     *
+     * <p><strong>Objetivo:</strong> Crear un símbolo que representa una variable de tipo objeto (instancia de clase).</p>
+     *
+     * <p><strong>Entrada:</strong> String nombre, String nombreClase, int linea, boolean inicializado.</p>
+     *
+     * <p><strong>Salida:</strong> Nueva instancia de Simbolo con categoría OBJETO.</p>
+     *
+     * <p><strong>Restricciones:</strong> Ninguna.</p>
+     */
+    public static Simbolo objeto(String nombre, String nombreClase, int linea, boolean inicializado) {
+        Simbolo simbolo = new Simbolo(nombre, ast.TipoDato.OBJETO, CategoriaSimb.OBJETO, linea, inicializado);
+        simbolo.nombreClase = nombreClase;
+        return simbolo;
+    }
+
+    /**
      * Nombre: getNombre
      *
      * Objetivo: Obtener el valor de Nombre almacenado en la instancia.
@@ -143,6 +162,21 @@ public class Simbolo {
      */
     public String getNombre() {
         return nombre;
+    }
+
+    /**
+     * Nombre: getNombreClase
+     *
+     * Objetivo: Obtener el nombre de la clase asociada (solo para símbolos de objeto).
+     *
+     * Entrada: Ninguna.
+     *
+     * Salida: Valor de tipo String (null si no es objeto).
+     *
+     * Restricciones: Ninguna.
+     */
+    public String getNombreClase() {
+        return nombreClase;
     }
 
     /**

@@ -20,6 +20,8 @@ public enum TipoDato {
     VOID,
     ERROR,
     EMPTY,
+    /** Tipo de una instancia de clase; el nombre concreto de la clase se transporta aparte. */
+    OBJETO,
     DESCONOCIDO;
     /**
      * Nombre: esNumerico
