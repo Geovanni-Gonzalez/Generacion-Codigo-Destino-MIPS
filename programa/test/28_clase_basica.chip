@@ -1,0 +1,13 @@
+class ~ Punto |:
+    int ~ x !
+    int ~ y !
+:|
+
+empty ~ __main__<| |>
+|:
+    Punto ~ p <- new Punto<| |> !
+    p.x <- 10 !
+    p.y <- 20 !
+    cout <| p.x |> !
+    cout <| p.y |> !
+:|

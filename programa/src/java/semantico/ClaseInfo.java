@@ -1,7 +1,10 @@
 package semantico;
 
 import ast.TipoDato;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,6 +24,37 @@ public class ClaseInfo {
     private final int linea;
     /** Campos propios de la clase, en orden de declaracion: nombre -> tipo. */
     private final Map<String, TipoDato> campos = new LinkedHashMap<>();
+    /** Metodos propios de la clase, en orden de declaracion: nombre -> firma. */
+    private final Map<String, MetodoInfo> metodos = new LinkedHashMap<>();
+
+    /**
+     * Nombre: MetodoInfo
+     *
+     * Objetivo: Describir la firma de un metodo (tipo de retorno y tipos de parametros).
+     */
+    public static final class MetodoInfo {
+        private final String nombre;
+        private final TipoDato tipoRetorno;
+        private final List<TipoDato> tiposParametros;
+
+        public MetodoInfo(String nombre, TipoDato tipoRetorno, List<TipoDato> tiposParametros) {
+            this.nombre = nombre;
+            this.tipoRetorno = tipoRetorno;
+            this.tiposParametros = new ArrayList<>(tiposParametros);
+        }
+
+        public String getNombre() {
+            return nombre;
+        }
+
+        public TipoDato getTipoRetorno() {
+            return tipoRetorno;
+        }
+
+        public List<TipoDato> getTiposParametros() {
+            return Collections.unmodifiableList(tiposParametros);
+        }
+    }
 
     /**
      * Nombre: ClaseInfo
@@ -131,5 +165,54 @@ public class ClaseInfo {
      */
     public TipoDato tipoCampo(String nombre) {
         return campos.get(nombre);
+    }
+
+    /**
+     * Nombre: agregarMetodo
+     *
+     * Objetivo: Registrar la firma de un metodo propio de la clase.
+     *
+     * Entrada: MetodoInfo metodo.
+     *
+     * Salida: Valor de tipo boolean (false si el metodo ya existia).
+     *
+     * Restricciones: Ninguna.
+     */
+    public boolean agregarMetodo(MetodoInfo metodo) {
+        if (metodos.containsKey(metodo.getNombre())) {
+            return false;
+        }
+        metodos.put(metodo.getNombre(), metodo);
+        return true;
+    }
+
+    /**
+     * Nombre: metodo
+     *
+     * Objetivo: Obtener la firma de un metodo propio de la clase.
+     *
+     * Entrada: String nombre.
+     *
+     * Salida: Valor de tipo MetodoInfo (null si no existe).
+     *
+     * Restricciones: Ninguna.
+     */
+    public MetodoInfo metodo(String nombre) {
+        return metodos.get(nombre);
+    }
+
+    /**
+     * Nombre: tieneConstructor
+     *
+     * Objetivo: Indicar si la clase declara un constructor (metodo con el nombre de la clase).
+     *
+     * Entrada: Ninguna.
+     *
+     * Salida: Valor de tipo boolean.
+     *
+     * Restricciones: Ninguna.
+     */
+    public boolean tieneConstructor() {
+        return metodos.containsKey(nombre);
     }
 }

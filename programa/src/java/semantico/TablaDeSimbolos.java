@@ -360,6 +360,21 @@ public class TablaDeSimbolos {
     }
 
     /**
+     * Nombre: reportarMetodoNoDeclarado
+     *
+     * Objetivo: Registrar un diagnostico de error con el formato del compilador.
+     *
+     * Entrada: String clase; String metodo; int linea.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Ninguna.
+     */
+    public void reportarMetodoNoDeclarado(String clase, String metodo, int linea) {
+        reportar("la clase '" + clase + "' no tiene un metodo llamado '" + metodo + "'", linea);
+    }
+
+    /**
      * Nombre: reportarAccesoCampoSobreNoObjeto
      *
      * Objetivo: Registrar un diagnostico de error con el formato del compilador.

@@ -183,9 +183,31 @@ final class AnalizadorIRMIPS {
             case MENOR_IGUAL:
             case MAYOR_IGUAL:
                 return "bool";
+            case NEW:
+                return "int";
+            case LOAD_FIELD:
+                return tipoDeCampoRef(i.op2);
             default:
                 return null;
         }
+    }
+
+    /**
+     * Nombre: tipoDeCampoRef
+     *
+     * Objetivo: Extraer el tipo codificado en una referencia de campo con formato "offset:tipo".
+     *
+     * Entrada: String referencia.
+     *
+     * Salida: Valor de tipo String.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
+    private String tipoDeCampoRef(String referencia) {
+        if (referencia == null || !referencia.contains(":")) {
+            return "int";
+        }
+        return OperandosMIPS.normalizarTipo(referencia.substring(referencia.indexOf(':') + 1));
     }
 
     /**

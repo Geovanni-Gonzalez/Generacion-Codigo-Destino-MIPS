@@ -1,0 +1,13 @@
+class ~ Punto |:
+    int ~ x !
+
+    empty ~ Punto<| int ~ a |>
+    |:
+        this.x <- a !
+    :|
+:|
+
+empty ~ __main__<| |>
+|:
+    Punto ~ p <- new Punto<| 1, 2 |> !
+:|

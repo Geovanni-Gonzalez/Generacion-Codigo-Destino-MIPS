@@ -96,6 +96,54 @@ class CompiladorTest {
         assertFalse(mips.contains("sw $t0, d_main_t9\n\tlw $t0, d_main_t9"), mips);
     }
 
+    @Test
+    void generaClaseBasicaConObjetoYCampos() throws Exception {
+        ResultadoCompilacion resultado =
+                new Compilador().compilar(Path.of("test", "28_clase_basica.chip"));
+
+        assertTrue(resultado.isAceptado());
+
+        String ir = irComoTexto(resultado.getCodigoIntermedio());
+        // El objeto se instancia con 'new' (tamaño = 4 de vtable + 2 campos * 4 = 12 bytes).
+        assertTrue(ir.contains("new Punto, 12"), ir);
+        // Acceso a campos por offset (x en 4, y en 8), con temporales y operaciones visibles.
+        assertTrue(ir.contains("field p @4:int = 10"), ir);
+        assertTrue(ir.contains("field p @8:int = 20"), ir);
+        assertTrue(ir.contains("= field p @4:int"), ir);
+
+        String mips = String.join("\n", resultado.getCodigoMIPS());
+        // Reserva del objeto en heap mediante syscall 9 (sbrk).
+        assertTrue(mips.contains("li $v0, 9"), mips);
+        assertTrue(mips.contains("li $a0, 12"), mips);
+        // Escritura de campo por offset desde el puntero del objeto.
+        assertTrue(mips.contains("4($t0)") || mips.contains("4($t1)"), mips);
+    }
+
+    @Test
+    void generaMetodosConstructorYDespachoEstatico() throws Exception {
+        ResultadoCompilacion resultado =
+                new Compilador().compilar(Path.of("test", "30_clase_metodos.chip"));
+
+        assertTrue(resultado.isAceptado());
+
+        String ir = irComoTexto(resultado.getCodigoIntermedio());
+        // El metodo y el constructor se emiten como funciones 'Clase_metodo' con 'this' implicito.
+        assertTrue(ir.contains("begin_function Punto_Punto"), ir);
+        assertTrue(ir.contains("begin_function Punto_sumar"), ir);
+        assertTrue(ir.contains("parameter objeto this"), ir);
+        // 'new' invoca el constructor pasando this + 2 args; la llamada al metodo pasa solo this.
+        assertTrue(ir.contains("call Punto_Punto, 3"), ir);
+        assertTrue(ir.contains("call Punto_sumar, 1"), ir);
+        // El constructor escribe los campos via this.
+        assertTrue(ir.contains("field this @4:int ="), ir);
+
+        String mips = String.join("\n", resultado.getCodigoMIPS());
+        // Despacho estatico con jal a las etiquetas de metodo.
+        assertTrue(mips.contains("_fn_Punto_sumar:"), mips);
+        assertTrue(mips.contains("jal _fn_Punto_Punto"), mips);
+        assertTrue(mips.contains("jal _fn_Punto_sumar"), mips);
+    }
+
     private static String irComoTexto(List<Instruccion> codigo) {
         return codigo.stream().map(Instruccion::toString).collect(Collectors.joining("\n"));
     }
@@ -113,7 +161,9 @@ class CompiladorTest {
                 "09_switch.chip",
                 "10_funciones.chip",
                 "12_comentarios.chip",
-                "22_condiciones_bool_validas.chip"
+                "22_condiciones_bool_validas.chip",
+                "28_clase_basica.chip",
+                "30_clase_metodos.chip"
         ).map(Arguments::of);
     }
 
@@ -133,7 +183,9 @@ class CompiladorTest {
                 "24_llamadas_funciones.chip",
                 "25_returns_tipado.chip",
                 "26_error_sin_cascada.chip",
-                "27_recuperacion_frase_fin_sentencia.chip"
+                "27_recuperacion_frase_fin_sentencia.chip",
+                "29_clase_campo_inexistente.chip",
+                "31_clase_constructor_args.chip"
         ).map(Arguments::of);
     }
 }

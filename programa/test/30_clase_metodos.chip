@@ -1,0 +1,21 @@
+class ~ Punto |:
+    int ~ x !
+    int ~ y !
+
+    empty ~ Punto<| int ~ a, int ~ b |>
+    |:
+        this.x <- a !
+        this.y <- b !
+    :|
+
+    int ~ sumar<| |>
+    |:
+        return ~ this.x + this.y !
+    :|
+:|
+
+empty ~ __main__<| |>
+|:
+    Punto ~ p <- new Punto<| 10, 20 |> !
+    cout <| p.sumar<| |> |> !
+:|

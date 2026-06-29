@@ -20,6 +20,7 @@ import ast.IfNodo;
 import ast.InicializacionArregloNodo;
 import ast.LiteralNodo;
 import ast.LlamadaFuncionNodo;
+import ast.LlamadaMetodoNodo;
 import ast.Nodo;
 import ast.NuevoObjetoNodo;
 import ast.ProgramaNodo;
@@ -32,9 +33,11 @@ import ast.WhileNodo;
 import java.util.ArrayList;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import pipeline.CompiladorInternoException;
 
 /**
@@ -59,6 +62,8 @@ public class GeneradorCodigoIntermedio {
     private final Map<String, ClaseLayout> clasesLayout = new LinkedHashMap<>();
     /** Variable de objeto -> nombre de su clase, dentro de la función actual. */
     private final Map<String, String> objetoClase = new LinkedHashMap<>();
+    /** Clases que declaran un constructor (método con el nombre de la clase). */
+    private final Set<String> clasesConConstructor = new HashSet<>();
 
     /** Disposición en memoria de una clase: offset y tipo por campo, y tamaño total en bytes. */
     private static final class ClaseLayout {
@@ -90,10 +95,55 @@ public class GeneradorCodigoIntermedio {
         contadorEtiquetas = 0;
         destinosBreak.clear();
         construirLayoutClases(programa);
+        for (ClaseNodo clase : programa.getClases()) {
+            for (FuncionNodo metodo : clase.getMetodos()) {
+                generarMetodo(clase, metodo);
+            }
+        }
         for (FuncionNodo funcion : programa.getFunciones()) {
             generarFuncion(funcion);
         }
         return new ArrayList<>(instrucciones);
+    }
+
+    /**
+     * Nombre: generarMetodo
+     *
+     * Objetivo: Emitir un metodo como una funcion 'Clase_metodo' con un primer parametro implicito 'this'.
+     *
+     * Entrada: ClaseNodo clase; FuncionNodo metodo.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
+    private void generarMetodo(ClaseNodo clase, FuncionNodo metodo) {
+        objetoClase.clear();
+        String nombreFuncion = mangle(clase.getNombre(), metodo.getNombre());
+        instrucciones.add(new Instruccion(Operacion.INICIO_FUNC, nombreFuncion));
+        instrucciones.add(new Instruccion(Operacion.FORMAL_PARAM, "this", "objeto"));
+        objetoClase.put("this", clase.getNombre());
+        for (ParametroNodo parametro : metodo.getParametros()) {
+            instrucciones.add(new Instruccion(Operacion.FORMAL_PARAM, parametro.getNombre(),
+                    parametro.getTipo().toString()));
+        }
+        generarBloque(metodo.getCuerpo());
+        instrucciones.add(new Instruccion(Operacion.FIN_FUNC, nombreFuncion));
+    }
+
+    /**
+     * Nombre: mangle
+     *
+     * Objetivo: Construir el nombre interno de un metodo a partir de su clase ('Clase_metodo').
+     *
+     * Entrada: String clase; String metodo.
+     *
+     * Salida: Valor de tipo String.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
+    private String mangle(String clase, String metodo) {
+        return clase + "_" + metodo;
     }
 
     /**
@@ -109,6 +159,7 @@ public class GeneradorCodigoIntermedio {
      */
     private void construirLayoutClases(ProgramaNodo programa) {
         clasesLayout.clear();
+        clasesConConstructor.clear();
         for (ClaseNodo clase : programa.getClases()) {
             Map<String, Integer> offsets = new LinkedHashMap<>();
             Map<String, String> tipos = new LinkedHashMap<>();
@@ -119,6 +170,11 @@ public class GeneradorCodigoIntermedio {
                 offset += 4;
             }
             clasesLayout.put(clase.getNombre(), new ClaseLayout(offsets, tipos, offset));
+            for (FuncionNodo metodo : clase.getMetodos()) {
+                if (metodo.getNombre().equals(clase.getNombre())) {
+                    clasesConConstructor.add(clase.getNombre());
+                }
+            }
         }
     }
 
@@ -531,6 +587,20 @@ public class GeneradorCodigoIntermedio {
         if (expresion instanceof LlamadaFuncionNodo) {
             return generarLlamada((LlamadaFuncionNodo) expresion);
         }
+        if (expresion instanceof NuevoObjetoNodo) {
+            return generarNuevoObjeto((NuevoObjetoNodo) expresion);
+        }
+        if (expresion instanceof LlamadaMetodoNodo) {
+            return generarLlamadaMetodo((LlamadaMetodoNodo) expresion);
+        }
+        if (expresion instanceof AccesoMiembroNodo) {
+            AccesoMiembroNodo acceso = (AccesoMiembroNodo) expresion;
+            String objeto = nombreObjeto(acceso.getObjeto());
+            String campoRef = offsetTipo(objeto, acceso.getNombreCampo());
+            String temporal = nuevoTemporal();
+            instrucciones.add(new Instruccion(Operacion.LOAD_FIELD, temporal, objeto, campoRef));
+            return temporal;
+        }
         throw new CompiladorInternoException("Expresion no soportada en codigo intermedio: "
                 + expresion.getClass().getSimpleName(),
                 expresion.getLinea(), expresion.getColumna());
@@ -707,6 +777,120 @@ public class GeneradorCodigoIntermedio {
      */
     private String nuevoTemporal() {
         return "_t" + contadorTemporales++;
+    }
+
+    /**
+     * Nombre: generarNuevoObjeto
+     *
+     * Objetivo: Emitir la instruccion NEW que reserva el bloque de un objeto y devolver su puntero.
+     *
+     * Entrada: NuevoObjetoNodo nuevo.
+     *
+     * Salida: Valor de tipo String (temporal con el puntero del objeto).
+     *
+     * Restricciones: Uso interno de la clase.
+     */
+    private String generarNuevoObjeto(NuevoObjetoNodo nuevo) {
+        ClaseLayout layout = clasesLayout.get(nuevo.getNombreClase());
+        int tamano = layout != null ? layout.tamanoBytes : 4;
+        String temporal = nuevoTemporal();
+        instrucciones.add(new Instruccion(Operacion.NEW, temporal, nuevo.getNombreClase(),
+                String.valueOf(tamano)));
+        if (clasesConConstructor.contains(nuevo.getNombreClase())) {
+            instrucciones.add(new Instruccion(Operacion.PARAM, temporal));
+            for (ExpresionNodo argumento : nuevo.getArgumentos()) {
+                instrucciones.add(new Instruccion(Operacion.PARAM, generarExpresion(argumento)));
+            }
+            instrucciones.add(new Instruccion(Operacion.CALL, null,
+                    mangle(nuevo.getNombreClase(), nuevo.getNombreClase()),
+                    String.valueOf(1 + nuevo.getArgumentos().size())));
+        }
+        return temporal;
+    }
+
+    /**
+     * Nombre: generarLlamadaMetodo
+     *
+     * Objetivo: Emitir el despacho estatico de un metodo, pasando el objeto receptor como 'this'.
+     *
+     * Entrada: LlamadaMetodoNodo llamada.
+     *
+     * Salida: Valor de tipo String (temporal con el resultado, o null si el metodo es void).
+     *
+     * Restricciones: Uso interno de la clase.
+     */
+    private String generarLlamadaMetodo(LlamadaMetodoNodo llamada) {
+        String receptor = nombreObjeto(llamada.getObjeto());
+        String clase = objetoClase.get(receptor);
+        if (clase == null) {
+            throw new CompiladorInternoException("No se pudo determinar la clase del objeto receptor '"
+                    + receptor + "'", llamada.getLinea(), llamada.getColumna());
+        }
+        String nombreFuncion = mangle(clase, llamada.getNombreMetodo());
+        instrucciones.add(new Instruccion(Operacion.PARAM, receptor));
+        for (ExpresionNodo argumento : llamada.getArgumentos()) {
+            instrucciones.add(new Instruccion(Operacion.PARAM, generarExpresion(argumento)));
+        }
+        String cantidad = String.valueOf(1 + llamada.getArgumentos().size());
+        if (esTipoVacio(llamada.getTipo())) {
+            instrucciones.add(new Instruccion(Operacion.CALL, null, nombreFuncion, cantidad));
+            return null;
+        }
+        String temporal = nuevoTemporal();
+        instrucciones.add(new Instruccion(Operacion.CALL, temporal, nombreFuncion, cantidad));
+        return temporal;
+    }
+
+    /**
+     * Nombre: esTipoVacio
+     *
+     * Objetivo: Indicar si un tipo de retorno corresponde a un metodo sin valor (void/empty).
+     *
+     * Entrada: TipoDato tipo.
+     *
+     * Salida: Valor de tipo boolean.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
+    private boolean esTipoVacio(TipoDato tipo) {
+        return tipo == TipoDato.VOID || tipo == TipoDato.EMPTY;
+    }
+
+    /**
+     * Nombre: nombreObjeto
+     *
+     * Objetivo: Obtener el operando que referencia al objeto receptor de un acceso a campo.
+     *
+     * Entrada: ExpresionNodo objeto.
+     *
+     * Salida: Valor de tipo String (nombre de variable o temporal con el puntero).
+     *
+     * Restricciones: Uso interno de la clase.
+     */
+    private String nombreObjeto(ExpresionNodo objeto) {
+        if (objeto instanceof IdentificadorNodo) {
+            return ((IdentificadorNodo) objeto).getNombre();
+        }
+        return generarExpresion(objeto);
+    }
+
+    /**
+     * Nombre: offsetTipo
+     *
+     * Objetivo: Construir el operando "offset:tipo" de un campo segun el layout de la clase del objeto.
+     *
+     * Entrada: String objeto; String campo.
+     *
+     * Salida: Valor de tipo String.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
+    private String offsetTipo(String objeto, String campo) {
+        ClaseLayout layout = clasesLayout.get(objetoClase.get(objeto));
+        if (layout == null || !layout.offsets.containsKey(campo)) {
+            return "4:int";
+        }
+        return layout.offsets.get(campo) + ":" + layout.tipos.get(campo);
     }
 
     /**

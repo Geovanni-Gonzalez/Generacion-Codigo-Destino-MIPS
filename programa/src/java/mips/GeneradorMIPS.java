@@ -38,6 +38,8 @@ public final class GeneradorMIPS {
     private final TraductorIOMIPS io = new TraductorIOMIPS(salida, memoria);
     private final TraductorFuncionesMIPS funciones =
             new TraductorFuncionesMIPS(salida, registros, memoria, parametrosFuncion);
+    private final TraductorObjetosMIPS objetos =
+            new TraductorObjetosMIPS(salida, registros, memoria);
 
     private int contadorEtiquetaInterna;
     private String funcionActual;
@@ -244,6 +246,15 @@ public final class GeneradorMIPS {
                 break;
             case READ:
                 io.traducirRead(i.op1 != null ? i.op1 : i.resultado, funcionActual);
+                break;
+            case NEW:
+                objetos.traducirNuevo(i, funcionActual);
+                break;
+            case LOAD_FIELD:
+                objetos.traducirCargaCampo(i, funcionActual);
+                break;
+            case STORE_FIELD:
+                objetos.traducirGuardaCampo(i, funcionActual);
                 break;
             default:
                 throw new CompiladorInternoException("Operacion MIPS no implementada: " + i.op);

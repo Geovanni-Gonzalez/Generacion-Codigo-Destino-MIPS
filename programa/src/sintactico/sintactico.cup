@@ -75,9 +75,24 @@ parser code {:
         analizadorSemantico.registrarDeclaracionArreglo(nombre, tipo, filas, columnas, inicializacion, linea);
     }
 
-    public void registrarClase(String nombre, String padre,
-                               java.util.List<DeclaracionVariableNodo> campos, int linea) {
-        analizadorSemantico.registrarClase(nombre, padre, campos, linea);
+    public void iniciarClase(String nombre, String padre, int linea) {
+        analizadorSemantico.iniciarClase(nombre, padre, linea);
+    }
+
+    public void agregarCampoClase(String nombre, TipoDato tipo, int linea) {
+        analizadorSemantico.agregarCampoClase(nombre, tipo, linea);
+    }
+
+    public void abrirMetodo(String nombre, TipoDato tipoRetorno, int linea) {
+        analizadorSemantico.abrirMetodo(nombre, tipoRetorno, linea);
+    }
+
+    public void cerrarMetodo(FuncionNodo metodo) {
+        analizadorSemantico.cerrarMetodo(metodo);
+    }
+
+    public void finalizarClase() {
+        analizadorSemantico.finalizarClase();
     }
 
     public void registrarDeclaracionObjeto(String nombre, String nombreClase,
@@ -270,11 +285,12 @@ terminal String ID;
 
 non terminal ProgramaNodo programa;
 non terminal java.util.List miembros, parametrosOpt, parametros, contenido, itemsCaso;
-non terminal java.util.List camposClase;
+non terminal java.util.List miembrosClase;
 non terminal Nodo miembro;
-non terminal FuncionNodo funcion, main;
+non terminal FuncionNodo funcion, main, metodoClase;
 non terminal ClaseNodo clase;
 non terminal DeclaracionVariableNodo campoClase;
+non terminal Object firmaMetodo;
 non terminal Object inicioPrograma, firmaFuncion, firmaMain, aperturaBloque;
 non terminal TipoDato tipo;
 non terminal ParametroNodo parametro;
@@ -361,42 +377,86 @@ miembro
         {: RESULT = c; :}
     ;
 
-/* Definicion de clase: nombre y cuerpo con declaraciones de campo (Corte A: sin herencia ni metodos). */
+/* Definicion de clase: nombre y cuerpo con campos y metodos (Corte B: sin herencia). */
 clase
-    ::= CLASS SEPARATOR ID:nombre L_BLOCK camposClase:cs R_BLOCK
+    ::= CLASS SEPARATOR ID:nombre
+        {: parser.iniciarClase(nombre, null, nombreleft); :}
+        L_BLOCK miembrosClase:ms R_BLOCK
         {:
-            parser.registrarClase(nombre, null, cs, nombreleft);
-            RESULT = new ClaseNodo(nombreleft, nombreright, nombre, null, cs,
-                    new java.util.ArrayList());
-        :}
-    | CLASS error ID:nombre L_BLOCK camposClase:cs R_BLOCK
-        {:
-            parser.report_error("Se esperaba '~' entre 'class' y el nombre de la clase", null);
-            parser.registrarClase(nombre, null, cs, nombreleft);
-            RESULT = new ClaseNodo(nombreleft, nombreright, nombre, null, cs,
-                    new java.util.ArrayList());
+            java.util.List campos = new java.util.ArrayList();
+            java.util.List metodos = new java.util.ArrayList();
+            for (Object miembroClase : ms) {
+                if (miembroClase instanceof FuncionNodo) {
+                    metodos.add(miembroClase);
+                } else if (miembroClase != null) {
+                    campos.add(miembroClase);
+                }
+            }
+            ClaseNodo claseNodo = new ClaseNodo(nombreleft, nombreright, nombre, null, campos, metodos);
+            parser.finalizarClase();
+            RESULT = claseNodo;
         :}
     ;
 
-/* Cuerpo de clase: cero o mas declaraciones de campo. */
-camposClase
+/* Cuerpo de clase: cero o mas campos o metodos (los campos deben declararse antes que los metodos). */
+miembrosClase
     ::=
         {: RESULT = new java.util.ArrayList(); :}
-    | camposClase:cs campoClase:c
+    | miembrosClase:ms campoClase:c
         {:
-            cs.add(c);
-            RESULT = cs;
+            ms.add(c);
+            RESULT = ms;
+        :}
+    | miembrosClase:ms metodoClase:m
+        {:
+            ms.add(m);
+            RESULT = ms;
         :}
     ;
 
 /* Declaracion de campo escalar dentro de una clase. */
 campoClase
     ::= tipo:t SEPARATOR ID:id END_EXPR
-        {: RESULT = new DeclaracionVariableNodo(tleft, tright, id, t, (ExpresionNodo) null); :}
+        {:
+            parser.agregarCampoClase(id, t, idleft);
+            RESULT = new DeclaracionVariableNodo(tleft, tright, id, t, (ExpresionNodo) null);
+        :}
     | tipo:t error ID:id END_EXPR
         {:
             parser.report_error("Se esperaba '~' entre el tipo y el nombre del campo", null);
+            parser.agregarCampoClase(id, t, idleft);
             RESULT = new DeclaracionVariableNodo(tleft, tright, id, t, (ExpresionNodo) null);
+        :}
+    ;
+
+/* Metodo de clase: como una funcion, pero con 'this' y los campos accesibles en su alcance. */
+metodoClase
+    ::= firmaMetodo:f L_PAREN parametrosOpt:p R_PAREN bloque:b
+        {:
+            Object[] firma = (Object[]) f;
+            FuncionNodo metodo = new FuncionNodo(((Integer) firma[1]).intValue(),
+                    ((Integer) firma[2]).intValue(), (String) firma[3], (TipoDato) firma[0], p, b, false);
+            parser.cerrarMetodo(metodo);
+            RESULT = metodo;
+        :}
+    ;
+
+/* Firma de metodo: abre su alcance (con 'this') antes de los parametros y el cuerpo. */
+firmaMetodo
+    ::= tipo:t SEPARATOR ID:id
+        {:
+            parser.abrirMetodo(id, t, idleft);
+            RESULT = new Object[] { t, Integer.valueOf(tleft), Integer.valueOf(tright), id };
+        :}
+    | EMPTY:e SEPARATOR ID:id
+        {:
+            parser.abrirMetodo(id, TipoDato.EMPTY, idleft);
+            RESULT = new Object[] { TipoDato.EMPTY, Integer.valueOf(eleft), Integer.valueOf(eright), id };
+        :}
+    | VOID:v SEPARATOR ID:id
+        {:
+            parser.abrirMetodo(id, TipoDato.VOID, idleft);
+            RESULT = new Object[] { TipoDato.VOID, Integer.valueOf(vleft), Integer.valueOf(vright), id };
         :}
     ;
 
@@ -928,6 +988,14 @@ asignacion
             AccesoMiembroNodo acceso = new AccesoMiembroNodo(objleft, objright,
                     new IdentificadorNodo(objleft, objright, obj), campo);
             AsignacionNodo asignacion = new AsignacionNodo(objleft, objright, acceso, e);
+            parser.verificarAsignacion(asignacion);
+            RESULT = asignacion;
+        :}
+    | THIS:t DOT ID:campo ASSIGN expresion:e
+        {:
+            AccesoMiembroNodo acceso = new AccesoMiembroNodo(tleft, tright,
+                    new IdentificadorNodo(tleft, tright, "this"), campo);
+            AsignacionNodo asignacion = new AsignacionNodo(tleft, tright, acceso, e);
             parser.verificarAsignacion(asignacion);
             RESULT = asignacion;
         :}
@@ -1549,13 +1617,25 @@ base
             RESULT = new AccesoMiembroNodo(objleft, objright,
                     new IdentificadorNodo(objleft, objright, obj), campo);
         :}
+    | ID:obj DOT ID:metodo L_PAREN args:a R_PAREN
+        {:
+            RESULT = new LlamadaMetodoNodo(objleft, objright,
+                    new IdentificadorNodo(objleft, objright, obj), metodo, a);
+        :}
+    | THIS:t
+        {: RESULT = new IdentificadorNodo(tleft, tright, "this"); :}
+    | THIS:t DOT ID:campo
+        {:
+            RESULT = new AccesoMiembroNodo(tleft, tright,
+                    new IdentificadorNodo(tleft, tright, "this"), campo);
+        :}
+    | THIS:t DOT ID:metodo L_PAREN args:a R_PAREN
+        {:
+            RESULT = new LlamadaMetodoNodo(tleft, tright,
+                    new IdentificadorNodo(tleft, tright, "this"), metodo, a);
+        :}
     | NEW ID:c L_PAREN args:a R_PAREN
         {:
-            RESULT = new NuevoObjetoNodo(cleft, cright, c, a);
-        :}
-    | NEW ID:c L_PAREN args:a error
-        {:
-            parser.report_error("Se esperaba '|>' para cerrar la instanciacion 'new'", null);
             RESULT = new NuevoObjetoNodo(cleft, cright, c, a);
         :}
     | L_PAREN expresion:e R_PAREN

@@ -74,7 +74,7 @@
                                     <arg value="sym"/>
 
                                     <arg value="-expect"/>
-                                    <arg value="36"/>
+                                    <arg value="38"/>
 
                                     <arg value="${project.basedir}/src/sintactico/sintactico.cup"/>
 

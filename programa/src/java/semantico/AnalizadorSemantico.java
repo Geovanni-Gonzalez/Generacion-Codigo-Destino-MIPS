@@ -6,6 +6,7 @@ import ast.AsignacionNodo;
 import ast.BloqueNodo;
 import ast.BreakNodo;
 import ast.CasoSwitchNodo;
+import ast.ClaseNodo;
 import ast.DeclaracionVariableNodo;
 import ast.EntradaNodo;
 import ast.ExpresionBinariaNodo;
@@ -15,6 +16,7 @@ import ast.FuncionNodo;
 import ast.IdentificadorNodo;
 import ast.InicializacionArregloNodo;
 import ast.LlamadaFuncionNodo;
+import ast.LlamadaMetodoNodo;
 import ast.LiteralNodo;
 import ast.Nodo;
 import ast.NuevoObjetoNodo;
@@ -48,6 +50,10 @@ public class AnalizadorSemantico {
     private final Consumer<String> reportadorSintactico;
     /** Registro de clases declaradas: nombre -> informacion estructural. */
     private final Map<String, ClaseInfo> clases = new LinkedHashMap<>();
+    /** Clase cuyo cuerpo se esta analizando actualmente (null fuera de una clase). */
+    private ClaseInfo claseEnConstruccion;
+    /** Indica si la clase en construccion debe registrarse al finalizar (false si es redeclaracion). */
+    private boolean registrarClaseActual;
     private int cantidadMain;
     private TipoDato tipoRetornoActual = TipoDato.DESCONOCIDO;
     private String funcionActual;
@@ -314,35 +320,115 @@ public class AnalizadorSemantico {
     }
 
     /**
-     * <strong>Nombre:</strong> registrarClase
+     * <strong>Nombre:</strong> iniciarClase
      *
-     * <p><strong>Objetivo:</strong> Registrar la estructura de una clase (campos) validando tipos y duplicados.</p>
+     * <p><strong>Objetivo:</strong> Comenzar la construccion de una clase, validando que no este redeclarada.</p>
      *
-     * <p><strong>Entrada:</strong> String nombre, String padre, List&lt;DeclaracionVariableNodo&gt; campos, int linea.</p>
+     * <p><strong>Entrada:</strong> String nombre, String padre, int linea.</p>
      *
      * <p><strong>Salida:</strong> No retorna valor.</p>
      *
-     * <p><strong>Restricciones:</strong> 'padre' puede ser null. La herencia se valida en una fase posterior.</p>
+     * <p><strong>Restricciones:</strong> 'padre' puede ser null. Los campos deben declararse antes que los metodos.</p>
      */
-    public void registrarClase(String nombre, String padre, List<DeclaracionVariableNodo> campos,
-                               int linea) {
-        if (clases.containsKey(nombre)) {
+    public void iniciarClase(String nombre, String padre, int linea) {
+        claseEnConstruccion = new ClaseInfo(nombre, padre, linea);
+        registrarClaseActual = !clases.containsKey(nombre);
+        if (!registrarClaseActual) {
             tablaSimbolos.reportarClaseRedeclarada(nombre, linea);
             return;
         }
-        ClaseInfo info = new ClaseInfo(nombre, padre, linea);
-        for (DeclaracionVariableNodo campo : campos) {
-            TipoDato tipo = campo.getTipo();
-            if (!tipo.esDeclarableVariable()) {
-                tablaSimbolos.reportarTipoDeclaracionInvalido(tipo, campo.getLinea());
-                continue;
-            }
-            if (!info.agregarCampo(campo.getNombre(), tipo)) {
-                tablaSimbolos.reportarCampoNoDeclarado(nombre, campo.getNombre(), campo.getLinea());
-            }
-        }
-        clases.put(nombre, info);
+        // Se registra de inmediato (no al finalizar) para que sus propios metodos puedan
+        // referenciarla via 'this' y campos durante el analisis de sus cuerpos.
+        clases.put(nombre, claseEnConstruccion);
         insertarSimbolo(new Simbolo(nombre, TipoDato.OBJETO, CategoriaSimb.CLASE, linea, true));
+    }
+
+    /**
+     * Nombre: agregarCampoClase
+     *
+     * Objetivo: Registrar un campo de la clase en construccion validando su tipo y unicidad.
+     *
+     * Entrada: String nombre; TipoDato tipo; int linea.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Ninguna.
+     */
+    public void agregarCampoClase(String nombre, TipoDato tipo, int linea) {
+        if (claseEnConstruccion == null) {
+            return;
+        }
+        if (!tipo.esDeclarableVariable()) {
+            tablaSimbolos.reportarTipoDeclaracionInvalido(tipo, linea);
+            return;
+        }
+        if (!claseEnConstruccion.agregarCampo(nombre, tipo)) {
+            tablaSimbolos.reportarCampoNoDeclarado(claseEnConstruccion.getNombre(), nombre, linea);
+        }
+    }
+
+    /**
+     * Nombre: abrirMetodo
+     *
+     * Objetivo: Abrir el alcance de un metodo exponiendo 'this' y preparando el control de retorno.
+     *
+     * Entrada: String nombre; TipoDato tipoRetorno; int linea.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Los campos se acceden mediante 'this.campo'.
+     */
+    public void abrirMetodo(String nombre, TipoDato tipoRetorno, int linea) {
+        tablaSimbolos.abrirAlcance();
+        if (claseEnConstruccion != null) {
+            insertarSimbolo(Simbolo.objeto("this", claseEnConstruccion.getNombre(), linea, true));
+        }
+        tipoRetornoActual = tipoRetorno;
+        funcionActual = nombre;
+        lineaFuncionActual = linea;
+    }
+
+    /**
+     * Nombre: cerrarMetodo
+     *
+     * Objetivo: Registrar la firma del metodo en su clase y cerrar su alcance.
+     *
+     * Entrada: FuncionNodo metodo.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Ninguna.
+     */
+    public void cerrarMetodo(FuncionNodo metodo) {
+        if (claseEnConstruccion != null) {
+            List<TipoDato> tiposParametros = new ArrayList<>();
+            for (ParametroNodo parametro : metodo.getParametros()) {
+                tiposParametros.add(parametro.getTipo());
+            }
+            claseEnConstruccion.agregarMetodo(new ClaseInfo.MetodoInfo(metodo.getNombre(),
+                    metodo.getTipoRetorno(), tiposParametros));
+        }
+        tablaSimbolos.cerrarAlcance();
+        tipoRetornoActual = TipoDato.DESCONOCIDO;
+        funcionActual = null;
+        lineaFuncionActual = 0;
+    }
+
+    /**
+     * Nombre: finalizarClase
+     *
+     * Objetivo: Registrar definitivamente la clase construida en el catalogo de clases.
+     *
+     * Entrada: Ninguna.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: No registra la clase si era una redeclaracion.
+     */
+    public void finalizarClase() {
+        // La clase ya se registro en iniciarClase; aqui solo se cierra el contexto de construccion.
+        claseEnConstruccion = null;
+        registrarClaseActual = false;
     }
 
     /**
@@ -556,6 +642,8 @@ public class AnalizadorSemantico {
             tipo = evaluarTipoNuevo((NuevoObjetoNodo) expresion);
         } else if (expresion instanceof AccesoMiembroNodo) {
             tipo = evaluarTipoAccesoMiembro((AccesoMiembroNodo) expresion);
+        } else if (expresion instanceof LlamadaMetodoNodo) {
+            tipo = evaluarTipoLlamadaMetodo((LlamadaMetodoNodo) expresion);
         }
 
         expresion.setTipo(tipo);
@@ -652,6 +740,11 @@ public class AnalizadorSemantico {
         for (FuncionNodo funcion : programa.getFunciones()) {
             verificarBreakEnBloque(funcion.getCuerpo(), false);
         }
+        for (ClaseNodo clase : programa.getClases()) {
+            for (FuncionNodo metodo : clase.getMetodos()) {
+                verificarBreakEnBloque(metodo.getCuerpo(), false);
+            }
+        }
     }
 
     /**
@@ -667,12 +760,32 @@ public class AnalizadorSemantico {
      */
     public void verificarRutasRetorno(ProgramaNodo programa) {
         for (FuncionNodo funcion : programa.getFunciones()) {
-            TipoDato tipo = funcion.getTipoRetorno();
-            boolean requiereRetorno = tipo != TipoDato.VOID && tipo != TipoDato.EMPTY
-                    && tipo != TipoDato.ERROR && tipo != TipoDato.DESCONOCIDO;
-            if (requiereRetorno && !bloqueGarantizaRetorno(funcion.getCuerpo())) {
-                tablaSimbolos.reportarReturnFaltante(tipo, funcion.getLinea());
+            verificarRetornoDeFuncion(funcion);
+        }
+        for (ClaseNodo clase : programa.getClases()) {
+            for (FuncionNodo metodo : clase.getMetodos()) {
+                verificarRetornoDeFuncion(metodo);
             }
+        }
+    }
+
+    /**
+     * Nombre: verificarRetornoDeFuncion
+     *
+     * Objetivo: Verificar que una funcion o metodo con retorno garantice un valor en todas las rutas.
+     *
+     * Entrada: FuncionNodo funcion.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
+    private void verificarRetornoDeFuncion(FuncionNodo funcion) {
+        TipoDato tipo = funcion.getTipoRetorno();
+        boolean requiereRetorno = tipo != TipoDato.VOID && tipo != TipoDato.EMPTY
+                && tipo != TipoDato.ERROR && tipo != TipoDato.DESCONOCIDO;
+        if (requiereRetorno && !bloqueGarantizaRetorno(funcion.getCuerpo())) {
+            tablaSimbolos.reportarReturnFaltante(tipo, funcion.getLinea());
         }
     }
 
@@ -985,7 +1098,76 @@ public class AnalizadorSemantico {
             tablaSimbolos.reportarClaseNoDeclarada(nuevo.getNombreClase(), nuevo.getLinea());
             return TipoDato.ERROR;
         }
+        ClaseInfo.MetodoInfo constructor = clases.get(nuevo.getNombreClase())
+                .metodo(nuevo.getNombreClase());
+        if (constructor != null) {
+            validarArgumentos(constructor.getTiposParametros(), nuevo.getArgumentos(),
+                    nuevo.getLinea());
+        } else if (!nuevo.getArgumentos().isEmpty()) {
+            tablaSimbolos.reportarCantidadArgumentosIncorrecta(0, nuevo.getArgumentos().size(),
+                    nuevo.getLinea());
+        }
         return TipoDato.OBJETO;
+    }
+
+    /**
+     * Nombre: evaluarTipoLlamadaMetodo
+     *
+     * Objetivo: Calcular el tipo de retorno de 'objeto.metodo<|args|>' validando objeto, metodo y argumentos.
+     *
+     * Entrada: LlamadaMetodoNodo llamada.
+     *
+     * Salida: Valor de tipo TipoDato.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
+    private TipoDato evaluarTipoLlamadaMetodo(LlamadaMetodoNodo llamada) {
+        TipoDato tipoObjeto = evaluarTipo(llamada.getObjeto());
+        String clase = claseDe(llamada.getObjeto());
+        if (clase == null || !clases.containsKey(clase)) {
+            if (tipoObjeto != TipoDato.ERROR && tipoObjeto != TipoDato.DESCONOCIDO) {
+                tablaSimbolos.reportarAccesoCampoSobreNoObjeto(tipoObjeto, llamada.getLinea());
+            }
+            return TipoDato.ERROR;
+        }
+        ClaseInfo.MetodoInfo metodo = clases.get(clase).metodo(llamada.getNombreMetodo());
+        if (metodo == null) {
+            tablaSimbolos.reportarMetodoNoDeclarado(clase, llamada.getNombreMetodo(),
+                    llamada.getLinea());
+            return TipoDato.ERROR;
+        }
+        validarArgumentos(metodo.getTiposParametros(), llamada.getArgumentos(), llamada.getLinea());
+        return metodo.getTipoRetorno();
+    }
+
+    /**
+     * Nombre: validarArgumentos
+     *
+     * Objetivo: Verificar la cantidad y tipos de los argumentos contra la firma esperada.
+     *
+     * Entrada: List<TipoDato> esperados; List<ExpresionNodo> argumentos; int linea.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
+    private void validarArgumentos(List<TipoDato> esperados, List<ExpresionNodo> argumentos,
+                                   int linea) {
+        if (esperados.size() != argumentos.size()) {
+            tablaSimbolos.reportarCantidadArgumentosIncorrecta(esperados.size(), argumentos.size(),
+                    linea);
+            return;
+        }
+        for (int i = 0; i < argumentos.size(); i++) {
+            TipoDato tipoArgumento = evaluarTipo(argumentos.get(i));
+            if (tipoArgumento == TipoDato.ERROR || tipoArgumento == TipoDato.DESCONOCIDO) {
+                continue;
+            }
+            if (tipoArgumento != esperados.get(i)) {
+                tablaSimbolos.reportarTipoArgumentoIncorrecto(i + 1, esperados.get(i), tipoArgumento,
+                        argumentos.get(i).getLinea());
+            }
+        }
     }
 
     /**
