@@ -175,6 +175,8 @@ public class GeneradorCodigoIntermedio {
     private void generarNodo(Nodo nodo) {
         if (nodo instanceof AsignacionNodo) {
             generarAsignacion((AsignacionNodo) nodo);
+        } else if (nodo instanceof DeclaracionObjetoNodo) {
+            generarDeclaracionObjeto((DeclaracionObjetoNodo) nodo);
         } else if (nodo instanceof DeclaracionVariableNodo) {
             generarDeclaracionVariable((DeclaracionVariableNodo) nodo);
         } else if (nodo instanceof ReturnNodo) {
@@ -264,11 +266,39 @@ public class GeneradorCodigoIntermedio {
      * Restricciones: Uso interno de la clase.
      */
     private void generarAsignacion(AsignacionNodo asignacion) {
+        if (asignacion.getDestino() instanceof AccesoMiembroNodo) {
+            AccesoMiembroNodo acceso = (AccesoMiembroNodo) asignacion.getDestino();
+            String valor = generarExpresion(asignacion.getValor());
+            String objeto = nombreObjeto(acceso.getObjeto());
+            String campoRef = offsetTipo(objeto, acceso.getNombreCampo());
+            instrucciones.add(new Instruccion(Operacion.STORE_FIELD, objeto, valor, campoRef));
+            return;
+        }
         String valor = generarExpresion(asignacion.getValor());
         String destino = generarDestino(asignacion.getDestino());
         Operacion operacion = asignacion.getDestino() instanceof AccesoArregloNodo
                 ? Operacion.STORE_ARRAY : Operacion.ASIG;
         instrucciones.add(new Instruccion(operacion, destino, valor));
+    }
+
+    /**
+     * Nombre: generarDeclaracionObjeto
+     *
+     * Objetivo: Generar el codigo intermedio de una declaracion de objeto (puntero + instanciacion).
+     *
+     * Entrada: DeclaracionObjetoNodo declaracion.
+     *
+     * Salida: No retorna valor.
+     *
+     * Restricciones: Uso interno de la clase.
+     */
+    private void generarDeclaracionObjeto(DeclaracionObjetoNodo declaracion) {
+        objetoClase.put(declaracion.getNombre(), declaracion.getNombreClase());
+        instrucciones.add(new Instruccion(Operacion.DECL, declaracion.getNombre(), "objeto"));
+        if (declaracion.getInicializador() != null) {
+            String valor = generarExpresion(declaracion.getInicializador());
+            instrucciones.add(new Instruccion(Operacion.ASIG, declaracion.getNombre(), valor));
+        }
     }
 
     /**
