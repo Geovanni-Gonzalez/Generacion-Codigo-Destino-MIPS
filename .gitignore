@@ -48,3 +48,39 @@ programa/.vscode/
 
 # NetBeans
 nbproject/
+
+# Java / Maven / Gradle
+build/
+out/
+.gradle/
+# C / C++ / native builds
+*.o
+*.obj
+*.exe
+*.out
+*.dll
+*.so
+*.dylib
+bin/
+obj/
+debug/
+release/
+# Assembly/native artifacts
+*.elf
+*.bin
+*.lst
+*.map
+# Local agent/editor state
+.claude/
+CLAUDE.md
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+# OS/editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+# Logs and temporary files
+*.tmp
+*.bak
