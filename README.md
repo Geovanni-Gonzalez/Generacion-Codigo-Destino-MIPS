@@ -13,9 +13,11 @@
 [![CI](https://img.shields.io/badge/CI-GitHub%20Actions-black)](.github/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-see%20LICENSE-lightgrey)](LICENSE)
 
+**🌐 English** · [Español](README.es.md)  |  📄 Technical report: [English](TECHNICAL_REPORT.md) · [Español](INFORME_TECNICO.md)
+
 </div>
 
-> **Language note.** This README is written in English to maximize reach for international reviewers. The source language, the in-code documentation and the external design document (`documentación/`) are in Spanish. A short Spanish summary is provided at the end.
+> **Language note.** This README is written in English to maximize reach for international reviewers. The source language and the in-code documentation are in Spanish. A short Spanish summary is provided at the end.
 
 ---
 
@@ -151,7 +153,7 @@ The compiler is a classic **phased (pipeline) architecture**. Each phase is an i
 | Generated `.asm` in QtSPIM | `docs/img/qtspim-registers.png` |
 | Error report (panic mode) | `docs/img/error-report.png` |
 
-Worked examples (source → IR → MIPS → QtSPIM register state) are documented in `documentación/Documentacion_Externa_Proyecto_3_MIPS.pdf`.
+Sample generated artifacts (tokens, symbol table, errors, IR and MIPS) for `30_clase_metodos.chip` are checked in under [`programa/salida/`](programa/salida/) for reference.
 
 ---
 
@@ -228,7 +230,6 @@ Generacion-Codigo-Destino-MIPS/
 │  │  └─ test/java/pipeline/       # JUnit 5 suite
 │  ├─ test/                        # .chip programs (valid & invalid corpus)
 │  └─ salida/                      # sample generated outputs
-├─ documentación/                  # external design document (PDF)
 ├─ .github/workflows/ci.yml        # CI: JDK 17 + mvn verify
 ├─ LICENSE
 └─ README.md
@@ -278,7 +279,7 @@ Pipeline/Phases · Façade · Composite (AST) · Visitor-style traversal · Stra
 - **2-D arrays** from the assignment's own example are currently **rejected** (only 1-D arrays translate end-to-end).
 - **Classes:** no inheritance or polymorphism; field access inside methods is explicit `this.field`; fields must be declared before methods; no object-typed fields/params/returns (except `this`); no `free`; no null-pointer checks.
 - **Register allocator** is a 6-register free-list (`$t0–$t5`) with **no spilling** — very complex expressions raise an internal error instead of spilling to memory.
-- **Temporaries are global `.data` labels**, so the current model is **not recursion-safe** (a recursive call would clobber a caller's temporaries).
+- **Temporaries are global `.data` labels**, so the current model is **not recursion-safe** (a recursive call would clobber a caller's temporaries). *This limitation is documented in-code in `AnalizadorIRMIPS.construirTablaDirecciones` and `TraductorFuncionesMIPS`.*
 
 ---
 
@@ -289,7 +290,6 @@ Pipeline/Phases · Façade · Composite (AST) · Visitor-style traversal · Stra
 - Finish **2-D arrays** end-to-end and add bounds handling.
 - Replace the string-based peephole optimizer with a pass over structured instructions; add more peepholes (dead-store elimination, constant propagation).
 - Unit-test individual translators, the optimizer and the register allocator, not just whole-program integration.
-- Replace the boilerplate Javadoc with real documentation (see report).
 
 ## Future work
 

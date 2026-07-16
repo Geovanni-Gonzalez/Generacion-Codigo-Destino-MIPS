@@ -7,43 +7,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-/**
- * Nombre: EscritorReportes
- *
- * Objetivo: Formatear o escribir reportes y artefactos generados por el compilador.
- *
- * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
- *
- * Salida: Estado, datos o artefactos producidos por la clase.
- *
- * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
- */
 public final class EscritorReportes {
-    /**
-     * Nombre: EscritorReportes
-     *
-     * Objetivo: Inicializar una instancia de EscritorReportes con los datos requeridos.
-     *
-     * Entrada: Ninguna.
-     *
-     * Salida: Nueva instancia de EscritorReportes.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private EscritorReportes() {
     }
 
-    /**
-     * Nombre: escribirTokens
-     *
-     * Objetivo: Indicar si se cumple la condicion cribirTokens.
-     *
-     * Entrada: Path archivo; List<TokenInfo> tokens.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Puede propagar Exception.
-     */
     public static void escribirTokens(Path archivo, List<TokenInfo> tokens) throws Exception {
         try (BufferedWriter writer = Files.newBufferedWriter(archivo, StandardCharsets.UTF_8)) {
             writer.write("ID_TOKEN\tTOKEN\tLEXEMA\tLINEA\tCOLUMNA\tTABLA\tINFORMACION");
@@ -57,17 +24,6 @@ public final class EscritorReportes {
         }
     }
 
-    /**
-     * Nombre: escribirTablaSimbolos
-     *
-     * Objetivo: Indicar si se cumple la condicion cribirTablaSimbolos.
-     *
-     * Entrada: Path archivo; List<TokenInfo> tokens.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Puede propagar Exception.
-     */
     public static void escribirTablaSimbolos(Path archivo, List<TokenInfo> tokens) throws Exception {
         try (BufferedWriter writer = Files.newBufferedWriter(archivo, StandardCharsets.UTF_8)) {
             writer.write("TABLA\tLEXEMA\tTOKEN\tLINEA\tCOLUMNA\tINFORMACION");
@@ -80,18 +36,6 @@ public final class EscritorReportes {
         }
     }
 
-    /**
-     * <strong>Nombre:</strong> escribirErrores
-     *
-     * <p><strong>Objetivo:</strong> Escribir en un solo archivo los errores léxicos, sintácticos y
-     * semánticos, cada grupo en su sección y precedidos por una línea de resumen con los conteos.</p>
-     *
-     * <p><strong>Entrada:</strong> Path archivo, List&lt;String&gt; erroresLexicos, List&lt;String&gt; erroresSintacticos, List&lt;String&gt; erroresSemanticos.</p>
-     *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
-     *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
-     */
     public static void escribirErrores(Path archivo, List<String> erroresLexicos,
                                        List<String> erroresSintacticos,
                                        List<String> erroresSemanticos) throws Exception {
@@ -112,17 +56,6 @@ public final class EscritorReportes {
         }
     }
 
-    /**
-     * Nombre: escribirResultado
-     *
-     * Objetivo: Indicar si se cumple la condicion cribirResultado.
-     *
-     * Entrada: Path archivo; Path fuente; boolean aceptado.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Puede propagar Exception.
-     */
     public static void escribirResultado(Path archivo, Path fuente, boolean aceptado) throws Exception {
         try (BufferedWriter writer = Files.newBufferedWriter(archivo, StandardCharsets.UTF_8)) {
             writer.write("Archivo fuente: " + fuente);
@@ -134,17 +67,6 @@ public final class EscritorReportes {
         }
     }
 
-    /**
-     * Nombre: escribirCodigoIntermedio
-     *
-     * Objetivo: Indicar si se cumple la condicion cribirCodigoIntermedio.
-     *
-     * Entrada: Path archivo; List<Instruccion> instrucciones.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Puede propagar Exception.
-     */
     public static void escribirCodigoIntermedio(Path archivo, List<Instruccion> instrucciones) throws Exception {
         try (BufferedWriter writer = Files.newBufferedWriter(archivo, StandardCharsets.UTF_8)) {
             for (Instruccion instruccion : instrucciones) {
@@ -154,18 +76,6 @@ public final class EscritorReportes {
         }
     }
 
-    /**
-     * <strong>Nombre:</strong> escribirSeccionErrores
-     *
-     * <p><strong>Objetivo:</strong> Escribir una sección de errores numerada, con su título y conteo;
-     * si la lista está vacía, escribe en su lugar el mensaje alterno indicado.</p>
-     *
-     * <p><strong>Entrada:</strong> BufferedWriter writer, String titulo, String mensajeVacio, List&lt;String&gt; errores.</p>
-     *
-     * <p><strong>Salida:</strong> No retorna valor.</p>
-     *
-     * <p><strong>Restricciones:</strong> Ninguna.</p>
-     */
     private static void escribirSeccionErrores(BufferedWriter writer, String titulo,
                                                String mensajeVacio, List<String> errores) throws Exception {
         writer.write(titulo + " (" + errores.size() + ")");

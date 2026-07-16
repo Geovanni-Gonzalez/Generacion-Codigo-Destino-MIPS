@@ -3,17 +3,6 @@ package mips;
 import intermedio.Instruccion;
 import intermedio.Operacion;
 
-/**
- * Nombre: TraductorControlMIPS
- *
- * Objetivo: Analizar, traducir, emitir u optimizar codigo destino MIPS.
- *
- * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
- *
- * Salida: Estado, datos o artefactos producidos por la clase.
- *
- * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
- */
 final class TraductorControlMIPS {
     private final EmisorMIPS salida;
     private final AdministradorRegistros registros;
@@ -26,17 +15,6 @@ final class TraductorControlMIPS {
         this.memoria = memoria;
     }
 
-    /**
-     * Nombre: puedeFusionarSalto
-     *
-     * Objetivo: Ejecutar la operacion puedeFusionarSalto definida por TraductorControlMIPS.
-     *
-     * Entrada: Instruccion comparacion; Instruccion salto; String funcion.
-     *
-     * Salida: Valor de tipo boolean.
-     *
-     * Restricciones: Ninguna.
-     */
     boolean puedeFusionarSalto(Instruccion comparacion, Instruccion salto, String funcion) {
         return OperandosMIPS.esComparacion(comparacion.op)
                 && salto.op == Operacion.IF_FALSE
@@ -46,17 +24,6 @@ final class TraductorControlMIPS {
                 && !OperandosMIPS.esFloat(memoria.tipoOperando(comparacion.op2, funcion));
     }
 
-    /**
-     * Nombre: traducirSaltoComparacion
-     *
-     * Objetivo: Convertir una instruccion o construccion intermedia a codigo MIPS.
-     *
-     * Entrada: Instruccion comparacion; String destino; String funcion.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Ninguna.
-     */
     void traducirSaltoComparacion(Instruccion comparacion, String destino, String funcion) {
         String izquierdo = memoria.cargarValor(comparacion.op1, funcion);
         String derecho = memoria.cargarValor(comparacion.op2, funcion);
@@ -76,47 +43,14 @@ final class TraductorControlMIPS {
         registros.liberarRegistro(izquierdo);
     }
 
-    /**
-     * Nombre: traducirLabel
-     *
-     * Objetivo: Convertir una instruccion o construccion intermedia a codigo MIPS.
-     *
-     * Entrada: String nombre.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Ninguna.
-     */
     void traducirLabel(String nombre) {
         salida.add(EtiquetasMIPS.etiquetaCodigo(nombre) + ":");
     }
 
-    /**
-     * Nombre: traducirGoto
-     *
-     * Objetivo: Convertir una instruccion o construccion intermedia a codigo MIPS.
-     *
-     * Entrada: String destino.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Ninguna.
-     */
     void traducirGoto(String destino) {
         salida.instruccion("j " + EtiquetasMIPS.etiquetaCodigo(destino));
     }
 
-    /**
-     * Nombre: traducirIfFalse
-     *
-     * Objetivo: Convertir una instruccion o construccion intermedia a codigo MIPS.
-     *
-     * Entrada: String condicionOperando; String destino; String funcion.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Ninguna.
-     */
     void traducirIfFalse(String condicionOperando, String destino, String funcion) {
         String condicion = memoria.cargarValor(condicionOperando, funcion);
         salida.instruccion("beq " + condicion + ", $zero, " + EtiquetasMIPS.etiquetaCodigo(destino));

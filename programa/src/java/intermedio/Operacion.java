@@ -1,16 +1,5 @@
 package intermedio;
 
-/**
- * Nombre: Operacion
- *
- * Objetivo: Representar, generar u optimizar instrucciones de codigo intermedio.
- *
- * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
- *
- * Salida: Estado, datos o artefactos producidos por la clase.
- *
- * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
- */
 public enum Operacion {
     /** Declaración de variable escalar. */
     DECL,

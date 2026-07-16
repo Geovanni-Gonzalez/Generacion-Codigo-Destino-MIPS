@@ -40,17 +40,6 @@ import java.util.Map;
 import java.util.Set;
 import pipeline.CompiladorInternoException;
 
-/**
- * Nombre: GeneradorCodigoIntermedio
- *
- * Objetivo: Representar, generar u optimizar instrucciones de codigo intermedio.
- *
- * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
- *
- * Salida: Estado, datos o artefactos producidos por la clase.
- *
- * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
- */
 public class GeneradorCodigoIntermedio {
     /** Instrucciones emitidas durante la generación; se limpia en cada corrida. */
     private final List<Instruccion> instrucciones = new ArrayList<>();
@@ -78,17 +67,6 @@ public class GeneradorCodigoIntermedio {
         }
     }
 
-    /**
-     * Nombre: generar
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: ProgramaNodo programa.
-     *
-     * Salida: Valor de tipo List<Instruccion>.
-     *
-     * Restricciones: Ninguna.
-     */
     public List<Instruccion> generar(ProgramaNodo programa) {
         instrucciones.clear();
         contadorTemporales = 0;
@@ -106,17 +84,6 @@ public class GeneradorCodigoIntermedio {
         return new ArrayList<>(instrucciones);
     }
 
-    /**
-     * Nombre: generarMetodo
-     *
-     * Objetivo: Emitir un metodo como una funcion 'Clase_metodo' con un primer parametro implicito 'this'.
-     *
-     * Entrada: ClaseNodo clase; FuncionNodo metodo.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private void generarMetodo(ClaseNodo clase, FuncionNodo metodo) {
         objetoClase.clear();
         String nombreFuncion = mangle(clase.getNombre(), metodo.getNombre());
@@ -131,32 +98,10 @@ public class GeneradorCodigoIntermedio {
         instrucciones.add(new Instruccion(Operacion.FIN_FUNC, nombreFuncion));
     }
 
-    /**
-     * Nombre: mangle
-     *
-     * Objetivo: Construir el nombre interno de un metodo a partir de su clase ('Clase_metodo').
-     *
-     * Entrada: String clase; String metodo.
-     *
-     * Salida: Valor de tipo String.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private String mangle(String clase, String metodo) {
         return clase + "_" + metodo;
     }
 
-    /**
-     * Nombre: construirLayoutClases
-     *
-     * Objetivo: Calcular el offset y tipo de cada campo y el tamaño total de cada clase declarada.
-     *
-     * Entrada: ProgramaNodo programa.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Reserva la palabra 0 (offset 0) para el puntero de vtable; los campos inician en 4.
-     */
     private void construirLayoutClases(ProgramaNodo programa) {
         clasesLayout.clear();
         clasesConConstructor.clear();
@@ -178,17 +123,6 @@ public class GeneradorCodigoIntermedio {
         }
     }
 
-    /**
-     * Nombre: generarFuncion
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: FuncionNodo funcion.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private void generarFuncion(FuncionNodo funcion) {
         objetoClase.clear();
         instrucciones.add(new Instruccion(Operacion.INICIO_FUNC, funcion.getNombre()));
@@ -200,34 +134,12 @@ public class GeneradorCodigoIntermedio {
         instrucciones.add(new Instruccion(Operacion.FIN_FUNC, funcion.getNombre()));
     }
 
-    /**
-     * Nombre: generarBloque
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: BloqueNodo bloque.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private void generarBloque(BloqueNodo bloque) {
         for (Nodo nodo : bloque.getInstrucciones()) {
             generarNodo(nodo);
         }
     }
 
-    /**
-     * Nombre: generarNodo
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: Nodo nodo.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private void generarNodo(Nodo nodo) {
         if (nodo instanceof AsignacionNodo) {
             generarAsignacion((AsignacionNodo) nodo);
@@ -256,17 +168,6 @@ public class GeneradorCodigoIntermedio {
         }
     }
 
-    /**
-     * Nombre: generarDeclaracionVariable
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: DeclaracionVariableNodo declaracion.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private void generarDeclaracionVariable(DeclaracionVariableNodo declaracion) {
         if (declaracion.esArreglo()) {
             generarDeclaracionArreglo(declaracion);
@@ -280,17 +181,6 @@ public class GeneradorCodigoIntermedio {
         }
     }
 
-    /**
-     * Nombre: generarDeclaracionArreglo
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: DeclaracionVariableNodo declaracion.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private void generarDeclaracionArreglo(DeclaracionVariableNodo declaracion) {
         String filas = generarExpresionSinCarga(declaracion.getFilas());
         String columnas = generarExpresionSinCarga(declaracion.getColumnas());
@@ -310,17 +200,6 @@ public class GeneradorCodigoIntermedio {
         }
     }
 
-    /**
-     * Nombre: generarAsignacion
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: AsignacionNodo asignacion.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private void generarAsignacion(AsignacionNodo asignacion) {
         if (asignacion.getDestino() instanceof AccesoMiembroNodo) {
             AccesoMiembroNodo acceso = (AccesoMiembroNodo) asignacion.getDestino();
@@ -337,17 +216,6 @@ public class GeneradorCodigoIntermedio {
         instrucciones.add(new Instruccion(operacion, destino, valor));
     }
 
-    /**
-     * Nombre: generarDeclaracionObjeto
-     *
-     * Objetivo: Generar el codigo intermedio de una declaracion de objeto (puntero + instanciacion).
-     *
-     * Entrada: DeclaracionObjetoNodo declaracion.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private void generarDeclaracionObjeto(DeclaracionObjetoNodo declaracion) {
         objetoClase.put(declaracion.getNombre(), declaracion.getNombreClase());
         instrucciones.add(new Instruccion(Operacion.DECL, declaracion.getNombre(), "objeto"));
@@ -357,95 +225,29 @@ public class GeneradorCodigoIntermedio {
         }
     }
 
-    /**
-     * Nombre: generarReturn
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: ReturnNodo retorno.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private void generarReturn(ReturnNodo retorno) {
         String valor = retorno.getValor() == null ? null : generarExpresion(retorno.getValor());
         instrucciones.add(new Instruccion(Operacion.RETURN, null, valor));
     }
 
-    /**
-     * Nombre: generarExpresionSentencia
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: ExpresionSentenciaNodo sentencia.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private void generarExpresionSentencia(ExpresionSentenciaNodo sentencia) {
         generarExpresion(sentencia.getExpresion());
     }
 
-    /**
-     * Nombre: generarSalida
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: SalidaNodo salida.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private void generarSalida(SalidaNodo salida) {
         instrucciones.add(new Instruccion(Operacion.PRINT, generarExpresion(salida.getValor())));
     }
 
-    /**
-     * Nombre: generarEntrada
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: EntradaNodo entrada.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private void generarEntrada(EntradaNodo entrada) {
         instrucciones.add(new Instruccion(Operacion.READ, entrada.getDestino()));
     }
 
-    /**
-     * Nombre: generarBreak
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: Ninguna.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private void generarBreak() {
         if (!destinosBreak.isEmpty()) {
             instrucciones.add(new Instruccion(Operacion.GOTO, destinosBreak.peek()));
         }
     }
 
-    /**
-     * Nombre: generarSwitch
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: SwitchNodo sentencia.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private void generarSwitch(SwitchNodo sentencia) {
         String selector = generarExpresion(sentencia.getExpresion());
         String etiquetaFin = nuevaEtiqueta();
@@ -484,17 +286,6 @@ public class GeneradorCodigoIntermedio {
         instrucciones.add(new Instruccion(Operacion.LABEL, etiquetaFin));
     }
 
-    /**
-     * Nombre: generarIf
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: IfNodo sentencia.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private void generarIf(IfNodo sentencia) {
         String condicion = generarExpresion(sentencia.getCondicion());
         String etiquetaElseOFin = nuevaEtiqueta();
@@ -514,17 +305,6 @@ public class GeneradorCodigoIntermedio {
         instrucciones.add(new Instruccion(Operacion.LABEL, etiquetaFin));
     }
 
-    /**
-     * Nombre: generarWhile
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: WhileNodo sentencia.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private void generarWhile(WhileNodo sentencia) {
         String etiquetaInicio = nuevaEtiqueta();
         String etiquetaSalida = nuevaEtiqueta();
@@ -547,17 +327,6 @@ public class GeneradorCodigoIntermedio {
         instrucciones.add(new Instruccion(Operacion.LABEL, etiquetaSalida));
     }
 
-    /**
-     * Nombre: generarExpresion
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: ExpresionNodo expresion.
-     *
-     * Salida: Valor de tipo String.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private String generarExpresion(ExpresionNodo expresion) {
         if (expresion == null) {
             throw new IllegalArgumentException("No se puede generar codigo para una expresion nula.");
@@ -606,17 +375,6 @@ public class GeneradorCodigoIntermedio {
                 expresion.getLinea(), expresion.getColumna());
     }
 
-    /**
-     * Nombre: generarDestino
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: ExpresionNodo expresion.
-     *
-     * Salida: Valor de tipo String.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private String generarDestino(ExpresionNodo expresion) {
         if (expresion instanceof IdentificadorNodo) {
             return ((IdentificadorNodo) expresion).getNombre();
@@ -630,17 +388,6 @@ public class GeneradorCodigoIntermedio {
                 + (expresion == null ? "<null>" : expresion.getClass().getSimpleName()));
     }
 
-    /**
-     * Nombre: generarExpresionSinCarga
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: ExpresionNodo expresion.
-     *
-     * Salida: Valor de tipo String.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private String generarExpresionSinCarga(ExpresionNodo expresion) {
         if (expresion instanceof IdentificadorNodo) {
             return ((IdentificadorNodo) expresion).getNombre();
@@ -648,17 +395,6 @@ public class GeneradorCodigoIntermedio {
         return generarExpresion(expresion);
     }
 
-    /**
-     * Nombre: formatearLiteral
-     *
-     * Objetivo: Convertir un valor interno a su representacion textual.
-     *
-     * Entrada: LiteralNodo literal.
-     *
-     * Salida: Valor de tipo String.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private String formatearLiteral(LiteralNodo literal) {
         Object valor = literal.getValor();
         if (valor == null) {
@@ -675,17 +411,6 @@ public class GeneradorCodigoIntermedio {
         return valor.toString();
     }
 
-    /**
-     * Nombre: generarBinaria
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: ExpresionBinariaNodo expresion.
-     *
-     * Salida: Valor de tipo String.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private String generarBinaria(ExpresionBinariaNodo expresion) {
         String izquierda = generarExpresion(expresion.getIzquierda());
         String derecha = generarExpresion(expresion.getDerecha());
@@ -694,17 +419,6 @@ public class GeneradorCodigoIntermedio {
         return temporal;
     }
 
-    /**
-     * Nombre: generarUnaria
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: ExpresionUnariaNodo expresion.
-     *
-     * Salida: Valor de tipo String.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private String generarUnaria(ExpresionUnariaNodo expresion) {
         if ("++".equals(expresion.getOperador()) || "--".equals(expresion.getOperador())) {
             String destino = generarDestino(expresion.getExpresion());
@@ -723,17 +437,6 @@ public class GeneradorCodigoIntermedio {
         return temporal;
     }
 
-    /**
-     * Nombre: generarLlamada
-     *
-     * Objetivo: Generar instrucciones o artefactos derivados del arbol sintactico.
-     *
-     * Entrada: LlamadaFuncionNodo llamada.
-     *
-     * Salida: Valor de tipo String.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private String generarLlamada(LlamadaFuncionNodo llamada) {
         for (ExpresionNodo argumento : llamada.getArgumentos()) {
             instrucciones.add(new Instruccion(Operacion.PARAM, generarExpresion(argumento)));
@@ -749,47 +452,14 @@ public class GeneradorCodigoIntermedio {
         return temporal;
     }
 
-    /**
-     * Nombre: esLlamadaVoid
-     *
-     * Objetivo: Indicar si se cumple la condicion LlamadaVoid.
-     *
-     * Entrada: LlamadaFuncionNodo llamada.
-     *
-     * Salida: Valor de tipo boolean.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private boolean esLlamadaVoid(LlamadaFuncionNodo llamada) {
         return llamada.getTipo() == TipoDato.VOID || llamada.getTipo() == TipoDato.EMPTY;
     }
 
-    /**
-     * Nombre: nuevoTemporal
-     *
-     * Objetivo: Ejecutar la operacion nuevoTemporal definida por GeneradorCodigoIntermedio.
-     *
-     * Entrada: Ninguna.
-     *
-     * Salida: Valor de tipo String.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private String nuevoTemporal() {
         return "_t" + contadorTemporales++;
     }
 
-    /**
-     * Nombre: generarNuevoObjeto
-     *
-     * Objetivo: Emitir la instruccion NEW que reserva el bloque de un objeto y devolver su puntero.
-     *
-     * Entrada: NuevoObjetoNodo nuevo.
-     *
-     * Salida: Valor de tipo String (temporal con el puntero del objeto).
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private String generarNuevoObjeto(NuevoObjetoNodo nuevo) {
         ClaseLayout layout = clasesLayout.get(nuevo.getNombreClase());
         int tamano = layout != null ? layout.tamanoBytes : 4;
@@ -808,17 +478,6 @@ public class GeneradorCodigoIntermedio {
         return temporal;
     }
 
-    /**
-     * Nombre: generarLlamadaMetodo
-     *
-     * Objetivo: Emitir el despacho estatico de un metodo, pasando el objeto receptor como 'this'.
-     *
-     * Entrada: LlamadaMetodoNodo llamada.
-     *
-     * Salida: Valor de tipo String (temporal con el resultado, o null si el metodo es void).
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private String generarLlamadaMetodo(LlamadaMetodoNodo llamada) {
         String receptor = nombreObjeto(llamada.getObjeto());
         String clase = objetoClase.get(receptor);
@@ -841,32 +500,10 @@ public class GeneradorCodigoIntermedio {
         return temporal;
     }
 
-    /**
-     * Nombre: esTipoVacio
-     *
-     * Objetivo: Indicar si un tipo de retorno corresponde a un metodo sin valor (void/empty).
-     *
-     * Entrada: TipoDato tipo.
-     *
-     * Salida: Valor de tipo boolean.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private boolean esTipoVacio(TipoDato tipo) {
         return tipo == TipoDato.VOID || tipo == TipoDato.EMPTY;
     }
 
-    /**
-     * Nombre: nombreObjeto
-     *
-     * Objetivo: Obtener el operando que referencia al objeto receptor de un acceso a campo.
-     *
-     * Entrada: ExpresionNodo objeto.
-     *
-     * Salida: Valor de tipo String (nombre de variable o temporal con el puntero).
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private String nombreObjeto(ExpresionNodo objeto) {
         if (objeto instanceof IdentificadorNodo) {
             return ((IdentificadorNodo) objeto).getNombre();
@@ -874,17 +511,6 @@ public class GeneradorCodigoIntermedio {
         return generarExpresion(objeto);
     }
 
-    /**
-     * Nombre: offsetTipo
-     *
-     * Objetivo: Construir el operando "offset:tipo" de un campo segun el layout de la clase del objeto.
-     *
-     * Entrada: String objeto; String campo.
-     *
-     * Salida: Valor de tipo String.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private String offsetTipo(String objeto, String campo) {
         ClaseLayout layout = clasesLayout.get(objetoClase.get(objeto));
         if (layout == null || !layout.offsets.containsKey(campo)) {
@@ -893,32 +519,10 @@ public class GeneradorCodigoIntermedio {
         return layout.offsets.get(campo) + ":" + layout.tipos.get(campo);
     }
 
-    /**
-     * Nombre: nuevaEtiqueta
-     *
-     * Objetivo: Ejecutar la operacion nuevaEtiqueta definida por GeneradorCodigoIntermedio.
-     *
-     * Entrada: Ninguna.
-     *
-     * Salida: Valor de tipo String.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private String nuevaEtiqueta() {
         return "_L" + contadorEtiquetas++;
     }
 
-    /**
-     * Nombre: operacionBinaria
-     *
-     * Objetivo: Ejecutar la operacion operacionBinaria definida por GeneradorCodigoIntermedio.
-     *
-     * Entrada: String operador.
-     *
-     * Salida: Valor de tipo Operacion.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private Operacion operacionBinaria(String operador) {
         switch (operador) {
             case "+":
@@ -954,17 +558,6 @@ public class GeneradorCodigoIntermedio {
         }
     }
 
-    /**
-     * Nombre: operacionUnaria
-     *
-     * Objetivo: Ejecutar la operacion operacionUnaria definida por GeneradorCodigoIntermedio.
-     *
-     * Entrada: String operador.
-     *
-     * Salida: Valor de tipo Operacion.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private Operacion operacionUnaria(String operador) {
         switch (operador) {
             case "-":

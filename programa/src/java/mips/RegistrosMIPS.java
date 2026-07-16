@@ -1,16 +1,5 @@
 package mips;
 
-/**
- * Nombre: RegistrosMIPS
- *
- * Objetivo: Analizar, traducir, emitir u optimizar codigo destino MIPS.
- *
- * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
- *
- * Salida: Estado, datos o artefactos producidos por la clase.
- *
- * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
- */
 final class RegistrosMIPS {
 
     /** Banco de temporales administrado por {@link AdministradorRegistros}. */
@@ -31,17 +20,6 @@ final class RegistrosMIPS {
     /** Registro de argumento flotante para syscalls de impresión (convenio SPIM/MARS). */
     static final String ARG_FLOAT = "$f12";
 
-    /**
-     * Nombre: RegistrosMIPS
-     *
-     * Objetivo: Inicializar una instancia de RegistrosMIPS con los datos requeridos.
-     *
-     * Entrada: Ninguna.
-     *
-     * Salida: Nueva instancia de RegistrosMIPS.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private RegistrosMIPS() {
     }
 }

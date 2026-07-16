@@ -9,17 +9,6 @@ import reporte.EscritorCodigo;
 import reporte.EscritorMIPS;
 import reporte.EscritorReportes;
 
-/**
- * Nombre: Main
- *
- * Objetivo: Ejecutar el compilador desde la linea de comandos.
- *
- * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
- *
- * Salida: Estado, datos o artefactos producidos por la clase.
- *
- * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
- */
 public class Main {
     private static final String DIR_SALIDA_POR_DEFECTO = "salida";
     private static final String REPORTE_TOKENS = "tokens_report.txt";
@@ -27,17 +16,6 @@ public class Main {
     private static final String REPORTE_ERRORES = "errores_report.txt";
     private static final String REPORTE_SINTACTICO = "resultado_sintactico.txt";
 
-    /**
-     * Nombre: main
-     *
-     * Objetivo: Inicializar una instancia de Main con los datos requeridos.
-     *
-     * Entrada: String[] args.
-     *
-     * Salida: Nueva instancia de Main.
-     *
-     * Restricciones: Ninguna.
-     */
     public static void main(String[] args) {
         if (args.length == 0) {
             System.out.println("Uso: java -jar target/proyecto-compiladores-1.0-SNAPSHOT.jar <archivo_fuente> [directorio_salida]");

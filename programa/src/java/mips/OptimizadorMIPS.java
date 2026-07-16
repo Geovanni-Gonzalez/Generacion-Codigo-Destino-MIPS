@@ -3,30 +3,8 @@ package mips;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Nombre: OptimizadorMIPS
- *
- * Objetivo: Analizar, traducir, emitir u optimizar codigo destino MIPS.
- *
- * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
- *
- * Salida: Estado, datos o artefactos producidos por la clase.
- *
- * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
- */
 final class OptimizadorMIPS {
 
-    /**
-     * Nombre: optimizar
-     *
-     * Objetivo: Aplicar optimizaciones sobre el codigo recibido.
-     *
-     * Entrada: List<String> lineas.
-     *
-     * Salida: Valor de tipo List<String>.
-     *
-     * Restricciones: Ninguna.
-     */
     List<String> optimizar(List<String> lineas) {
         List<String> resultado = new ArrayList<>(lineas.size());
         int i = 0;
@@ -48,17 +26,6 @@ final class OptimizadorMIPS {
         return resultado;
     }
 
-    /**
-     * Nombre: fusionarStoreLoad
-     *
-     * Objetivo: Ejecutar la operacion fusionarStoreLoad definida por OptimizadorMIPS.
-     *
-     * Entrada: String store; String load.
-     *
-     * Salida: Valor de tipo String.
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private String fusionarStoreLoad(String store, String load) {
         String[] guardar = instruccion(store);
         String[] cargar = instruccion(load);
@@ -97,17 +64,6 @@ final class OptimizadorMIPS {
     }
 
     /** Separa una línea de instrucción (con tabulador) en [mnemónico, operandos]; {@code null} si no es instrucción. */
-    /**
-     * Nombre: instruccion
-     *
-     * Objetivo: Ejecutar la operacion instruccion definida por OptimizadorMIPS.
-     *
-     * Entrada: String linea.
-     *
-     * Salida: Valor de tipo String[].
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private String[] instruccion(String linea) {
         if (linea == null || !linea.startsWith("\t")) {
             return null;
@@ -121,17 +77,6 @@ final class OptimizadorMIPS {
     }
 
     /** Separa "reg, direccion" en sus dos partes; {@code null} si no tiene exactamente dos operandos. */
-    /**
-     * Nombre: operandos
-     *
-     * Objetivo: Ejecutar la operacion operandos definida por OptimizadorMIPS.
-     *
-     * Entrada: String texto.
-     *
-     * Salida: Valor de tipo String[].
-     *
-     * Restricciones: Uso interno de la clase.
-     */
     private String[] operandos(String texto) {
         int coma = texto.indexOf(',');
         if (coma < 0) {

@@ -3,16 +3,13 @@ package mips;
 import intermedio.Instruccion;
 import java.util.Map;
 
-/**
- * Nombre: TraductorFuncionesMIPS
- *
- * Objetivo: Analizar, traducir, emitir u optimizar codigo destino MIPS.
- *
- * Entrada: Dependencias, datos o estructuras recibidas por sus constructores y metodos.
- *
- * Salida: Estado, datos o artefactos producidos por la clase.
- *
- * Restricciones: Debe respetar el contrato del paquete y las validaciones de sus metodos.
+/*
+ * NOTA DE DISENO - El prologo/epilogo guarda unicamente $ra en la pila; los locales
+ * y temporales viven en etiquetas globales de .data (ver
+ * AnalizadorIRMIPS.construirTablaDirecciones). Por eso el despacho es correcto para
+ * llamadas NO recursivas, pero una funcion recursiva corromperia sus propios
+ * temporales. Mover los temporales a slots de marco de pila es el cambio requerido
+ * para soportar recursion. Ver TECHNICAL_REPORT.md (P0).
  */
 final class TraductorFuncionesMIPS {
     private final EmisorMIPS salida;
@@ -28,17 +25,6 @@ final class TraductorFuncionesMIPS {
         this.parametrosFuncion = parametrosFuncion;
     }
 
-    /**
-     * Nombre: iniciarFuncion
-     *
-     * Objetivo: Ejecutar la operacion iniciarFuncion definida por TraductorFuncionesMIPS.
-     *
-     * Entrada: String nombre.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Ninguna.
-     */
     void iniciarFuncion(String nombre) {
         salida.add("");
         salida.add(EtiquetasMIPS.etiquetaFuncion(nombre) + ":");
@@ -48,17 +34,6 @@ final class TraductorFuncionesMIPS {
         }
     }
 
-    /**
-     * Nombre: finalizarFuncion
-     *
-     * Objetivo: Ejecutar la operacion finalizarFuncion definida por TraductorFuncionesMIPS.
-     *
-     * Entrada: String nombre.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Ninguna.
-     */
     void finalizarFuncion(String nombre) {
         salida.add(EtiquetasMIPS.etiquetaEpilogo(nombre) + ":");
         if ("__main__".equals(nombre)) {
@@ -72,17 +47,6 @@ final class TraductorFuncionesMIPS {
         salida.instruccion("jr $ra");
     }
 
-    /**
-     * Nombre: traducirParametroFormal
-     *
-     * Objetivo: Convertir una instruccion o construccion intermedia a codigo MIPS.
-     *
-     * Entrada: Instruccion i; String funcion; int indiceParametroFormal.
-     *
-     * Salida: Valor de tipo int.
-     *
-     * Restricciones: Ninguna.
-     */
     int traducirParametroFormal(Instruccion i, String funcion, int indiceParametroFormal) {
         int total = parametrosFuncion.getOrDefault(funcion, 0);
         int desplazamiento = 4 * (total - indiceParametroFormal);
@@ -93,17 +57,6 @@ final class TraductorFuncionesMIPS {
         return indiceParametroFormal + 1;
     }
 
-    /**
-     * Nombre: traducirParametro
-     *
-     * Objetivo: Convertir una instruccion o construccion intermedia a codigo MIPS.
-     *
-     * Entrada: Instruccion i; String funcion.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Ninguna.
-     */
     void traducirParametro(Instruccion i, String funcion) {
         String argumento = i.op1 != null ? i.op1 : i.resultado;
         String registroParametro = registros.obtenerRegistro();
@@ -118,17 +71,6 @@ final class TraductorFuncionesMIPS {
         registros.liberarRegistro(registroParametro);
     }
 
-    /**
-     * Nombre: traducirLlamada
-     *
-     * Objetivo: Convertir una instruccion o construccion intermedia a codigo MIPS.
-     *
-     * Entrada: Instruccion i; String funcion.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Ninguna.
-     */
     void traducirLlamada(Instruccion i, String funcion) {
         salida.instruccion("jal " + EtiquetasMIPS.etiquetaFuncion(i.op1));
         int cantidad = OperandosMIPS.parseEntero(i.op2, 0);
@@ -148,17 +90,6 @@ final class TraductorFuncionesMIPS {
         }
     }
 
-    /**
-     * Nombre: traducirRetorno
-     *
-     * Objetivo: Convertir una instruccion o construccion intermedia a codigo MIPS.
-     *
-     * Entrada: Instruccion i; String funcion.
-     *
-     * Salida: No retorna valor.
-     *
-     * Restricciones: Ninguna.
-     */
     void traducirRetorno(Instruccion i, String funcion) {
         if (i.op1 != null) {
             if (OperandosMIPS.esFloat(memoria.tipoOperando(i.op1, funcion))) {

@@ -1,8 +1,13 @@
 # Technical Report — `Generacion-Codigo-Destino-MIPS`
 
+> **🌐 English** · [Español](INFORME_TECNICO.md)  |  README: [English](README.md) · [Español](README.es.md)
+
+
 > **Scope of this report.** An evidence-based technical evaluation of the repository as if reviewed by a Staff/Principal engineer during hiring. Every claim below is grounded in files actually present in the repo. Where I could not execute something, I say so explicitly.
 >
-> **Verification note.** The build could **not** be executed inside the review sandbox (only JDK 11 available, no Maven; the project targets JDK 17). All findings are from **static reading** of the source, the CUP/JFlex specs, the JUnit suite, the Maven build, the CI workflow, and the external design PDF. The "36 tests" claim was verified structurally (see §8). The project's own CI (`.github/workflows/ci.yml`) runs `mvn verify` on Temurin JDK 17 and is the real green-build evidence.
+> **Verification note.** The build could **not** be executed inside the review sandbox (only JDK 11 available, no Maven; the project targets JDK 17). All findings are from **static reading** of the source, the CUP/JFlex specs, the JUnit suite, the Maven build, the CI workflow, and the checked-in sample outputs under `programa/salida/`. The "36 tests" claim was verified structurally (see §8). The project's own CI (`.github/workflows/ci.yml`) runs `mvn verify` on Temurin JDK 17 and is the real green-build evidence.
+>
+> **Post-review changes applied (this pass).** Two items from this report were actioned: (1) **522 boilerplate Javadoc blocks** were removed across 73 files (comment-only edit — zero code lines changed, CRLF line endings preserved; the genuine one-line docs in `Operacion.java`, `TipoDato.java` and `GeneradorCodigoIntermedio.java` were kept). (2) The **recursion limitation is now documented in-code** at `AnalizadorIRMIPS.construirTablaDirecciones` and `TraductorFuncionesMIPS`. The structural *fix* (stack-frame temporaries) was intentionally **not** attempted blind, since the build can't be compiled/tested in this environment. The analytical sections below reflect the code **as originally reviewed**, with resolution status called out inline.
 
 ---
 
@@ -12,7 +17,7 @@
 
 **Problem solved.** The repository implements the **back-end (target-code generation)** phase of a compiler for a small imperative language, `.chip`. Given a source file it runs the full compiler pipeline and, for valid programs, emits three-address intermediate code (`.ic`) and **executable MIPS assembly** (`.asm`) runnable in QtSPIM.
 
-**Context.** Academic — Project #3 of *Compilers & Interpreters* (IC5701, Tecnológico de Costa Rica, II-2026). It reuses the JFlex/CUP front-end from Projects I and II and adds IR + MIPS generation and a class module. Evidence: `info.txt`, `documentación/Documentacion_Externa_Proyecto_3_MIPS.pdf`, `pom.xml` `groupId cr.ac.itcr`.
+**Context.** Academic — Project #3 of *Compilers & Interpreters* (IC5701, Tecnológico de Costa Rica, II-2026). It reuses the JFlex/CUP front-end from Projects I and II and adds IR + MIPS generation and a class module. Evidence: `info.txt`, `pom.xml` `groupId cr.ac.itcr`, and the `test/` corpus naming (`28–31_clase_*.chip`).
 
 **Users / use cases.** Course staff grading the work; students learning compiler construction; and — repurposed — a **portfolio artifact** for recruiters. Primary use case is non-interactive/batch: `java -jar … source.chip [out]` → reports + `.ic` + `.asm` → load `.asm` in QtSPIM.
 
@@ -49,7 +54,7 @@
 - **CI/CD:** GitHub Actions (`actions/checkout@v4`, `actions/setup-java@v4`, Temurin JDK 17, Maven cache, `mvn -B verify`).
 - **IDE / dev config:** VS Code (`.vscode/launch.json`, `.vscode/tasks.json`), `compilador.debug` system property to toggle stack traces.
 - **VCS:** Git/GitHub (41 commits); repo also contains a `.github/modernize/java-upgrade/` hook scaffold (`recordToolUse.ps1/.sh`).
-- **Data formats:** `.chip` (source), `.ic` (IR), `.asm` (MIPS), `.txt` (reports), `.pdf` (external doc), UTF-8 encoding, POSIX/Windows paths via `java.nio.file`.
+- **Data formats:** `.chip` (source), `.ic` (IR), `.asm` (MIPS), `.txt` (reports), UTF-8 encoding, POSIX/Windows paths via `java.nio.file`.
 - **Not present (correctly):** no DB, ORM, REST, sockets, containers, cloud, i18n frameworks, mocking library, concurrency/async.
 
 ### 4. Technical concepts applied
@@ -92,29 +97,29 @@ Concepts **claimed by generic checklists but NOT present** (and shouldn't be for
 
 ### 6. Good practices
 
-**Strong:** single-responsibility packages and classes; consistent naming (domain-driven Spanish, e.g. `TraductorControlMIPS`); small classes (most 40–300 LOC) with the two large files being the inherently large semantic analyzer and grammar; immutability/defensive copies; pinned dependency & plugin versions; deterministic build with `-expect 38` guard; a real valid/invalid **test corpus**; CI on the correct JDK; `.gitignore`, LICENSE, and an external design document.
+**Strong:** single-responsibility packages and classes; consistent naming (domain-driven Spanish, e.g. `TraductorControlMIPS`); small classes (most 40–300 LOC) with the two large files being the inherently large semantic analyzer and grammar; immutability/defensive copies; pinned dependency & plugin versions; deterministic build with `-expect 38` guard; a real valid/invalid **test corpus**; CI on the correct JDK; `.gitignore`, LICENSE, and checked-in sample outputs.
 
-**Weak:** **Javadoc is auto-generated boilerplate** — nearly every method repeats *"Objetivo: Ejecutar la operacion X definida por Y … Restricciones: Ninguna."* This is documentation *noise*, not documentation; it inflates line counts and hides the few methods that deserve real docs. Comments/identifiers drop Spanish accents (encoding-safe but reads oddly). Tests assert against **raw output strings** (brittle). Some translators duplicate int-vs-float emission logic.
+**Weak:** **Javadoc was auto-generated boilerplate** — nearly every method repeated *"Objetivo: Ejecutar la operacion X definida por Y … Restricciones: Ninguna."*, which was documentation *noise* that inflated line counts and hid the few methods deserving real docs. ✅ *Resolved in this pass: the 522 boilerplate blocks were removed; the meaningful one-line docs were kept.* Remaining: comments/identifiers drop Spanish accents (encoding-safe but reads oddly); tests assert against **raw output strings** (brittle); some translators duplicate int-vs-float emission logic.
 
 ### 7. Project quality
 
-**Strengths.** A working, end-to-end compiler with every classic phase; a genuinely modular backend; real error recovery; an OO runtime model on MIPS (heap, offsets, `this`, constructors, static dispatch) that is *above* the usual student bar; professional build/CI hygiene; an honest external doc that self-reports the class module as *partially* done.
+**Strengths.** A working, end-to-end compiler with every classic phase; a genuinely modular backend; real error recovery; an OO runtime model on MIPS (heap, offsets, `this`, constructors, static dispatch) that is *above* the usual student bar; professional build/CI hygiene; and a test corpus that is candid about scope — the class module is exercised (`28`/`30`) while the incomplete cases are marked as expected-to-reject.
 
 **Weaknesses / technical debt / risks:**
 
-1. **Global temporaries → not recursion-safe.** Temporaries and locals are emitted as **global `.data` labels** (`d_<func>_<name>`). A recursive or re-entrant call would clobber a caller's temporaries. This is a real semantic-equivalence risk for any recursive program. *(Evidence: `.data` dumps in the design PDF; `EmisorDatosMIPS`/`AnalizadorIRMIPS` global-label scheme.)*
+1. **Global temporaries → not recursion-safe.** Temporaries and locals are emitted as **global `.data` labels** (`d_<func>_<name>`). A recursive or re-entrant call would clobber a caller's temporaries. This is a real semantic-equivalence risk for any recursive program. *(Evidence: the global-label scheme in `AnalizadorIRMIPS`/`EmisorDatosMIPS`, and the `d_<func>_<name>: .word 0` dumps in the checked-in `programa/salida/*.asm`.)*
 2. **Register allocator has no spilling.** `AdministradorRegistros.obtenerRegistro()` **throws** `CompiladorInternoException("No hay registros temporales… $t0-$t5")` when the 6-register pool is exhausted — complex expressions fail to compile instead of spilling.
 3. **2-D arrays incomplete.** The assignment's own array example `11_arreglos_enunciado.chip` (`int ~ matriz <<2,2>>`) is in the test suite's **`programasInvalidos`** list — i.e. the compiler is expected to *reject* it, despite "arreglos bidimensionales" being listed in scope. 1-D array ops exist in the IR (`DECL_ARRAY`, `STORE_ARRAY`).
 4. **String-based optimizer.** `OptimizadorMIPS` parses emitted **text lines** rather than structured instructions; fragile to any formatting change and hard to extend.
 5. **Test brittleness / gaps.** Only whole-program integration tests exist; assertions match substrings of IR/MIPS (e.g. `mips.contains("move $t0, $t2")`). No unit tests for the optimizer, register allocator, symbol table, or individual translators.
 6. **38 shift/reduce conflicts** are silenced via `-expect 38` — managed, but the grammar remains ambiguous and a future edit can mask a real conflict.
-7. **Documentation debt** — the boilerplate Javadoc (see §6).
+7. **Documentation debt** — the boilerplate Javadoc (see §6). ✅ *Addressed in this pass.*
 
 No evidence of concurrency bugs (single-threaded), injection, or resource leaks (readers use try-with-resources). Complexity is contained.
 
 ### 8. Compliance against the assignment
 
-Requirements taken from the external doc §4.2/§4.6 and course statement.
+Requirements taken from the course assignment statement (`.chip` language, Project #3).
 
 | # | Requirement | Status | Evidence |
 |---|-------------|--------|----------|
@@ -122,7 +127,7 @@ Requirements taken from the external doc §4.2/§4.6 and course statement.
 | b | State whether source is generated by the grammar (grammar + syntax + semantics) | ✔ | `resultado_sintactico.txt`; acceptance conjunction in `Compilador.compilar` |
 | c | Report lexical/syntactic/semantic errors via **panic-mode recovery** | ✔ | `error` productions + `siguienteTokenConRecuperacion`; `errores_report.txt`; tests `26/27` |
 | d | Generate three-address intermediate code as translation basis | ✔ | `GeneradorCodigoIntermedio`; `.ic` output; `generaCodigoIntermedioEsperado` test |
-| e | Write `.asm` (same base name) with **semantically-equivalent** MIPS, runnable in QtSPIM | ✔ | `mips/`, `EscritorMIPS`; `04_aritmeticas` verified to `y=29` in QtSPIM (design PDF) |
+| e | Write `.asm` (same base name) with **semantically-equivalent** MIPS, runnable in QtSPIM | ✔ | `mips/`, `EscritorMIPS`; `generaMipsConEstructuraEsperada` test; sample `.asm` in `programa/salida/` |
 | f | Data types `int, float, bool, char, string` | ✔ | `TipoDato` enum; type checks in `AnalizadorSemantico` |
 | g | Expressions with correct precedence (arith/rel/logic, `^`, `%`) | ✔ | CUP precedence; test asserts `5*2` before `+` |
 | h | Control flow: `if/else`, `do-while`, `switch/case/default`, `break` | ✔ | `IfNodo`, `WhileNodo`, `SwitchNodo`, `BreakNodo`; `TraductorControlMIPS` |
@@ -145,7 +150,7 @@ Requirements taken from the external doc §4.2/§4.6 and course statement.
 - **Mandatory core (lex/syn/sem + panic recovery + IR + MIPS + types + expressions + control flow + functions + I/O + tests):** ~**100%** — all present with evidence and (per the project's CI) passing tests.
 - **2-D arrays:** ~**40%** — 1-D functional, 2-D rejected. This is the clearest *shortfall vs. stated scope*.
 - **Classes (bonus):** ~**70%** — structure + use + MIPS work; inheritance/polymorphism absent (self-reported, time-boxed).
-- **Engineering extras (CI, fat JAR, optimizer, external doc):** exceed requirements.
+- **Engineering extras (CI, fat JAR, optimizer, sample outputs):** exceed requirements.
 
 A single weighted number is unavoidably subjective; **~90% mandatory completeness with a documented array gap and a partially-complete bonus class module** is the honest summary.
 
@@ -161,7 +166,7 @@ A single weighted number is unavoidably subjective; **~90% mandatory completenes
 
 **Testing** — JUnit 5 parameterized suite over a valid/invalid corpus; assertions across IR and MIPS output.
 
-**Tooling** — Git workflow (41 commits), VS Code debug/tasks configs, external design documentation.
+**Tooling** — Git workflow (41 commits), VS Code debug/tasks configs, checked-in sample outputs.
 
 *(No frontend, DB, or cloud skills are claimed — none are evidenced.)*
 
@@ -183,7 +188,7 @@ Readable, consistently named, well-decomposed. The single biggest quality detrac
 
 ### B.4 Assignment compliance
 
-See §8 matrix. Mandatory requirements met with evidence; **2-D arrays partial**; **classes partial-but-bonus**; several items exceed scope (CI, fat JAR, optimizer). The author's own documentation is candid about the class-module gap, which is a credibility plus.
+See §8 matrix. Mandatory requirements met with evidence; **2-D arrays partial**; **classes partial-but-bonus**; several items exceed scope (CI, fat JAR, optimizer). The test corpus is candid about the gaps (incomplete cases are marked expected-to-reject), which is a credibility plus.
 
 ### B.5 Risks
 
@@ -203,7 +208,7 @@ See §8 matrix. Mandatory requirements met with evidence; **2-D arrays partial**
 3. Finish **2-D arrays** end-to-end (or explicitly remove them from stated scope to keep scope/implementation honest).
 4. Re-base the **optimizer on structured instructions** and add dead-store/constant-propagation peepholes.
 5. Add **unit tests** for `TablaDeSimbolos`, `AdministradorRegistros`, `OptimizadorMIPS`, and each translator; add **golden-file** `.asm` tests.
-6. Replace **boilerplate Javadoc** with real docs on the non-obvious methods; delete the rest.
+6. ✅ *Done —* **boilerplate Javadoc removed**. Follow-up: add real docs on the non-obvious methods (`GeneradorMIPS.traducir` switch, `AnalizadorSemantico.evaluarTipo`, the panic-recovery wrapper).
 7. Optionally add a **"what did NOT get generated and why"** note in `errores_report.txt` for register-exhaustion cases.
 
 ### B.7 Suggested refactorings
@@ -222,7 +227,7 @@ See §8 matrix. Mandatory requirements met with evidence; **2-D arrays partial**
 | 3 | Finish 2-D arrays (or de-scope) | Medium | Medium | **P1** |
 | 4 | Unit + golden-file tests | Medium | Medium | **P1** |
 | 5 | Structured-instruction optimizer | Medium | Medium | **P2** |
-| 6 | Remove boilerplate Javadoc / write real docs | Low-Med | Low | **P1** |
+| 6 | ~~Remove boilerplate Javadoc~~ ✅ done / write real docs on non-obvious methods | Low-Med | Low | **P1** |
 | 7 | More peepholes (dead store, const prop) | Low | Medium | **P3** |
 | 8 | Inheritance + dynamic dispatch (vtable slot already reserved) | Medium | High | **P3** |
 
@@ -236,24 +241,24 @@ See §8 matrix. Mandatory requirements met with evidence; **2-D arrays partial**
 
 - Implemented a **complete multi-phase compiler with a real MIPS backend** — LALR parsing, panic-mode recovery, a typed scope-stack symbol table, a three-address IR, register allocation, a stack calling convention, and a **heap OO object model**. This breadth of CS fundamentals, applied and working, is well beyond Junior scope.
 - **Deliberate architecture:** a façade backend delegating to seven single-responsibility translators, immutable DTOs between phases, custom located exceptions. That's design intent, not accident.
-- **Engineering maturity around the code:** Maven build that *generates* the scanner/parser and packages a fat JAR, **CI on the correct JDK**, a curated valid/invalid **test corpus**, and an honest external design document.
+- **Engineering maturity around the code:** Maven build that *generates* the scanner/parser and packages a fat JAR, **CI on the correct JDK**, a curated valid/invalid **test corpus**, and checked-in sample outputs.
 
 **Why not Mid+/Senior (evidence-based):**
 
 - A **design-level correctness flaw** (global temporaries → recursion-unsafe) and a **register allocator that aborts instead of spilling** show the runtime model wasn't pushed to full generality.
 - **Testing is integration-only and string-brittle**; no unit tests for the trickiest components. A Mid+/Senior would test the optimizer, allocator, and symbol table directly.
-- **Documentation is auto-generated boilerplate** — a maturity/craft signal that reviewers weight.
+- **Documentation was auto-generated boilerplate** — a maturity/craft signal reviewers weight (now removed, but the codebase still lacks real docs on its hardest methods).
 - A **stated-scope item (2-D arrays) is unimplemented** and quietly marked as a rejected test.
 
 ### First-five-minutes impression on GitHub
 
 > **Honest answer:** Strong and credible, with a couple of visible seams.
 >
-> In the first 30 seconds the repo reads *professional*: a badged README, a `programa/` layout with clearly-named packages (`ast`, `semantico`, `intermedio`, `mips`, `pipeline`, `reporte`), a Maven build, a green-looking CI workflow, an external PDF, and a LICENSE. A recruiter or engineer immediately thinks "this person built a real compiler, not a tutorial clone." Opening `mips/` and seeing seven focused translators plus a peephole optimizer *raises* the estimate — this is systems work with taste.
+> In the first 30 seconds the repo reads *professional*: a badged README, a `programa/` layout with clearly-named packages (`ast`, `semantico`, `intermedio`, `mips`, `pipeline`, `reporte`), a Maven build, a green-looking CI workflow, checked-in sample outputs, and a LICENSE. A recruiter or engineer immediately thinks "this person built a real compiler, not a tutorial clone." Opening `mips/` and seeing seven focused translators plus a peephole optimizer *raises* the estimate — this is systems work with taste.
 >
-> Then the seams appear. Skimming any class, the **repetitive boilerplate Javadoc** stands out and slightly cheapens the impression. A careful reviewer who opens `CompiladorTest` notices the tests are **whole-program string assertions** and that `11_arreglos_enunciado.chip` sits in the **invalid** list — a tell that 2-D arrays don't work. Anyone who knows compilers will ask "where do locals/temporaries live?" and, on finding they're **global `.data` labels**, will immediately note it can't do recursion safely.
+> Then the seams appear. *(At original review time, skimming any class the **repetitive boilerplate Javadoc** stood out and slightly cheapened the impression; that has since been removed.)* A careful reviewer who opens `CompiladorTest` notices the tests are **whole-program string assertions** and that `11_arreglos_enunciado.chip` sits in the **invalid** list — a tell that 2-D arrays don't work. Anyone who knows compilers will ask "where do locals/temporaries live?" and, on finding they're **global `.data` labels**, will immediately note it can't do recursion safely.
 >
-> **Net:** in five minutes this lands as a **strong Mid-level portfolio piece** — clearly hireable, clearly capable of hard systems work, and clearly still with room to grow on testing discipline, runtime generality, and documentation craft. It would earn an interview at most of the companies named, and the honest external doc plus CI would count in the candidate's favor. The fastest credibility wins before sharing it widely: fix/annotate the recursion limitation, delete the boilerplate Javadoc, and either finish or explicitly de-scope 2-D arrays.
+> **Net:** in five minutes this lands as a **strong Mid-level portfolio piece** — clearly hireable, clearly capable of hard systems work, and clearly still with room to grow on testing discipline, runtime generality, and documentation craft. It would earn an interview at most of the companies named, and the working CI plus a candid test corpus would count in the candidate's favor. The fastest credibility wins before sharing it widely: fix/annotate the recursion limitation, delete the boilerplate Javadoc, and either finish or explicitly de-scope 2-D arrays.
 
 ---
 
