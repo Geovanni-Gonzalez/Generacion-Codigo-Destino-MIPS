@@ -17,7 +17,6 @@
 
 </div>
 
-> **Language note.** This README is written in English to maximize reach for international reviewers. The source language and the in-code documentation are in Spanish. A short Spanish summary is provided at the end.
 
 ---
 
